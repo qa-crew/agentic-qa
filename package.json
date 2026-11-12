@@ -1,29 +1,14 @@
 {
-  "name": "playwright-cli",
-  "version": "1.0.0",
-  "description": "showcase usage of playwright-cli to create automated test cases",
-  "homepage": "https://github.com/rohan12patil/Playwright-CLI#readme",
-  "bugs": {
-    "url": "https://github.com/rohan12patil/Playwright-CLI/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/rohan12patil/Playwright-CLI.git"
-  },
-  "license": "ISC",
-  "author": "Rohan Patil",
-  "type": "commonjs",
-  "main": "index.js",
-  "directories": {},
+  "name": "aiqa-agents",
+  "private": true,
+  "description": "AIQA's agents and skills for Claude Code and GitHub Copilot. Nothing to install: these scripts only build and check the bundle.",
+  "type": "module",
+  "license": "MIT",
   "scripts": {
-    "test": "npx playwright test --project=chromium --headed",
-    "show-report": "npx playwright show-report"
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/build.mjs --check",
+    "test": "node --test",
+    "dashboard": "node .claude/skills/qa-dashboard/dashboard/server.mjs --open"
   },
-  "dependencies": {
-    "playwright": "^1.59.1"
-  },
-  "devDependencies": {
-    "@playwright/test": "^1.59.1",
-    "@types/node": "^25.6.0"
-  }
+  "engines": { "node": ">=20" }
 }

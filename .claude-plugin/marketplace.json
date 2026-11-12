@@ -1,0 +1,13 @@
+{
+  "name": "agents-forge",
+  "description": "AI Quality Engineering agents and skills from agents-forge.",
+  "owner": { "name": "Rohan Patil" },
+  "plugins": [
+    {
+      "name": "aiqa",
+      "source": "./",
+      "description": "AIQA's QA agents: a full Playwright suite from a URL, or one user story at a time, with a live dashboard.",
+      "version": "2.5.0"
+    }
+  ]
+}

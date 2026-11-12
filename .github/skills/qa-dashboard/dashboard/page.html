@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en" data-theme="slate">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AIQA Dashboard</title>
+<!--THEME_BOOT-->
+<style>/*THEME_CSS*/</style>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px/1.5 var(--font-sans); }
+  a { color: var(--link); }
+  .top { position: sticky; top: 0; z-index: 30; height: var(--topbar-h); display: flex; align-items: center; gap: 12px; padding: 0 16px; background: var(--bg-chrome); color: var(--fg-on-chrome); border-bottom: 1px solid var(--border); }
+  .brand { display: flex; align-items: center; gap: 10px; color: inherit; text-decoration: none; min-width: 0; }
+  .logo { background: var(--logo-bg); color: var(--logo-fg); font: var(--display-weight) 15px/1 var(--font-display); letter-spacing: .06em; padding: 7px 9px; border-radius: var(--radius-sm); }
+  .proj { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .live { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--fg-on-chrome-muted); white-space: nowrap; }
+  .live .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--chrome-ok); }
+  .live.stale .dot { background: var(--chrome-warn); }
+  .live.snapshot .dot { background: var(--fg-on-chrome-muted); }
+  .shell { display: grid; grid-template-columns: var(--rail-w) minmax(0, 1fr); min-height: calc(100vh - var(--topbar-h)); }
+  .rail { background: var(--bg-rail); display: flex; flex-direction: column; gap: 4px; padding: 10px 8px; position: sticky; top: var(--topbar-h); height: calc(100vh - var(--topbar-h)); }
+  .rail a { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 4px; border-radius: var(--radius-md); color: var(--fg-on-chrome-muted); text-decoration: none; font-size: 11.5px; font-weight: 600; text-align: center; }
+  .rail a:hover { color: var(--fg-on-chrome); background: var(--bg-rail-active); }
+  .rail a[aria-current="page"] { background: var(--bg-rail-active); color: var(--fg-on-chrome); }
+  .rail a:focus-visible { outline-color: var(--focus-chrome); }
+  main { padding: 24px clamp(16px, 3vw, 32px) 48px; max-width: 1320px; width: 100%; outline: none; }
+  h1 { font-size: 26px; line-height: 1.2; margin: 0 0 4px; font-weight: var(--display-weight); }
+  h2 { font-size: 17px; margin: 28px 0 10px; font-weight: var(--display-weight); }
+  .sub { color: var(--fg-muted); margin: 0 0 18px; }
+  .card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
+  .pad { padding: 16px 18px; }
+  .steps { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+  .step { padding: 14px 14px 12px; display: flex; flex-direction: column; gap: 6px; }
+  .step .num { font: 600 12px var(--font-mono); color: var(--fg-muted); }
+  .step .name { font-weight: 600; }
+  .step .role { font-size: 13px; color: var(--fg-muted); flex: 1; }
+  .step .meta { font-size: 12.5px; color: var(--fg-muted); display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; }
+  .step.running { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-tint-border); }
+  .chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: var(--radius-pill); background: var(--neutral-bg); color: var(--neutral-fg); white-space: nowrap; }
+  .chip.ok { background: var(--ok-bg); color: var(--ok-fg); }
+  .chip.warn { background: var(--warn-bg); color: var(--warn-fg); }
+  .chip.err { background: var(--err-bg); color: var(--err-fg); }
+  .chip.info { background: var(--info-bg); color: var(--info-fg); }
+  .chip.agent { background: var(--agent-bg); color: var(--agent-fg); }
+  .chip.accent { background: var(--accent-tint); color: var(--accent-tint-fg); }
+  .chip.running::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; animation: pulse 1.2s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: .25; } }
+  @media (prefers-reduced-motion: reduce) { .chip.running::before { animation: none; } }
+  .kv { display: flex; flex-wrap: wrap; gap: 6px 22px; font-size: 14px; margin: 0 0 18px; }
+  .kv span { color: var(--fg-muted); }
+  .kv b { color: var(--fg); font-weight: 600; overflow-wrap: anywhere; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; }
+  .stat { padding: 12px 16px; }
+  .stat .v { font: var(--display-weight) 28px/1.15 var(--font-display); }
+  .stat .l { font-size: 13px; color: var(--fg-muted); }
+  .stat.ok .v { color: var(--ok-solid); } .stat.err .v { color: var(--err-solid); } .stat.warn .v { color: var(--warn-solid); }
+  .list { list-style: none; margin: 0; padding: 0; }
+  .list li { display: flex; gap: 12px; align-items: center; padding: var(--row-pad-y) 16px; border-top: 1px solid var(--border-subtle); flex-wrap: wrap; }
+  .list li:first-child { border-top: 0; }
+  .list a { font-weight: 600; text-decoration: none; }
+  .list a:hover { text-decoration: underline; }
+  .grow { flex: 1; min-width: 0; }
+  .muted { color: var(--fg-muted); }
+  .small { font-size: 13px; }
+  .mono { font-family: var(--font-mono); font-size: 13px; overflow-wrap: anywhere; }
+  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg-surface); margin: 0 0 16px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-top: 1px solid var(--border-subtle); }
+  th { background: var(--bg-sunken); font-weight: 600; border-top: 0; white-space: nowrap; }
+  td.id { font-family: var(--font-mono); font-size: 12.5px; white-space: nowrap; }
+  .doc { line-height: 1.6; overflow-wrap: anywhere; }
+  .doc h1 { font-size: 24px; margin: 8px 0 12px; } .doc h2 { font-size: 19px; margin: 26px 0 8px; } .doc h3 { font-size: 16px; margin: 20px 0 6px; }
+  .doc pre { background: var(--bg-sunken); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 14px; overflow: auto; font: 13px/1.5 var(--font-mono); }
+  .doc code { font-family: var(--font-mono); font-size: .92em; background: var(--bg-sunken); padding: 1px 4px; border-radius: 4px; }
+  .doc pre code { background: none; padding: 0; }
+  .doc blockquote { margin: 0 0 12px; padding: 2px 14px; border-left: 3px solid var(--border); color: var(--fg-2); }
+  .doc .table-wrap table { font-size: 13px; }
+  pre.text { margin: 0; padding: 14px 16px; overflow: auto; font: 13px/1.5 var(--font-mono); background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); white-space: pre; }
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 20px 0 14px; }
+  .tabs a { padding: 6px 12px; border-radius: var(--radius-pill); border: 1px solid var(--border); text-decoration: none; color: var(--fg); font-size: 13.5px; font-weight: 600; background: var(--bg-surface); }
+  .tabs a[aria-current="true"] { background: var(--accent); color: var(--accent-fg); border-color: transparent; }
+  .bar { display: flex; height: 8px; border-radius: 999px; overflow: hidden; background: var(--bg-sunken); min-width: 80px; }
+  .bar span { display: block; height: 100%; }
+  .empty { padding: 32px 20px; text-align: center; color: var(--fg-muted); }
+  .empty code, .hint code { font-family: var(--font-mono); background: var(--bg-sunken); padding: 1px 6px; border-radius: 4px; color: var(--fg); }
+  .grid2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+  .back { display: inline-block; margin-bottom: 10px; font-size: 14px; }
+  .gate { background: var(--gate-bg); color: var(--gate-fg); border: 1px solid var(--gate-border); border-radius: var(--radius-lg); padding: 12px 16px; margin: 0 0 16px; }
+  .gate code { font-family: var(--font-mono); }
+  .err-box { background: var(--err-bg); color: var(--err-fg); border-radius: var(--radius-md); padding: 10px 14px; }
+  .failure { padding: 10px 16px; border-top: 1px solid var(--border-subtle); }
+  .failure:first-child { border-top: 0; }
+  .failure .e { font: 12.5px/1.45 var(--font-mono); color: var(--err-solid); overflow-wrap: anywhere; }
+  .story-row .bar { width: 140px; }
+  select { font: inherit; font-size: 14px; color: var(--fg); background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 6px 10px; min-height: 36px; max-width: 100%; }
+  select:disabled { opacity: .7; }
+  .btn { font: inherit; font-size: 14px; font-weight: 600; min-height: 38px; padding: 8px 16px; border-radius: var(--radius-md); border: 1px solid transparent; background: var(--accent); color: var(--accent-fg); cursor: pointer; }
+  .btn:disabled { opacity: .6; cursor: default; }
+  .btn.ghost { background: var(--bg-surface); color: var(--fg); border-color: var(--border); }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 16px 0 0; }
+  .ok-box { background: var(--ok-bg); color: var(--ok-fg); border-radius: var(--radius-md); padding: 8px 12px; }
+  .models td { vertical-align: middle; }
+  .models label { font-weight: 600; }
+  .m-only { display: none; }
+  @media (max-width: 1000px) { .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } .grid2 { grid-template-columns: 1fr; } }
+  @media (max-width: 720px) {
+    .shell { grid-template-columns: minmax(0, 1fr); }
+    .rail { z-index: 20; height: auto; flex-direction: row; justify-content: space-around; padding: 6px; }
+    .rail a { flex-direction: row; font-size: 13px; padding: 8px 10px; }
+    .steps { grid-template-columns: 1fr; }
+    .live #liveText, #themeLabel { display: none; }
+    h1 { font-size: 22px; }
+    .story-row .bar { width: 100%; }
+    .m-only { display: block; margin-top: 2px; }
+    .models .d-only, .models thead { display: none; }
+    .models table, .models tbody, .models tr, .models td { display: block; width: 100%; }
+    .models tr { padding: 10px 14px; border-top: 1px solid var(--border-subtle); }
+    .models tr:first-child { border-top: 0; }
+    .models td { border: 0; padding: 2px 0; }
+    .models select { width: 100%; margin-top: 6px; }
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="#suite"><span class="logo">AIQA</span><span class="proj" id="proj">Dashboard</span></a>
+  <span class="live" id="live" role="status"><span class="dot"></span><span id="liveText">Connecting…</span></span>
+  <!--THEME_MENU-->
+</header>
+<div class="shell">
+  <nav class="rail" aria-label="Views">
+    <a href="#suite" data-view="suite"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 3 8l9 5 9-5-9-5z"/><path d="m3 13 9 5 9-5"/></svg>Full suite</a>
+    <a href="#stories" data-view="stories"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>Stories</a>
+    <a href="#results" data-view="results"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Results</a>
+    <a href="#models" data-view="models"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>Models</a>
+  </nav>
+  <main id="main" tabindex="-1"><p class="muted">Loading…</p></main>
+</div>
+<!--STATIC_DATA-->
+<script>
+(function () {
+  "use strict";
+  var STATIC = window.__AIQA_STATIC__ || null;
+  var main = document.getElementById("main");
+  var state = null, lastJson = "", route = parseRoute();
+
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function api(p) {
+    if (STATIC) return Promise.resolve().then(function () { if (p in STATIC) return STATIC[p]; throw new Error("This part isn't in the saved snapshot. Open the live dashboard to see it."); });
+    return fetch(p, { cache: "no-store" }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(j.error || r.statusText); return j; });
+    });
+  }
+  function docKey(p) { return "api/doc?path=" + encodeURIComponent(p); }
+  function parseRoute() {
+    var h = decodeURIComponent(location.hash.replace(/^#/, ""));
+    if (!h) return { v: "suite" };
+    var i = h.indexOf("/");
+    return i < 0 ? { v: h } : { v: h.slice(0, i), arg: h.slice(i + 1) };
+  }
+  function fmtDur(ms) {
+    if (ms == null || isNaN(ms)) return "";
+    var s = Math.round(ms / 1000);
+    return s >= 3600 ? Math.floor(s / 3600) + "h " + Math.floor((s % 3600) / 60) + "m" : s >= 60 ? Math.floor(s / 60) + "m " + (s % 60) + "s" : s + "s";
+  }
+  function fmtTime(iso) { if (!iso) return ""; var d = new Date(iso); return isNaN(d) ? "" : d.toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }); }
+  function fmtSize(n) { return n == null ? "" : n < 1024 ? n + " B" : n < 1048576 ? (n / 1024).toFixed(1) + " KB" : (n / 1048576).toFixed(1) + " MB"; }
+  function docLink(p, label) { return '<a href="#doc/' + encodeURIComponent(p) + '">' + esc(label || p.split("/").pop()) + "</a>"; }
+  function rawHref(p) { return STATIC ? "../../" + p.split("/").map(encodeURIComponent).join("/") : "raw/" + p.split("/").map(encodeURIComponent).join("/"); }
+
+  var STEP_CHIP = {
+    done: ["ok", "Done"], running: ["accent running", "Running"], failed: ["err", "Failed"], skipped: ["neutral", "Skipped"],
+    paused: ["warn", "Waiting for you"], pending: ["neutral", "Not started"], notNeeded: ["neutral", "Not needed"], next: ["info", "Next"], review: ["warn", "Your turn: review"]
+  };
+  function chip(kind) { var c = STEP_CHIP[kind] || ["neutral", kind]; return '<span class="chip ' + c[0] + '">' + esc(c[1]) + "</span>"; }
+
+  var STATUS_TONE = { Draft: "neutral", Verified: "ok", Updated: "info", New: "accent", Blocked: "warn", "Possible defect": "err", Existing: "info", Outdated: "warn", Obsolete: "neutral" };
+  var STATUS_COLOR = { Draft: "var(--border)", Verified: "var(--ok-solid)", Updated: "var(--info-solid)", New: "var(--accent)", Blocked: "var(--warn-solid)", "Possible defect": "var(--err-solid)", Existing: "var(--info-solid)", Outdated: "var(--warn-solid)", Obsolete: "var(--fg-muted)" };
+  function statusChip(s) { return '<span class="chip ' + (STATUS_TONE[s] || "neutral") + '">' + esc(s || "—") + "</span>"; }
+  function countsBar(counts, total) {
+    if (!total) return '<div class="bar" aria-hidden="true"></div>';
+    var parts = Object.keys(counts).map(function (k) { return '<span style="width:' + (100 * counts[k] / total) + "%;background:" + (STATUS_COLOR[k] || "var(--fg-muted)") + '" title="' + esc(k + ": " + counts[k]) + '"></span>'; });
+    var label = Object.keys(counts).map(function (k) { return counts[k] + " " + k; }).join(", ");
+    return '<div class="bar" role="img" aria-label="' + esc(label) + '">' + parts.join("") + "</div>";
+  }
+  function emptyBox(html) { return '<div class="card empty">' + html + "</div>"; }
+
+  /** Relative links in a rendered document point at files next to it: .md opens in the viewer, the rest raw. */
+  function fixLinks(rootEl, baseFile) {
+    var dir = (baseFile || "").split("/").slice(0, -1);
+    rootEl.querySelectorAll("a[href]").forEach(function (a) {
+      var h = a.getAttribute("href");
+      if (/^https?:/i.test(h)) { a.target = "_blank"; a.rel = "noopener noreferrer"; return; }
+      if (/^(#|mailto:)/i.test(h)) return;
+      var parts = dir.slice();
+      h.split("#")[0].split("/").forEach(function (seg) { if (seg === "..") parts.pop(); else if (seg && seg !== ".") parts.push(seg); });
+      var p = parts.join("/");
+      if (/\.md$/i.test(p)) a.href = "#doc/" + encodeURIComponent(p);
+      else { a.href = rawHref(p); a.target = "_blank"; a.rel = "noopener"; }
+    });
+  }
+
+  // ── Views ────────────────────────────────────────────────────────────────
+  function viewSuite() {
+    var s = state.suite, run = s.run;
+    var anything = s.steps.some(function (x) { return x.state !== "pending"; });
+    var html = "<h1>Full suite</h1>";
+    html += '<p class="sub">Five AIQA roles, one after another: explore → plan → automate → review → report.</p>';
+    if (run) {
+      html += '<div class="kv"><div><span>Target </span><b>' + esc(run.target || "—") + "</b></div><div><span>Run </span><b class=\"mono\">" + esc(run.run || "—") + "</b></div><div><span>Filter </span><b>" + esc(run.filter && run.filter !== "none" ? run.filter : "@smoke (default)") + "</b></div><div><span>Started </span><b>" + esc(fmtTime(run.startedAt)) + "</b></div><div><span>Status </span>" + chip(run.state === "running" ? "running" : run.state || "pending") + "</div></div>";
+    }
+    var paused = s.steps.filter(function (x) { return x.state === "paused"; })[0];
+    if (paused) html += '<div class="gate" role="status"><b>Your turn.</b> The pipeline is waiting after ' + esc(paused.name) + ". Review the output, then answer in the chat.</div>";
+    if (!anything && !run) {
+      html += emptyBox("<p><b>No full-suite run here yet.</b></p><p>In Claude Code, run <code>/qa-pipeline https://your-app.example</code> (or <code>/aiqa:qa-pipeline</code> when AIQA is installed as a plugin). This page updates while it runs.</p>");
+    }
+    html += '<div class="steps" role="list">';
+    s.steps.forEach(function (x, i) {
+      var out = x.outputInfo || {};
+      var outLink = out.exists ? (out.dir ? '<a href="#results">' + esc(s.specs.length + " spec" + (s.specs.length === 1 ? "" : "s")) + "</a>" : docLink(out.path, out.path.split("/").pop())) : "";
+      html += '<div class="card step' + (x.state === "running" ? " running" : "") + '" role="listitem"><span class="num">' + (i + 1) + " · " + esc(x.id) + '</span><span class="name">' + esc(x.name) + '</span><span class="role">' + esc(x.role) + '</span><span class="meta">' + chip(x.state) + (x.durationMs ? "<span>" + esc(fmtDur(x.durationMs)) + "</span>" : "") + (outLink ? "<span>" + outLink + "</span>" : "") + "</span>" + (x.note ? '<span class="small muted">' + esc(x.note) + "</span>" : "") + "</div>";
+    });
+    html += "</div>";
+
+    html += '<div class="grid2"><div><h2>Documents</h2>';
+    html += s.documents.length ? '<ul class="list card">' + s.documents.map(function (d) { return '<li><span class="grow">' + docLink(d.path, d.label) + '</span><span class="small muted">' + esc(fmtSize(d.size)) + " · " + esc(fmtTime(d.mtime)) + "</span></li>"; }).join("") + "</ul>" : emptyBox("Nothing written yet.");
+    html += "<h2>Test cases</h2>";
+    html += s.testCases.length ? '<ul class="list card">' + s.testCases.map(function (t) { return '<li><span class="grow">' + docLink(t.path, t.title) + '</span><span class="chip">' + t.cases + " case" + (t.cases === 1 ? "" : "s") + "</span></li>"; }).join("") + "</ul>" : emptyBox("No test cases yet.");
+    html += "</div><div><h2>Test scripts</h2>";
+    var scripts = s.specs.concat(s.pageObjects);
+    if (s.config.exists) scripts.unshift("playwright.config.ts");
+    html += scripts.length ? '<ul class="list card">' + scripts.map(function (p) { return '<li><span class="grow mono">' + docLink(p, p.replace(/^\.aiqa\/test-scripts\//, "")) + "</span></li>"; }).join("") + "</ul>" : emptyBox("No specs yet.");
+    html += "<h2>Snapshots</h2>";
+    html += s.snapshots.length ? '<ul class="list card">' + s.snapshots.map(function (p) { return '<li><span class="grow mono">' + docLink(p, p.split("/").pop()) + "</span></li>"; }).join("") + "</ul>" : emptyBox("No snapshots yet.");
+    html += "</div></div>";
+    main.innerHTML = html;
+  }
+
+  function storyStepChip(st, story) {
+    if (st.state === "running") return chip("running");
+    if (st.state === "failed") return chip("failed");
+    if (st.notNeeded) return chip("notNeeded");
+    if (st.done) return chip("done");
+    if (story.next === st.id) return chip(story.review ? "review" : "next");
+    return chip("pending");
+  }
+
+  function viewStories() {
+    var html = "<h1>Stories</h1><p class=\"sub\">One user story at a time: pull → design → explore → automate → run.</p>";
+    if (!state.stories.length) {
+      html += emptyBox("<p><b>No stories yet.</b></p><p>Add a story file to <code>.aiqa/stories/</code> (for example <code>SD-1-login.md</code>) and run <code>/qa-story SD-1</code>.</p>");
+      main.innerHTML = html;
+      return;
+    }
+    html += '<ul class="list card">' + state.stories.map(function (s) {
+      var stepTxt = s.steps.map(function (st) { return st.notNeeded ? "–" : st.done ? "●" : "○"; }).join(" ");
+      var status = s.running ? chip("running") : s.next ? (s.review ? chip("review") : '<span class="chip info">Next: ' + esc((s.steps.filter(function (x) { return x.id === s.next; })[0] || {}).name) + "</span>") : chip("done");
+      var last = s.lastRun ? '<span class="small muted">Last run ' + esc(s.lastRun.date) + ": " + s.lastRun.passed + " passed, " + s.lastRun.failed + " failed</span>" : "";
+      return '<li class="story-row"><span class="grow"><a href="#story/' + encodeURIComponent(s.key) + '">' + esc(s.key) + "</a> " + esc(s.title) + '<br><span class="small muted" aria-label="Steps done">' + esc(stepTxt) + "</span>" + (s.stale ? ' <span class="chip warn">Story changed</span>' : "") + "</span>" + countsBar(s.counts, s.total) + '<span class="small muted">' + s.total + " case" + (s.total === 1 ? "" : "s") + "</span>" + status + last + "</li>";
+    }).join("") + "</ul>";
+    main.innerHTML = html;
+  }
+
+  function viewStory(key, tab) {
+    tab = tab || "cases";
+    api("api/story?key=" + encodeURIComponent(key)).then(function (s) {
+      if (parseRoute().v !== "story") return;
+      var html = '<a class="back" href="#stories">← Stories</a><h1>' + esc(s.key) + " — " + esc(s.title) + "</h1>";
+      html += '<p class="sub">' + docLink(s.files.testCases, s.files.testCases) + (s.stale ? ' <span class="chip warn">The story changed since its cases were designed</span>' : "") + "</p>";
+      if (s.review && s.next) html += '<div class="gate" role="status"><b>Your turn.</b> Review the test cases (edit them in <code>' + esc(s.files.testCases) + "</code> if needed), then continue in the chat: <code>/qa-story " + esc(s.key) + "</code>.</div>";
+      html += '<div class="steps" role="list">' + s.steps.map(function (st, i) {
+        return '<div class="card step' + (st.state === "running" ? " running" : "") + '" role="listitem"><span class="num">' + (i + 1) + '</span><span class="name">' + esc(st.name) + '</span><span class="role">' + esc(st.notNeeded || st.role) + '</span><span class="meta">' + storyStepChip(st, s) + (st.durationMs ? "<span>" + esc(fmtDur(st.durationMs)) + "</span>" : "") + "</span></div>";
+      }).join("") + "</div>";
+      var counts = Object.keys(s.counts);
+      if (counts.length) html += '<h2>Status</h2><div class="stats">' + counts.map(function (k) { return '<div class="card stat"><div class="v">' + s.counts[k] + '</div><div class="l">' + esc(k) + "</div></div>"; }).join("") + "</div>";
+      var tabs = [["cases", "Test cases"], ["story", "Story & ACs"], ["questions", "Open questions"], ["notes", "Exploration notes"], ["runs", "Runs"], ["snapshots", "Snapshots (" + s.snapshots.length + ")"]];
+      html += '<nav class="tabs" aria-label="Story sections">' + tabs.map(function (t) { return '<a href="#story/' + encodeURIComponent(s.key) + "/" + t[0] + '"' + (t[0] === tab ? ' aria-current="true"' : "") + ">" + esc(t[1]) + "</a>"; }).join("") + "</nav>";
+      html += '<section id="tabBody">';
+      if (tab === "cases") {
+        if (!s.rows.length) html += emptyBox("No test cases yet. The Design step writes them.");
+        else {
+          var cols = s.headers.filter(function (h) { return h !== "ALM" || s.rows.some(function (r) { return r.cells.ALM && r.cells.ALM !== "—"; }); });
+          html += '<div class="table-wrap"><table><thead><tr>' + cols.map(function (h) { return "<th>" + esc(h) + "</th>"; }).join("") + "</tr></thead><tbody>" + s.rows.map(function (r) {
+            return "<tr>" + cols.map(function (h) { return h === "Status" ? "<td>" + statusChip(r.cells.Status) + "</td>" : h === "ID" ? '<td class="id">' + r.html[h] + "</td>" : "<td>" + r.html[h] + "</td>"; }).join("") + "</tr>";
+          }).join("") + "</tbody></table></div>";
+        }
+      } else if (tab === "story") {
+        html += '<div class="grid2"><div class="card pad doc"><h3>Story</h3>' + (s.storyHtml || '<p class="muted">No story file.</p>') + '</div><div class="card pad doc"><h3>Testable acceptance criteria</h3>' + (s.criteriaHtml || '<p class="muted">Written by the Design step.</p>') + "</div></div>";
+      } else if (tab === "questions") {
+        html += '<div class="card pad doc">' + (s.questionsHtml || '<p class="muted">None recorded.</p>') + "</div>";
+      } else if (tab === "notes") {
+        html += '<div class="card pad doc">' + (s.notesHtml || '<p class="muted">Written by the Explore step.</p>') + "</div>";
+      } else if (tab === "runs") {
+        html += s.results && s.results.stats ? resultsBlock(s.results, s.htmlReport) : "";
+        html += '<div class="card pad doc">' + (s.historyHtml || '<p class="muted">No runs yet. The Run step records each one here.</p>') + "</div>";
+      } else if (tab === "snapshots") {
+        html += s.snapshots.length ? '<ul class="list card">' + s.snapshots.map(function (p) { return '<li class="mono">' + docLink(p, p.split("/").pop()) + "</li>"; }).join("") + "</ul>" : emptyBox("No snapshots yet. The Explore step saves them.");
+      }
+      html += "</section>";
+      main.innerHTML = html;
+      fixLinks(main, s.files.testCases);
+    }).catch(showError);
+  }
+
+  function resultsBlock(r, report) {
+    var st = r.stats, total = st.passed + st.failed + st.skipped + st.flaky;
+    var html = '<div class="stats"><div class="card stat ok"><div class="v">' + st.passed + '</div><div class="l">Passed</div></div><div class="card stat err"><div class="v">' + st.failed + '</div><div class="l">Failed</div></div><div class="card stat warn"><div class="v">' + st.flaky + '</div><div class="l">Flaky</div></div><div class="card stat"><div class="v">' + st.skipped + '</div><div class="l">Skipped</div></div><div class="card stat"><div class="v">' + total + '</div><div class="l">Total' + (r.durationMs ? " · " + esc(fmtDur(r.durationMs)) : "") + "</div></div></div>";
+    html += '<p class="small muted">' + esc(r.path) + " · " + esc(fmtTime(r.mtime)) + (report && report.exists ? ' · <a href="' + rawHref(report.path) + '" target="_blank" rel="noopener">Open the Playwright HTML report</a>' : "") + "</p>";
+    if (r.failures && r.failures.length) html += '<h2>Failures</h2><div class="card">' + r.failures.map(function (f) { return '<div class="failure"><div><b>' + esc(f.title) + '</b> <span class="small muted mono">' + esc(f.file) + '</span></div><div class="e">' + esc(f.error) + "</div></div>"; }).join("") + "</div>";
+    return html;
+  }
+
+  function viewResults() {
+    var s = state.suite, html = "<h1>Results</h1><p class=\"sub\">The latest Playwright runs: the full suite and each story.</p><h2>Full suite</h2>";
+    if (s.results && s.results.stats) {
+      html += resultsBlock(s.results, s.htmlReport);
+      if (s.results.files.length) html += '<h2>By spec file</h2><div class="table-wrap"><table><thead><tr><th>Spec</th><th>Passed</th><th>Failed</th><th>Flaky</th><th>Skipped</th></tr></thead><tbody>' + s.results.files.map(function (f) { return '<tr><td class="mono">' + esc(f.file) + "</td><td>" + f.passed + "</td><td>" + f.failed + "</td><td>" + f.flaky + "</td><td>" + f.skipped + "</td></tr>"; }).join("") + "</tbody></table></div>";
+      if (s.performanceReport.exists) html += '<p><a href="' + rawHref(s.performanceReport.path) + '" target="_blank" rel="noopener">Open the k6 performance report</a></p>';
+    } else html += emptyBox("No full-suite results yet. The QA Reporter step runs the tests.");
+    html += "<h2>Stories</h2>";
+    var withRuns = state.stories.filter(function (x) { return x.lastRun; });
+    html += withRuns.length ? '<div class="table-wrap"><table><thead><tr><th>Story</th><th>Last run</th><th>Passed</th><th>Failed</th><th>Flaky</th><th>Skipped</th></tr></thead><tbody>' + withRuns.map(function (x) { return '<tr><td><a href="#story/' + encodeURIComponent(x.key) + '/runs">' + esc(x.key) + "</a> " + esc(x.title) + "</td><td>" + esc(x.lastRun.date) + "</td><td>" + x.lastRun.passed + "</td><td>" + x.lastRun.failed + "</td><td>" + x.lastRun.flaky + "</td><td>" + x.lastRun.skipped + "</td></tr>"; }).join("") + "</tbody></table></div>" : emptyBox("No story runs yet.");
+    main.innerHTML = html;
+  }
+
+  function viewDoc(p) {
+    api(docKey(p)).then(function (d) {
+      if (parseRoute().v !== "doc") return;
+      var html = '<a class="back" href="javascript:history.back()">← Back</a><h1 class="mono" style="font-size:18px">' + esc(p) + '</h1><p class="sub small">' + esc(fmtSize(d.size)) + " · " + esc(fmtTime(d.mtime)) + (STATIC ? "" : ' · <a href="' + rawHref(p) + '" target="_blank" rel="noopener">Raw file</a>') + "</p>";
+      if (d.kind === "md") html += '<article class="card pad doc">' + d.html + "</article>";
+      else if (d.kind === "large") html += emptyBox("This file is too large to show here.");
+      else html += '<pre class="text">' + esc(d.text) + "</pre>";
+      main.innerHTML = html;
+      fixLinks(main, p);
+    }).catch(showError);
+  }
+
+  var MODEL_LABEL = { sonnet: "Sonnet", opus: "Opus", haiku: "Haiku", fable: "Fable" };
+  function viewModels(message) {
+    api("api/models").then(function (m) {
+      if (parseRoute().v !== "models") return;
+      var html = "<h1>Models</h1><p class=\"sub\">The Claude model each role's agent starts with. The full suite and the story steps share the roles.</p>";
+      if (message) html += '<p class="ok-box" role="status">' + esc(message) + "</p>";
+      html += '<form id="modelsForm"><div class="table-wrap models"><table><thead><tr><th>Role</th><th class="d-only">Used by</th><th>Model</th><th class="d-only">Runs on now</th></tr></thead><tbody>';
+      m.roles.forEach(function (r) {
+        var opts = [["", r.key === "default" ? "Session model" : "Default"]].concat(m.options.map(function (o) { return [o, MODEL_LABEL[o] || o]; }));
+        if (r.saved && m.options.indexOf(r.saved) < 0) opts.push([r.saved, r.saved + " (saved by the npm package)"]);
+        var res = r.key === "default" ? null : m.resolved[r.key];
+        var now = res ? (res.model ? esc(MODEL_LABEL[res.model] || res.model) + ' <span class="small muted">(' + esc(res.source) + ")</span>" : '<span class="muted">Session model</span>') + (res.note ? '<br><span class="small muted">' + esc(res.note) + "</span>" : "") : '<span class="muted">—</span>';
+        html += '<tr><td><label for="m-' + esc(r.key) + '">' + esc(r.name) + '</label><span class="m-only small muted">' + esc(r.uses) + (res ? " · now: " + esc(res.model ? MODEL_LABEL[res.model] || res.model : "Session model") : "") + '</span></td><td class="small muted d-only">' + esc(r.uses) + '</td><td><select id="m-' + esc(r.key) + '" name="' + esc(r.key) + '"' + (STATIC ? " disabled" : "") + ">" +
+          opts.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (o[0] === r.saved ? " selected" : "") + ">" + esc(o[1]) + "</option>"; }).join("") + "</select></td><td class=\"d-only\">" + now + "</td></tr>";
+      });
+      html += "</tbody></table></div>";
+      html += STATIC
+        ? '<p class="small muted">This is a saved snapshot. Open the live dashboard to change the models.</p>'
+        : '<div class="actions"><button class="btn" type="submit" id="saveModels">Save</button><span class="small muted">Saved in <code>' + esc(m.file) + "</code>, the file the npm package's Connect → AI uses too.</span></div>";
+      html += '</form><div class="card pad small" style="margin-top:20px"><p style="margin-top:0"><b>How the picks apply.</b> <code>/qa-pipeline</code> and <code>/qa-story</code> read them when they start each agent, so the next step that starts uses them. A <code>--model-&lt;role&gt;</code> or <code>--model</code> option on those commands wins for that run. "Session model" means the model of your Claude Code session.</p><p style="margin-bottom:0">GitHub Copilot uses its own model picker; these picks don\'t apply there.</p></div>';
+      main.innerHTML = html;
+      var form = document.getElementById("modelsForm");
+      if (STATIC || !form) return;
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        var models = {};
+        form.querySelectorAll("select").forEach(function (s) { models[s.name] = s.value; });
+        var btn = document.getElementById("saveModels");
+        btn.disabled = true;
+        btn.textContent = "Saving…";
+        fetch("api/models", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ models: models }) })
+          .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || r.statusText); return j; }); })
+          .then(function () { viewModels("Saved. The next agent that starts uses these models."); })
+          .catch(function (err) { btn.disabled = false; btn.textContent = "Save"; showError(err); });
+      });
+    }).catch(showError);
+  }
+
+  function showError(err) { main.innerHTML = '<div class="err-box" role="alert">' + esc(err && err.message ? err.message : err) + "</div>"; }
+
+  function render(scrollTop) {
+    route = parseRoute();
+    document.querySelectorAll(".rail a").forEach(function (a) {
+      var v = a.getAttribute("data-view");
+      var on = v === route.v || (v === "stories" && route.v === "story") || (v === "suite" && route.v === "doc") || (v === "suite" && !route.v);
+      if (on) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
+    });
+    if (!state) return;
+    document.getElementById("proj").textContent = state.project;
+    document.title = state.project + " · AIQA Dashboard";
+    if (!state.hasAiqa && route.v !== "doc" && route.v !== "models") {
+      main.innerHTML = "<h1>Nothing here yet</h1>" + emptyBox("<p>This project has no <code>.aiqa/</code> folder yet.</p><p>Run <code>/qa-pipeline &lt;url&gt;</code> for a full suite, or <code>/qa-story &lt;KEY&gt;</code> for one story. This page updates as files appear.</p>");
+      return;
+    }
+    if (route.v === "stories") viewStories();
+    else if (route.v === "story" && route.arg) { var parts = route.arg.split("/"); viewStory(parts[0], parts[1]); }
+    else if (route.v === "results") viewResults();
+    else if (route.v === "models") viewModels();
+    else if (route.v === "doc" && route.arg) viewDoc(route.arg);
+    else viewSuite();
+    if (scrollTop) window.scrollTo(0, 0);
+  }
+
+  function setLive(kind, text) {
+    var el = document.getElementById("live");
+    el.className = "live" + (kind ? " " + kind : "");
+    document.getElementById("liveText").textContent = text;
+  }
+
+  function poll() {
+    api("api/state").then(function (s) {
+      var json = JSON.stringify(Object.assign({}, s, { generatedAt: "" }));
+      state = s;
+      if (STATIC) setLive("snapshot", "Snapshot · " + fmtTime(s.generatedAt));
+      else setLive("", "Live · " + new Date().toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
+      // Re-render only when something changed, and leave documents and the Models form alone while they're in use.
+      if (json !== lastJson) {
+        var first = !lastJson;
+        lastJson = json;
+        if (first || (route.v !== "doc" && route.v !== "models")) render(false);
+      }
+    }).catch(function () { setLive("stale", "Disconnected — is the dashboard still running?"); });
+  }
+
+  window.addEventListener("hashchange", function () { render(true); main.focus({ preventScroll: true }); });
+  poll();
+  if (!STATIC) setInterval(poll, 2000);
+})();
+</script>
+</body>
+</html>

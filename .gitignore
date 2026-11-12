@@ -1,9 +1,7 @@
-/node_modules
-
-# Playwright
 node_modules/
-/test-results/
-/playwright-report/
-/blob-report/
-/playwright/.cache/
-/playwright/.auth/
+.aiqa/
+test-results/
+playwright-report/
+__pycache__/
+*.log
+.DS_Store
