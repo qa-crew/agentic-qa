@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import * as fs from "node:fs";
+import * as path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
@@ -43,6 +44,22 @@ test("the docs' install commands and command prefix match the plugin, the market
     each(/\/([\w-]+):qa-(?:pipeline|story|setup|dashboard)\b/g, plugin.name);
   }
   assert.ok(seen > 20, `only ${seen} install commands found; did the patterns stop matching?`);
+});
+
+test("the docs site only links to files inside docs/, so it works on GitHub Pages", () => {
+  const docs = fileURLToPath(new URL("../docs/", import.meta.url));
+  for (const f of ["index.html", "tutorial/index.html"]) {
+    const file = path.join(docs, f);
+    const html = fs.readFileSync(file, "utf-8");
+    for (const m of html.matchAll(/(?:href|src)="([^"#]+)/g)) {
+      const link = m[1];
+      if (/^(https?:|mailto:|data:)/.test(link)) continue;
+      const target = path.resolve(path.dirname(file), link);
+      assert.ok(target.startsWith(docs), `${f}: ${link} leaves docs/`);
+      assert.ok(fs.existsSync(target), `${f}: ${link} doesn't exist`);
+    }
+  }
+  assert.ok(fs.existsSync(path.join(docs, ".nojekyll")), "docs/.nojekyll is missing");
 });
 
 test("every agent carries the git rule and never waits for a user", () => {

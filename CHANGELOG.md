@@ -1,10 +1,10 @@
 # Changelog
 
 Agentic QA is the open-source side of AIQA (`@agents-forge/aiqa`), the Agents Forge product for enterprises. The
-first version, 2.5.0, matches the AIQA release the agents' prompts were ported from. This repository is kept
-separate from the npm package: changes are made here, and listed below.
+first version, 1.0.0, was ported from AIQA 2.5. This repository is kept separate from the npm package: changes are
+made here, and listed below.
 
-## 2.5.0 — 2026-11-11
+## 1.0.0 — 2026-11-13
 
 The repository becomes Agentic QA, the open-source agents bundle. The earlier proof of concept (Playwright's
 planner, generator and healer agents, the saucedemo tests and the deck) is removed; it stays in git history.
@@ -26,7 +26,8 @@ planner, generator and healer agents, the saucedemo tests and the deck) is remov
   - `--model` and `--model-<role>` set them for one run.
 - **An example:** `examples/saucedemo`, a walkthrough of a real run with screenshots.
 - **A tutorial:** `docs/tutorial/index.html`, one page covering install, setup, working with Claude Code or Copilot,
-  both workflows, the dashboard (with screenshots of every view) and models.
+  both workflows, the dashboard (with screenshots of every view) and models. It's online at
+  https://qa-crew.github.io/agentic-qa/tutorial/, served by GitHub Pages from `docs/`.
 - **A Claude Code plugin and marketplace:** `/plugin marketplace add qa-crew/agentic-qa`, then
   `/plugin install agentic-qa@qa-crew`. The plugin is `agentic-qa`, so the commands are
   `/agentic-qa:qa-pipeline` and so on. The repository lives in the `qa-crew` organization on GitHub.

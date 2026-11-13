@@ -9,9 +9,9 @@ Open-source QA agents for **Claude Code** and **GitHub Copilot**, from Agents Fo
 
 They can also work one user story at a time. A small live dashboard shows the progress.
 
-**New here?** Start with the [tutorial](docs/tutorial/index.html). It covers installing, setting up, working with the
-agents in Claude Code or Copilot, and the dashboard, with screenshots. Open the file in a browser from a clone or
-download.
+**New here?** Start with the [tutorial](https://qa-crew.github.io/agentic-qa/tutorial/). It covers installing,
+setting up, working with the agents in Claude Code or Copilot, and the dashboard, with screenshots. Its source is
+[docs/tutorial/index.html](docs/tutorial/index.html).
 
 Agentic QA is the open-source side of [AIQA](https://www.npmjs.com/package/@agents-forge/aiqa), the Agents Forge
 product for enterprises. The agents started as AIQA's and come here as plain agent and skill files: no SDK and no
