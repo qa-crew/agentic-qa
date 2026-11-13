@@ -1,9 +1,8 @@
 ---
 name: qa-story
-description: Run Agentic QA's story workflow for ONE user story. Design writes manual test cases from its acceptance criteria, Explore walks them in the real app and saves snapshots, Automate writes Playwright tests from them, and Run records the results and screenshots in the test-case file. Pass the story key, e.g. SD-123.
+description: Run Agentic QA's story workflow for ONE user story. Design writes manual test cases from its acceptance criteria, Explore walks them in the real app and saves snapshots, Automate writes Playwright tests from them, and Run records the results and screenshots in the test-case file. Pass the story key, e.g. SD-123. Use it when the user asks to test, design test cases for, or automate one user story by its key.
 argument-hint: "<KEY> [--step design|explore|automate|run] [--url <app-url>] [--force] [--auto] [--headed] [--model <m>] [--model-<role> <m>]"
-disable-model-invocation: true
-allowed-tools: Bash(node .github/skills/qa-story/scripts/story.mjs *)
+allowed-tools: Bash(node ".github/skills/qa-story/scripts/story.mjs" *)
 ---
 <!-- Generated from .claude/skills/qa-story/SKILL.md by scripts/build.mjs. Edit that file, then run: npm run build -->
 
@@ -122,6 +121,7 @@ Print what each step did, the files written, and what to do next: review failure
   or `analysis` (a story key such as `REPORT-12`). When an agent says a write was refused and gives the content,
   save it to the path it names, exactly as returned.
 - Results, evidence and the story hash are written by `story.mjs`, never by hand or by an agent.
+- Run each `node ".github/skills/qa-story/…"` command on its own, exactly as written here, not joined to other commands with `&&` or `;`. Only then does it run without a permission prompt.
 - NEVER run git commands that change the repository: no git add, commit, push, pull, fetch, merge, rebase, reset,
   checkout, switch, restore, stash, tag, branch -d/-D, clean, cherry-pick, revert or am. Read-only git (status,
   diff, log, show, blame) is fine. A person reviews and commits the work afterwards.

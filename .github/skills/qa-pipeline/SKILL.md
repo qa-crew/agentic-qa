@@ -1,9 +1,8 @@
 ---
 name: qa-pipeline
-description: Run the Agentic QA full-suite QA pipeline on a web app (analyst → qa-planner → qa-engineer → qa-reviewer → qa-reporter). It writes requirements, a test plan, test cases, Playwright page objects and specs, and reports under .agentic-qa/. Pass a URL, or a step name to run one step again.
+description: Run the Agentic QA full-suite QA pipeline on a web app (analyst → qa-planner → qa-engineer → qa-reviewer → qa-reporter). It writes requirements, a test plan, test cases, Playwright page objects and specs, and reports under .agentic-qa/. Pass a URL, or a step name to run one step again. Use it when the user asks to test a web app from its URL, to build or rerun the Playwright suite, or to run one step again (for example, run the regression tests = the qa-reporter step with --grep @regression).
 argument-hint: "<url> [--grep <tags>|all] [--skip a,b] [--auto] [--requirements <file>] [--headed] [--users N --minutes M] [--model <m>] [--model-<role> <m>]"
-disable-model-invocation: true
-allowed-tools: Bash(node .github/skills/qa-pipeline/scripts/progress.mjs *) Bash(node .github/skills/qa-pipeline/scripts/models.mjs) Bash(node .github/skills/qa-pipeline/scripts/models.mjs *) Bash(playwright-cli --version) Bash(npx --no-install playwright --version) Bash(mkdir -p .agentic-qa/*)
+allowed-tools: Bash(node ".github/skills/qa-pipeline/scripts/progress.mjs" *) Bash(node ".github/skills/qa-pipeline/scripts/models.mjs") Bash(node ".github/skills/qa-pipeline/scripts/models.mjs" *) Bash(playwright-cli --version) Bash(npx --no-install playwright --version) Bash(mkdir -p .agentic-qa/*)
 ---
 <!-- Generated from .claude/skills/qa-pipeline/SKILL.md by scripts/build.mjs. Edit that file, then run: npm run build -->
 
@@ -117,6 +116,7 @@ At the end: `progress.mjs pipeline done --run <run id>`. Then print a final summ
 2. After completing each step — confirm the output file was written with its size.
 3. Every step after the analyst uses the analyst's snapshots in `.agentic-qa/snapshots/`.
 4. The subagents never ask the user anything. Only you do, at the points above.
-5. NEVER run git commands that change the repository: no git add, commit, push, pull, fetch, merge, rebase, reset,
+5. Run each `node ".github/skills/qa-pipeline/…"` command on its own, exactly as written here, not joined to other commands with `&&` or `;`. Only then does it run without a permission prompt.
+6. NEVER run git commands that change the repository: no git add, commit, push, pull, fetch, merge, rebase, reset,
    checkout, switch, restore, stash, tag, branch -d/-D, clean, cherry-pick, revert or am. Read-only git (status,
    diff, log, show, blame) is fine. A person reviews and commits the work afterwards.

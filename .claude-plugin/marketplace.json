@@ -1,6 +1,6 @@
 {
   "name": "qa-crew",
-  "description": "Open-source agents and skills from Agents Forge.",
+  "description": "Open-source QA agents for Claude Code and GitHub Copilot.",
   "owner": { "name": "Rohan Patil" },
   "plugins": [
     {

@@ -18,6 +18,10 @@ generator and healer agents, the saucedemo tests and the deck) is removed; it st
     writing results into the test cases;
   - `qa-setup`;
   - `qa-dashboard`: live, or a `--static` snapshot.
+
+  You can type them as commands, or ask in plain words: Claude may start `qa-pipeline`, `qa-story` and
+  `qa-dashboard` itself. `qa-setup` is only ever typed, because it installs software. Each skill pre-approves its own
+  scripts, written exactly as it runs them, so they don't ask for permission on every call.
 - **A model for each agent:**
   - the dashboard's Models page saves the picks to `.agentic-qa/ai.json`;
   - `qa-pipeline` and `qa-story` start each agent with its role's model;
