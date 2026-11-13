@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// The model each AIQA role runs on, for the qa-pipeline skill. Run from the project root:
+// The model each Agentic QA role runs on, for the qa-pipeline skill. Run from the project root:
 //   node models.mjs [--model <id>] [--model-<role> <id>]…
 // Prints { "<role>": { "model": "opus" | null, "source": "command line" | ".aiqa/ai.json" | "session", … } }.
 // null = start the agent without a model override (it inherits the session's model).

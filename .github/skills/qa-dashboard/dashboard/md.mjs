@@ -1,4 +1,4 @@
-// A small markdown → HTML renderer for AIQA's own documents (requirements, plans, test cases, reports).
+// A small markdown → HTML renderer for Agentic QA's own documents (requirements, plans, test cases, reports).
 // Everything is HTML-escaped first; the only markup that survives is what this file emits, plus <br> inside
 // table cells (the test-case format uses it). Links are kept only for http(s), relative paths and #anchors.
 

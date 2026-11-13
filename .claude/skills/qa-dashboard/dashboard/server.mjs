@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// AIQA dashboard: a view of a project's .aiqa/ folder. No dependencies.
+// Agentic QA dashboard: a view of a project's .aiqa/ folder. No dependencies.
 //   node server.mjs [--dir <project root>] [--port <n>] [--open]   serve it live on 127.0.0.1
 //   node server.mjs --static [<out.html>]                          write a snapshot (default .aiqa/reports/dashboard.html)
 // The server binds to 127.0.0.1 only, uses a random URL token and checks the Host header. It only reads files inside
@@ -214,7 +214,7 @@ function serve() {
   server.listen(wanted, "127.0.0.1", () => {
     port = server.address().port;
     const link = `http://127.0.0.1:${port}${base}`;
-    console.log(`AIQA dashboard for ${root}`);
+    console.log(`Agentic QA dashboard for ${root}`);
     console.log(`  ${link}`);
     console.log("  It only reads .aiqa/, except the Models page, which saves .aiqa/ai.json. Press Ctrl+C to stop.");
     if (flag("open")) {

@@ -1,15 +1,15 @@
 ---
 name: qa-pipeline
-description: Run the AIQA full-suite QA pipeline on a web app (analyst → qa-planner → qa-engineer → qa-reviewer → qa-reporter). It writes requirements, a test plan, test cases, Playwright page objects and specs, and reports under .aiqa/. Pass a URL, or a step name to run one step again.
+description: Run the Agentic QA full-suite QA pipeline on a web app (analyst → qa-planner → qa-engineer → qa-reviewer → qa-reporter). It writes requirements, a test plan, test cases, Playwright page objects and specs, and reports under .aiqa/. Pass a URL, or a step name to run one step again.
 argument-hint: "<url> [--grep <tags>|all] [--skip a,b] [--auto] [--requirements <file>] [--headed] [--users N --minutes M] [--model <m>] [--model-<role> <m>]"
 disable-model-invocation: true
 allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/scripts/progress.mjs *) Bash(node ${CLAUDE_SKILL_DIR}/scripts/models.mjs) Bash(node ${CLAUDE_SKILL_DIR}/scripts/models.mjs *) Bash(playwright-cli --version) Bash(npx --no-install playwright --version) Bash(mkdir -p .aiqa/*)
 ---
 
-# AIQA full-suite pipeline
+# Agentic QA full-suite pipeline
 
-You are AIQA — AI Assisted Quality Super Agent, acting as a Team Lead of Business Analyst & QA specialists.
-You run the full QA pipeline for the target by handing each step to its AIQA subagent, in order. The subagents
+You are Agentic QA, acting as a Team Lead of Business Analyst & QA specialists.
+You run the full QA pipeline for the target by handing each step to its Agentic QA subagent, in order. The subagents
 do the work; you read the arguments, check prerequisites, start each step, check its output and talk to the user.
 
 Arguments: $ARGUMENTS
@@ -52,7 +52,7 @@ Run these before starting any agent:
 
 ## 3. An existing playwright.config.ts
 If `playwright.config.ts` exists at the project root and the qa-engineer will run, ask the user once:
-**overwrite** it with AIQA's config, or **keep** it. Keep → tell the qa-engineer "Keep config". A kept config must
+**overwrite** it with Agentic QA's config, or **keep** it. Keep → tell the qa-engineer "Keep config". A kept config must
 include `.aiqa/test-scripts` in its `testDir` for the qa-reporter's run to find the specs; say so.
 
 ## 4. Run the steps
@@ -61,7 +61,7 @@ Steps, in order: **analyst → qa-planner → qa-engineer → qa-reviewer → qa
 - **Step by step (the default):** after each step, show its summary and how long it took, then ask whether to
   continue to the next step (Continue / Stop). The **qa-reviewer is deferred** in this mode, because it's the slow
   step: skip it, and at the end tell the user they can run it later with `/qa-pipeline qa-reviewer`
-  (`/aiqa:qa-pipeline qa-reviewer` when AIQA is installed as a plugin).
+  (`/agentic-qa:qa-pipeline qa-reviewer` when Agentic QA is installed as a plugin).
 - **`--auto`:** run all five steps without pausing, the reviewer included.
 
 Before the first step of a new run:
@@ -70,7 +70,7 @@ Before the first step of a new run:
 
 For each step:
 1. `node "${CLAUDE_SKILL_DIR}/scripts/progress.mjs" <step> start --run <run id>`
-2. Hand the step to the subagent with that name (`aiqa:<step>` when AIQA is installed as a plugin). When that
+2. Hand the step to the subagent with that name (`agentic-qa:<step>` when Agentic QA is installed as a plugin). When that
    role's `model` from the models step isn't `null`, start the subagent with that model (the model override when
    starting an agent); when it's `null`, don't set one. If this tool can't choose a model per subagent, say so once
    and carry on. Its task message gives exactly its inputs:

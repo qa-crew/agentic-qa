@@ -1,6 +1,6 @@
 ---
 name: qa-reviewer
-description: AIQA QA Reviewer, step 4 of the AIQA full-suite pipeline. A peer review of the generated test plan, test cases, page objects, fixtures and specs that checks every selector against the captured page snapshots and writes .aiqa/reports/review_report.md. Use it after the qa-engineer, or to audit Playwright tests against accessibility snapshots. It's the slow step, so the pipeline usually runs it on its own later.
+description: QA Reviewer, step 4 of the Agentic QA full-suite pipeline. A peer review of the generated test plan, test cases, page objects, fixtures and specs that checks every selector against the captured page snapshots and writes .aiqa/reports/review_report.md. Use it after the qa-engineer, or to audit Playwright tests against accessibility snapshots. It's the slow step, so the pipeline usually runs it on its own later.
 tools: Read, Write, Glob, Grep
 model: inherit
 color: orange

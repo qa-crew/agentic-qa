@@ -1,12 +1,12 @@
 ---
 name: qa-dashboard
-description: Open AIQA's local dashboard in AIQA's look (Slate/Industrial, light/dark). It shows the full-suite steps as they run, the requirements, test plan and test cases, each story's steps and test cases, snapshots and test results, and a Models page for picking the model each agent runs on. Use --static to save a snapshot file instead.
+description: Open Agentic QA's local dashboard in AIQA's look (Slate/Industrial, light/dark). It shows the full-suite steps as they run, the requirements, test plan and test cases, each story's steps and test cases, snapshots and test results, and a Models page for picking the model each agent runs on. Use --static to save a snapshot file instead.
 argument-hint: "[--static [<out.html>]] [--port <n>]"
 disable-model-invocation: true
 allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/dashboard/server.mjs) Bash(node ${CLAUDE_SKILL_DIR}/dashboard/server.mjs *)
 ---
 
-# AIQA dashboard
+# Agentic QA dashboard
 
 Arguments: $ARGUMENTS
 

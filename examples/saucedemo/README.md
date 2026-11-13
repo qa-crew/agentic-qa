@@ -1,6 +1,6 @@
 # Example: a real run on saucedemo.com
 
-This is a real run of the AIQA agents on [saucedemo.com](https://www.saucedemo.com), the public demo shop by Sauce
+This is a real run of the Agentic QA agents on [saucedemo.com](https://www.saucedemo.com), the public demo shop by Sauce
 Labs. It shows the commands, what each step wrote, how long each step took, and the dashboard.
 
 The run's own files (`.aiqa/…`) aren't in this repository. This page quotes short parts of them.
@@ -8,9 +8,11 @@ The run's own files (`.aiqa/…`) aren't in this repository. This page quotes sh
 | | |
 |---|---|
 | Dates | 11–12 November 2026 |
-| Tool | Claude Code 2.1.322, with AIQA installed as a plugin from this repository |
+| Tool | Claude Code 2.1.322, with Agentic QA installed as a plugin from this repository |
 | Model | Claude Opus 5.5 for every agent (see [Models](#models)) |
 | Browser | Chromium, through `playwright-cli` and Playwright 1.61.0 |
+
+The run used the plugin's earlier name, `aiqa`. The commands on this page use its current name, `agentic-qa`.
 
 ## Setup
 In an empty folder:
@@ -18,11 +20,11 @@ In an empty folder:
 npm init -y
 npm install -D @playwright/test
 npx playwright install chromium
-claude plugin marketplace add rohan12patil/AIQA --scope project
-claude plugin install aiqa@agents-forge --scope project
+claude plugin marketplace add agents-forge/agentic-qa --scope project
+claude plugin install agentic-qa@agents-forge --scope project
 ```
 `playwright-cli` was already installed (`npm install -g @playwright/cli@latest`). Instead of the first three lines,
-you can install the plugin and then run `/aiqa:qa-setup`, which asks and installs the same things.
+you can install the plugin and then run `/agentic-qa:qa-setup`, which asks and installs the same things.
 
 This run installed the plugin from a local copy of this repository. Some steps ran headless with `claude -p`, so
 the folder's `.claude/settings.local.json` allowed the commands the agents use (`playwright-cli`, `npx`, `node`,
@@ -30,7 +32,7 @@ file reads and writes), as `qa-setup` suggests.
 
 ## The full suite
 ```
-/aiqa:qa-pipeline https://www.saucedemo.com --grep @smoke --auto
+/agentic-qa:qa-pipeline https://www.saucedemo.com --grep @smoke --auto
 ```
 `--auto` runs all five steps without pausing. `--grep @smoke` makes the reporter run only the quick smoke tests.
 
@@ -53,9 +55,9 @@ The steps didn't all run in one go:
 - After the limit reset, the last three steps were run one at a time. A step name runs just that step, as part of
   the last run, so the dashboard still shows one run:
   ```
-  /aiqa:qa-pipeline qa-engineer --grep @smoke
-  /aiqa:qa-pipeline qa-reviewer
-  /aiqa:qa-pipeline qa-reporter --grep @smoke
+  /agentic-qa:qa-pipeline qa-engineer --grep @smoke
+  /agentic-qa:qa-pipeline qa-reviewer
+  /agentic-qa:qa-pipeline qa-reporter --grep @smoke
   ```
   The QA Engineer kept 13 test-case files from the earlier try, changed 5 and added 4.
 
@@ -165,7 +167,7 @@ As a shopper I want to sign in so I can buy things.
 ```
 Then:
 ```
-/aiqa:qa-story SD-1 --url https://www.saucedemo.com --auto
+/agentic-qa:qa-story SD-1 --url https://www.saucedemo.com --auto
 ```
 
 | Step | Time | What happened |
@@ -217,8 +219,8 @@ test("TC-SD1-S-002 — Locked-out user sees the locked-out message and stays on 
 ```
 The Run step filled in **Last Result** and **Evidence** for every row, and added a row to **Run History**.
 
-### Same files as the npm package
-The npm package's `stories status` (run here from the package's source) reads the story that the agents wrote:
+### Same files as AIQA
+AIQA's `stories status` (run here from the npm package's source) reads the story that the agents wrote:
 ```
    Story        Title                                        Manual   Auto   Last run
 ✅   SD-1         Login with the demo accounts                 12       12     12✓ 0✗ 2026-11-12
@@ -227,7 +229,7 @@ Its "Last run" column needs the package's story index (`.aiqa/stories/index.json
 creates it; after that, each story run is recorded there too.
 
 ## The dashboard
-`/aiqa:qa-dashboard` showed the run live. The full suite, with each step's time and files:
+`/agentic-qa:qa-dashboard` showed the run live. The full suite, with each step's time and files:
 
 ![The full suite view](screenshots/dashboard-suite.png)
 

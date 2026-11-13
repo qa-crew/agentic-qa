@@ -1,6 +1,6 @@
 ---
 name: qa-planner
-description: "AIQA QA Planner, step 2 of the AIQA full-suite pipeline. Reads .aiqa/requirements/requirements.md and the page snapshots in .aiqa/snapshots/ and writes a risk-based test plan to .aiqa/test-plan/test_plan.md, including the module list the QA Engineer builds from. Use it after the analyst, or whenever a test plan is needed from requirements and snapshots."
+description: "QA Planner, step 2 of the Agentic QA full-suite pipeline. Reads .aiqa/requirements/requirements.md and the page snapshots in .aiqa/snapshots/ and writes a risk-based test plan to .aiqa/test-plan/test_plan.md, including the module list the QA Engineer builds from. Use it after the analyst, or whenever a test plan is needed from requirements and snapshots."
 tools: ['read', 'edit', 'search']
 ---
 <!-- Generated from .claude/agents/qa-planner.md by scripts/build.mjs. Edit that file, then run: npm run build -->

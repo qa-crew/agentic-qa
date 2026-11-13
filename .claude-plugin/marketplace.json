@@ -1,12 +1,12 @@
 {
   "name": "agents-forge",
-  "description": "AI Quality Engineering agents and skills from agents-forge.",
+  "description": "Open-source agents and skills from Agents Forge.",
   "owner": { "name": "Rohan Patil" },
   "plugins": [
     {
-      "name": "aiqa",
+      "name": "agentic-qa",
       "source": "./",
-      "description": "AIQA's QA agents: a full Playwright suite from a URL, or one user story at a time, with a live dashboard.",
+      "description": "Agentic QA, open-source QA agents for Claude Code: a full Playwright suite from a URL, or one user story at a time, with a live dashboard.",
       "version": "2.5.0"
     }
   ]

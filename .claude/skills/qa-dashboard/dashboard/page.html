@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AIQA Dashboard</title>
+<title>Agentic QA Dashboard</title>
 <!--THEME_BOOT-->
 <style>/*THEME_CSS*/</style>
 <style>
@@ -124,7 +124,7 @@
 </head>
 <body>
 <header class="top">
-  <a class="brand" href="#suite"><span class="logo">AIQA</span><span class="proj" id="proj">Dashboard</span></a>
+  <a class="brand" href="#suite"><span class="logo">Agentic QA</span><span class="proj" id="proj">Dashboard</span></a>
   <span class="live" id="live" role="status"><span class="dot"></span><span id="liveText">Connecting…</span></span>
   <!--THEME_MENU-->
 </header>
@@ -206,14 +206,14 @@
     var s = state.suite, run = s.run;
     var anything = s.steps.some(function (x) { return x.state !== "pending"; });
     var html = "<h1>Full suite</h1>";
-    html += '<p class="sub">Five AIQA roles, one after another: explore → plan → automate → review → report.</p>';
+    html += '<p class="sub">Five Agentic QA roles, one after another: explore → plan → automate → review → report.</p>';
     if (run) {
       html += '<div class="kv"><div><span>Target </span><b>' + esc(run.target || "—") + "</b></div><div><span>Run </span><b class=\"mono\">" + esc(run.run || "—") + "</b></div><div><span>Filter </span><b>" + esc(run.filter && run.filter !== "none" ? run.filter : "@smoke (default)") + "</b></div><div><span>Started </span><b>" + esc(fmtTime(run.startedAt)) + "</b></div><div><span>Status </span>" + chip(run.state === "running" ? "running" : run.state || "pending") + "</div></div>";
     }
     var paused = s.steps.filter(function (x) { return x.state === "paused"; })[0];
     if (paused) html += '<div class="gate" role="status"><b>Your turn.</b> The pipeline is waiting after ' + esc(paused.name) + ". Review the output, then answer in the chat.</div>";
     if (!anything && !run) {
-      html += emptyBox("<p><b>No full-suite run here yet.</b></p><p>In Claude Code, run <code>/qa-pipeline https://your-app.example</code> (or <code>/aiqa:qa-pipeline</code> when AIQA is installed as a plugin). This page updates while it runs.</p>");
+      html += emptyBox("<p><b>No full-suite run here yet.</b></p><p>In Claude Code, run <code>/qa-pipeline https://your-app.example</code> (or <code>/agentic-qa:qa-pipeline</code> when Agentic QA is installed as a plugin). This page updates while it runs.</p>");
     }
     html += '<div class="steps" role="list">';
     s.steps.forEach(function (x, i) {
@@ -345,7 +345,7 @@
       html += '<form id="modelsForm"><div class="table-wrap models"><table><thead><tr><th>Role</th><th class="d-only">Used by</th><th>Model</th><th class="d-only">Runs on now</th></tr></thead><tbody>';
       m.roles.forEach(function (r) {
         var opts = [["", r.key === "default" ? "Session model" : "Default"]].concat(m.options.map(function (o) { return [o, MODEL_LABEL[o] || o]; }));
-        if (r.saved && m.options.indexOf(r.saved) < 0) opts.push([r.saved, r.saved + " (saved by the npm package)"]);
+        if (r.saved && m.options.indexOf(r.saved) < 0) opts.push([r.saved, r.saved + " (saved by AIQA)"]);
         var res = r.key === "default" ? null : m.resolved[r.key];
         var now = res ? (res.model ? esc(MODEL_LABEL[res.model] || res.model) + ' <span class="small muted">(' + esc(res.source) + ")</span>" : '<span class="muted">Session model</span>') + (res.note ? '<br><span class="small muted">' + esc(res.note) + "</span>" : "") : '<span class="muted">—</span>';
         html += '<tr><td><label for="m-' + esc(r.key) + '">' + esc(r.name) + '</label><span class="m-only small muted">' + esc(r.uses) + (res ? " · now: " + esc(res.model ? MODEL_LABEL[res.model] || res.model : "Session model") : "") + '</span></td><td class="small muted d-only">' + esc(r.uses) + '</td><td><select id="m-' + esc(r.key) + '" name="' + esc(r.key) + '"' + (STATIC ? " disabled" : "") + ">" +
@@ -385,7 +385,7 @@
     });
     if (!state) return;
     document.getElementById("proj").textContent = state.project;
-    document.title = state.project + " · AIQA Dashboard";
+    document.title = state.project + " · Agentic QA Dashboard";
     if (!state.hasAiqa && route.v !== "doc" && route.v !== "models") {
       main.innerHTML = "<h1>Nothing here yet</h1>" + emptyBox("<p>This project has no <code>.aiqa/</code> folder yet.</p><p>Run <code>/qa-pipeline &lt;url&gt;</code> for a full suite, or <code>/qa-story &lt;KEY&gt;</code> for one story. This page updates as files appear.</p>");
       return;

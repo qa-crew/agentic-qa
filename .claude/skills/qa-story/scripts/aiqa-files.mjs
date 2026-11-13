@@ -374,7 +374,7 @@ export function scriptableRows(parsed) {
 export function nothingToAutomate(parsed) {
   const rows = parsed?.table?.rows ?? [];
   if (!rows.length || scriptableRows(parsed).length) return undefined;
-  if (rows.every((r) => hasSource(r.cells.Source))) return "Every case comes from an existing test, so there's nothing for AIQA to automate";
+  if (rows.every((r) => hasSource(r.cells.Source))) return "Every case comes from an existing test, so there's nothing for Agentic QA to automate";
   return "No case is ready to automate (none is Verified, Updated, New or a possible defect)";
 }
 
@@ -410,7 +410,7 @@ export function stepState(sp, key, title = key) {
       notNeeded["story-script"] = why;
       done["story-script"] = true;
       if (!done["story-run"]) {
-        notNeeded["story-run"] = "Nothing to run: AIQA has no spec for this story";
+        notNeeded["story-run"] = "Nothing to run: Agentic QA has no spec for this story";
         done["story-run"] = true;
       }
     }

@@ -1,6 +1,6 @@
 ---
 name: story-explorer
-description: "AIQA story Explore step (the Analyst role). Walks ONE story's test cases through the real application with playwright-cli, saves page snapshots to .aiqa/snapshots/<KEY>/, and corrects the test-case file in place (Verified / Updated / New / Blocked / Possible defect) without hiding defects. Use it after story-designer (normally started by the qa-story skill), with the story key and title, the app URL, the test-case file and the story text."
+description: "Agentic QA story Explore step (the Analyst role). Walks ONE story's test cases through the real application with playwright-cli, saves page snapshots to .aiqa/snapshots/<KEY>/, and corrects the test-case file in place (Verified / Updated / New / Blocked / Possible defect) without hiding defects. Use it after story-designer (normally started by the qa-story skill), with the story key and title, the app URL, the test-case file and the story text."
 tools: ['read', 'edit', 'search', 'execute']
 ---
 <!-- Generated from .claude/agents/story-explorer.md by scripts/build.mjs. Edit that file, then run: npm run build -->
@@ -84,9 +84,9 @@ Walk them like the other cases, then set their Status (never Verified, Updated, 
 - **Outdated** — the app no longer matches them (a label, the flow or the result changed). Don't edit the row: write
   under Exploration Notes what differs (TC id, what the row says, what the app does now).
 - **Obsolete** — only for a spec row whose feature is gone from the app.
-A row with no steps: check the behaviour its title describes. Every other rule below is for AIQA's own rows.
+A row with no steps: check the behaviour its title describes. Every other rule below is for Agentic QA's own rows.
 
-### Status of AIQA's own rows
+### Status of Agentic QA's own rows
 Set each case's Status:
 - **Verified** — the steps work as written and the app shows the expected result.
 - **Updated** — the behaviour matches the story, but the steps/labels/navigation in the case

@@ -1,6 +1,6 @@
 ---
 name: qa-engineer
-description: AIQA QA Engineer, step 3 of the AIQA full-suite pipeline. From .aiqa/test-plan/test_plan.md and the page snapshots it writes test-case documents (.aiqa/test-cases/<module>.md), playwright.config.ts, page objects, Playwright fixtures and one spec per module in .aiqa/test-scripts/, plus an axe accessibility spec and a k6 load test when those are selected. Use it after the qa-planner, or to generate snapshot-accurate Playwright tests from a test plan. Give it the base URL and the tag filter.
+description: QA Engineer, step 3 of the Agentic QA full-suite pipeline. From .aiqa/test-plan/test_plan.md and the page snapshots it writes test-case documents (.aiqa/test-cases/<module>.md), playwright.config.ts, page objects, Playwright fixtures and one spec per module in .aiqa/test-scripts/, plus an axe accessibility spec and a k6 load test when those are selected. Use it after the qa-planner, or to generate snapshot-accurate Playwright tests from a test plan. Give it the base URL and the tag filter.
 tools: Read, Write, Edit, Glob, Grep, Bash
 model: inherit
 color: green
@@ -116,7 +116,7 @@ export default defineConfig({
     // Other browsers are commented out by default (they multiply total test
     // time). Uncomment any of these, then run `npx playwright test` to
     // include them — this is a deliberate, user-decided opt-in, not something
-    // AIQA enables automatically.
+    // Agentic QA enables automatically.
     // { name: "firefox", use: { ...devices["Desktop Firefox"] } },
     // { name: "webkit", use: { ...devices["Desktop Safari"] } },
     // { name: "mobile", use: { ...devices["Pixel 5"] } },

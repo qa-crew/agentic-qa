@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Progress lines for the AIQA dashboard, written by the qa-pipeline skill. Run from the project root:
+// Progress lines for the Agentic QA dashboard, written by the qa-pipeline skill. Run from the project root:
 //   node progress.mjs <step> <event> [--run <id>] [--target <url>] [--filter <tags>] [--note <text>]
 //     step:  pipeline | analyst | qa-planner | qa-engineer | qa-reviewer | qa-reporter
 //     event: start | done | failed | skipped | paused

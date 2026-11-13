@@ -1,4 +1,4 @@
-// A throwaway project with AIQA files in it: a full-suite run in progress and one story.
+// A throwaway project with .aiqa/ files in it: a full-suite run in progress and one story.
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";

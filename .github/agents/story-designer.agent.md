@@ -1,6 +1,6 @@
 ---
 name: story-designer
-description: "AIQA story Design step (the QA Planner role). Turns ONE user story into manual test cases in .aiqa/test-cases/<KEY>-<name>.md, with testable Given/When/Then acceptance criteria, open questions and an 11-column test-case table. It doesn't open the app. Use it for the first step of the AIQA story workflow (normally started by the qa-story skill), with the story key, title, story hash, output file and story text."
+description: "Agentic QA story Design step (the QA Planner role). Turns ONE user story into manual test cases in .aiqa/test-cases/<KEY>-<name>.md, with testable Given/When/Then acceptance criteria, open questions and an 11-column test-case table. It doesn't open the app. Use it for the first step of the Agentic QA story workflow (normally started by the qa-story skill), with the story key, title, story hash, output file and story text."
 tools: ['read', 'edit', 'search']
 ---
 <!-- Generated from .claude/agents/story-designer.md by scripts/build.mjs. Edit that file, then run: npm run build -->

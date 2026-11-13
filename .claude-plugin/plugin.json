@@ -1,14 +1,14 @@
 {
-  "name": "aiqa",
-  "displayName": "AIQA: AI Quality Engineering agents",
+  "name": "agentic-qa",
+  "displayName": "Agentic QA: open-source QA agents",
   "version": "2.5.0",
-  "description": "AIQA's QA agents for Claude Code: analyst, qa-planner, qa-engineer, qa-reviewer and qa-reporter for a full Playwright suite from a URL, plus story-designer, story-explorer and story-automator for one user story at a time. Skills run them, set up Playwright and open a live dashboard.",
+  "description": "QA agents for Claude Code: analyst, qa-planner, qa-engineer, qa-reviewer and qa-reporter for a full Playwright suite from a URL, plus story-designer, story-explorer and story-automator for one user story at a time. Skills run them, set up Playwright and open a live dashboard.",
   "author": {
     "name": "Rohan Patil",
     "url": "https://github.com/rohan12patil"
   },
-  "homepage": "https://github.com/rohan12patil/AIQA",
-  "repository": "https://github.com/rohan12patil/AIQA",
+  "homepage": "https://github.com/agents-forge/agentic-qa",
+  "repository": "https://github.com/agents-forge/agentic-qa",
   "license": "MIT",
   "keywords": [
     "qa",
@@ -19,7 +19,8 @@
     "test-cases",
     "accessibility",
     "k6",
-    "agents"
+    "agents",
+    "open-source"
   ],
   "agents": [
     "./.claude/agents/analyst.md",

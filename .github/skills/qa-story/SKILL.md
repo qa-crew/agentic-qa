@@ -1,16 +1,16 @@
 ---
 name: qa-story
-description: Run AIQA's story workflow for ONE user story. Design writes manual test cases from its acceptance criteria, Explore walks them in the real app and saves snapshots, Automate writes Playwright tests from them, and Run records the results and screenshots in the test-case file. Pass the story key, e.g. SD-123.
+description: Run Agentic QA's story workflow for ONE user story. Design writes manual test cases from its acceptance criteria, Explore walks them in the real app and saves snapshots, Automate writes Playwright tests from them, and Run records the results and screenshots in the test-case file. Pass the story key, e.g. SD-123.
 argument-hint: "<KEY> [--step design|explore|automate|run] [--url <app-url>] [--force] [--auto] [--headed] [--model <m>] [--model-<role> <m>]"
 disable-model-invocation: true
 allowed-tools: Bash(node .github/skills/qa-story/scripts/story.mjs *)
 ---
 <!-- Generated from .claude/skills/qa-story/SKILL.md by scripts/build.mjs. Edit that file, then run: npm run build -->
 
-# AIQA story workflow
+# Agentic QA story workflow
 
 One user story at a time: **Pull → Design → Explore → Automate → Run**. Design, Explore and Automate are agent
-steps (the subagents `story-designer`, `story-explorer` and `story-automator`; `aiqa:story-…` when AIQA is
+steps (the subagents `story-designer`, `story-explorer` and `story-automator`; `agentic-qa:story-…` when Agentic QA is
 installed as a plugin). Pull and Run are plain code in `story.mjs`, so a result is never made up.
 
 Arguments: $ARGUMENTS
@@ -107,7 +107,7 @@ If `nothingToAutomate` is set, skip Automate and Run: they're **Not needed**. Ot
 Automate is done when `stage.done["story-script"]` is true (a spec tagged `@<KEY>`).
 
 ### Run (code)
-`story.mjs run <KEY> --url <app-url> --run-id <run id>`. It runs the story's tests with AIQA's story config, then
+`story.mjs run <KEY> --url <app-url> --run-id <run id>`. It runs the story's tests with Agentic QA's story config, then
 writes into the test-case file: **Last Result**, **Evidence** (screenshots copied to
 `.aiqa/evidence/<KEY>/<run id>/`) and a **Run History** row. Show its summary.
 

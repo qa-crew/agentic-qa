@@ -1,7 +1,7 @@
 {
-  "name": "aiqa-agents",
+  "name": "agentic-qa",
   "private": true,
-  "description": "AIQA's agents and skills for Claude Code and GitHub Copilot. Nothing to install: these scripts only build and check the bundle.",
+  "description": "Agentic QA's agents and skills for Claude Code and GitHub Copilot. Nothing to install: these scripts only build and check the bundle.",
   "type": "module",
   "license": "MIT",
   "scripts": {

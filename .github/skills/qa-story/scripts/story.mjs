@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// The code-owned parts of AIQA's story workflow, for the qa-story skill. Run from the project root:
+// The code-owned parts of Agentic QA's story workflow, for the qa-story skill. Run from the project root:
 //   node story.mjs info <KEY>                    where the story stands, its files and hash (JSON)
 //   node story.mjs config <KEY> --url <app>      write .aiqa/playwright.stories.config.ts
 //   node story.mjs finish-design <KEY>           write storyHash into the test cases if the agent left it out

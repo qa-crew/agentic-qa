@@ -1,11 +1,11 @@
 ---
 name: qa-setup
-description: Check and install what the AIQA agents need in this project (Node, @playwright/test, playwright-cli and its skill, Chromium, plus the optional @axe-core/playwright and k6), and suggest permission rules and .gitignore lines. It asks before installing anything.
+description: Check and install what the Agentic QA agents need in this project (Node, @playwright/test, playwright-cli and its skill, Chromium, plus the optional @axe-core/playwright and k6), and suggest permission rules and .gitignore lines. It asks before installing anything.
 disable-model-invocation: true
 allowed-tools: Bash(node --version) Bash(npm ls *) Bash(playwright-cli --version) Bash(npx --no-install playwright --version) Bash(k6 version)
 ---
 
-# AIQA setup
+# Agentic QA setup
 
 Check each item in order and report a short table: item, status (✅ ready, ⚠️ optional and missing, ❌ missing),
 and the fix. **Ask before installing anything**, one question that lists everything missing (the user can untick
@@ -34,7 +34,7 @@ these rules to `.claude/settings.json` (merge them with what's there and keep th
 ```
 
 ## .gitignore (optional)
-AIQA's outputs under `.aiqa/` (requirements, test plan, test cases, test scripts, snapshots) are meant to be
+Agentic QA's outputs under `.aiqa/` (requirements, test plan, test cases, test scripts, snapshots) are meant to be
 committed. Offer to add these lines to `.gitignore` for the files that shouldn't be:
 ```
 .aiqa/auth-state.json

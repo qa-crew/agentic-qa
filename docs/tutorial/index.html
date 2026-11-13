@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AIQA Agents Tutorial</title>
-<meta name="description" content="How to install the AIQA agents for Claude Code or GitHub Copilot, work with them in chat, run a full QA suite or one user story, and read the results on the dashboard.">
+<title>Agentic QA Tutorial</title>
+<meta name="description" content="How to install the Agentic QA agents for Claude Code or GitHub Copilot, work with them in chat, run a full QA suite or one user story, and read the results on the dashboard.">
 <script>
   // Apply a saved light/dark choice before the page paints.
   try { var m = localStorage.getItem("aiqa-tutorial-mode"); if (m === "light" || m === "dark") document.documentElement.setAttribute("data-mode", m); } catch (e) {}
@@ -271,7 +271,7 @@
 </head>
 <body>
 <header class="top">
-  <a class="brand" href="#top"><span class="logo">AIQA</span><span><span class="full">Agents · </span>Tutorial</span></a>
+  <a class="brand" href="#top"><span class="logo">Agentic QA</span><span>Tutorial</span></a>
   <span class="spacer"></span>
   <button class="mode" id="mode" type="button" aria-label="Switch between light and dark">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></svg>
@@ -303,23 +303,23 @@
     <div class="hero">
       <span class="eyebrow">Tutorial · about 15 minutes to read</span>
       <h1>From a URL to a tested Playwright suite</h1>
-      <p class="lead">AIQA is a team of QA agents for Claude Code and GitHub Copilot. You give them your web app's address, in chat.
+      <p class="lead">Agentic QA is an open-source team of QA agents for Claude Code and GitHub Copilot. You give them your web app's address, in chat.
         They explore it, plan the testing, write the tests, check them and run them. This page walks you through it, step by step.</p>
       <div class="code labeled">
         <span class="label">Quick start, in Claude Code</span>
         <button class="copy" type="button">Copy</button>
-<pre><code>/plugin marketplace add rohan12patil/AIQA
-/plugin install aiqa@agents-forge
-/aiqa:qa-setup
-/aiqa:qa-pipeline https://www.saucedemo.com
-/aiqa:qa-dashboard</code></pre>
+<pre><code>/plugin marketplace add agents-forge/agentic-qa
+/plugin install agentic-qa@agents-forge
+/agentic-qa:qa-setup
+/agentic-qa:qa-pipeline https://www.saucedemo.com
+/agentic-qa:qa-dashboard</code></pre>
       </div>
       <ul class="outcomes" aria-label="What you have at the end">
         <li>Requirements</li><li>Risk-based test plan</li><li>Test cases</li><li>Playwright page objects &amp; specs</li><li>A review of every selector</li><li>An executive test report</li>
       </ul>
       <figure>
         <a class="shot crop" href="images/suite.png" data-caption="The dashboard after a full-suite run on saucedemo.com: five steps done, with their times and files.">
-          <img src="images/suite.png" alt="The AIQA dashboard's Full suite view: five step cards marked Done with their times, then the documents, test cases and test scripts." width="1366" height="1120"><span class="zoom">Open</span></a>
+          <img src="images/suite.png" alt="The Agentic QA dashboard's Full suite view: five step cards marked Done with their times, then the documents, test cases and test scripts." width="1366" height="1120"><span class="zoom">Open</span></a>
         <figcaption>The dashboard after a real run on saucedemo.com. Every image on this page comes from that run.</figcaption>
       </figure>
     </div>
@@ -352,13 +352,13 @@
       <div class="table-wrap"><table>
         <thead><tr><th>Command</th><th>What it does</th></tr></thead>
         <tbody>
-          <tr><td><code>/aiqa:qa-setup</code></td><td>Checks and installs what the agents need. It asks before installing anything.</td></tr>
-          <tr><td><code>/aiqa:qa-pipeline &lt;url&gt;</code></td><td>Runs the five full-suite agents in order.</td></tr>
-          <tr><td><code>/aiqa:qa-story &lt;KEY&gt;</code></td><td>Runs one story: Design, Explore, Automate, Run.</td></tr>
-          <tr><td><code>/aiqa:qa-dashboard</code></td><td>Opens a live page that shows progress, files and results.</td></tr>
+          <tr><td><code>/agentic-qa:qa-setup</code></td><td>Checks and installs what the agents need. It asks before installing anything.</td></tr>
+          <tr><td><code>/agentic-qa:qa-pipeline &lt;url&gt;</code></td><td>Runs the five full-suite agents in order.</td></tr>
+          <tr><td><code>/agentic-qa:qa-story &lt;KEY&gt;</code></td><td>Runs one story: Design, Explore, Automate, Run.</td></tr>
+          <tr><td><code>/agentic-qa:qa-dashboard</code></td><td>Opens a live page that shows progress, files and results.</td></tr>
         </tbody>
       </table></div>
-      <div class="callout note"><span class="ic">i</span><div><p>The <code>aiqa:</code> prefix appears when you install AIQA as a Claude Code plugin. If you copy the files, or use GitHub Copilot, the commands have no prefix: <code>/qa-pipeline</code>, <code>/qa-story</code> and so on.</p></div></div>
+      <div class="callout note"><span class="ic">i</span><div><p>The <code>agentic-qa:</code> prefix appears when you install Agentic QA as a Claude Code plugin. If you copy the files, or use GitHub Copilot, the commands have no prefix: <code>/qa-pipeline</code>, <code>/qa-story</code> and so on.</p></div></div>
     </section>
 
     <!-- 2 -->
@@ -387,28 +387,31 @@
         <div class="tabpanel" role="tabpanel" id="p-plugin" aria-labelledby="t-plugin">
           <p>In Claude Code, type:</p>
           <div class="code"><button class="copy" type="button">Copy</button>
-<pre><code>/plugin marketplace add rohan12patil/AIQA
-/plugin install aiqa@agents-forge</code></pre></div>
-          <p>Or from a terminal:</p>
+<pre><code>/plugin marketplace add agents-forge/agentic-qa
+/plugin install agentic-qa@agents-forge</code></pre></div>
+          <p>Or from a terminal, in one step:</p>
           <div class="code"><button class="copy" type="button">Copy</button>
-<pre><code>claude plugin marketplace add rohan12patil/AIQA
-claude plugin install aiqa@agents-forge</code></pre></div>
-          <p>Restart Claude Code. The commands are now <code>/aiqa:qa-pipeline</code> and so on, and the agents are <code>aiqa:analyst</code> and so on.</p>
-          <p>To update later: <code>claude plugin marketplace update agents-forge</code>, then <code>claude plugin update aiqa@agents-forge</code>, and restart.</p>
+<pre><code>claude plugin install agentic-qa --marketplace agents-forge/agentic-qa</code></pre></div>
+          <p>Restart Claude Code. The commands are now <code>/agentic-qa:qa-pipeline</code> and so on, and the agents are <code>agentic-qa:analyst</code> and so on.</p>
+          <p>To update later: <code>claude plugin marketplace update agents-forge</code>, then <code>claude plugin update agentic-qa@agents-forge</code>, and restart. To get updates automatically, open <code>/plugin</code>, go to <strong>Marketplaces</strong>, pick <code>agents-forge</code> and turn on auto-update. It's off by default.</p>
+          <p>Just trying it? <code>claude --plugin-dir &lt;path to a clone&gt;</code> loads the plugin for one session, without installing it.</p>
         </div>
         <div class="tabpanel" role="tabpanel" id="p-team" aria-labelledby="t-team" hidden>
-          <p>Commit this to <code>.claude/settings.json</code> in your team's repository. Everyone who opens the project in Claude Code is offered the plugin.</p>
+          <p><strong>Once, for the whole team:</strong> commit this to <code>.claude/settings.json</code> in your team's repository.</p>
           <div class="code labeled"><span class="label">.claude/settings.json</span><button class="copy" type="button">Copy</button>
 <pre><code>{
   "extraKnownMarketplaces": {
-    "agents-forge": { "source": { "source": "github", "repo": "rohan12patil/AIQA" } }
+    "agents-forge": { "source": { "source": "github", "repo": "agents-forge/agentic-qa" } }
   },
-  "enabledPlugins": { "aiqa@agents-forge": true }
+  "enabledPlugins": { "agentic-qa@agents-forge": true }
 }</code></pre></div>
           <p>Or let Claude Code write it for you:</p>
           <div class="code"><button class="copy" type="button">Copy</button>
-<pre><code>claude plugin marketplace add rohan12patil/AIQA --scope project
-claude plugin install aiqa@agents-forge --scope project</code></pre></div>
+<pre><code>claude plugin marketplace add agents-forge/agentic-qa --scope project
+claude plugin install agentic-qa@agents-forge --scope project</code></pre></div>
+          <p><strong>Then each teammate, once per clone:</strong> the file tells Claude Code where the plugin comes from and turns it on, but it doesn't install it. Open the project, say yes when Claude Code asks to trust the folder, and run:</p>
+          <div class="code"><button class="copy" type="button">Copy</button>
+<pre><code>claude plugin install agentic-qa@agents-forge --scope project</code></pre></div>
         </div>
         <div class="tabpanel" role="tabpanel" id="p-copy" aria-labelledby="t-copy" hidden>
           <p>Copy <code>.claude/agents/</code> and <code>.claude/skills/</code> from this repository into your project's <code>.claude/</code> folder. Or copy them into <code>~/.claude/</code> to have them in every project.</p>
@@ -433,7 +436,7 @@ claude plugin install aiqa@agents-forge --scope project</code></pre></div>
       <h2><span class="n">4</span>Set up your project</h2>
       <p class="intro">Open Claude Code (or Copilot Chat) in your project folder and run setup once.</p>
       <div class="code"><button class="copy" type="button">Copy</button>
-<pre><code>/aiqa:qa-setup</code></pre></div>
+<pre><code>/agentic-qa:qa-setup</code></pre></div>
       <p>It checks each item, shows a short table, and asks before installing what's missing:</p>
       <div class="table-wrap"><table>
         <thead><tr><th>Item</th><th>Why</th><th>Needed?</th></tr></thead>
@@ -463,7 +466,7 @@ claude plugin install aiqa@agents-forge --scope project</code></pre></div>
     <!-- 5 -->
     <section id="chat">
       <h2><span class="n">5</span>Work with Claude or Copilot</h2>
-      <p class="intro">You don't run AIQA like a program. You talk to it, in the same chat you already use for code.</p>
+      <p class="intro">You don't run Agentic QA like a program. You talk to it, in the same chat you already use for code.</p>
 
       <h3>What happens when you type a command</h3>
       <div class="roles" aria-label="How a command flows">
@@ -479,17 +482,17 @@ claude plugin install aiqa@agents-forge --scope project</code></pre></div>
       <h3>What a session looks like</h3>
       <div class="card chat" role="group" aria-label="Example conversation">
         <div class="head"><span>Example conversation, shortened</span><span>The numbers come from the real saucedemo run</span></div>
-        <div class="msg you"><code>/aiqa:qa-pipeline https://www.saucedemo.com</code></div>
-        <div class="msg ai"><span class="av">AIQA</span><div class="body"><p>playwright-cli and Playwright are installed. Models: every role uses this session's model.</p><p><strong>Step 1 of 5: Analyst.</strong></p></div></div>
-        <div class="handoff">→ hands the step to aiqa:analyst · it explores the app</div>
-        <div class="msg ai"><span class="av">AIQA</span><div class="body"><p>The analyst finished in 25m 35s. It saved 56 page snapshots and wrote <code>requirements.md</code> (51 KB): 13 user journeys, 61 functional and 29 non-functional requirements.</p><p>Go on to the QA Planner?</p><div class="choices" aria-hidden="true"><span>Continue</span><span>Stop</span></div></div></div>
+        <div class="msg you"><code>/agentic-qa:qa-pipeline https://www.saucedemo.com</code></div>
+        <div class="msg ai"><span class="av">AQ</span><div class="body"><p>playwright-cli and Playwright are installed. Models: every role uses this session's model.</p><p><strong>Step 1 of 5: Analyst.</strong></p></div></div>
+        <div class="handoff">→ hands the step to agentic-qa:analyst · it explores the app</div>
+        <div class="msg ai"><span class="av">AQ</span><div class="body"><p>The analyst finished in 25m 35s. It saved 56 page snapshots and wrote <code>requirements.md</code> (51 KB): 13 user journeys, 61 functional and 29 non-functional requirements.</p><p>Go on to the QA Planner?</p><div class="choices" aria-hidden="true"><span>Continue</span><span>Stop</span></div></div></div>
         <div class="msg you">Continue</div>
         <div class="gap">… the QA Planner and the QA Engineer run the same way …</div>
-        <div class="msg ai"><span class="av">AIQA</span><div class="body"><p>The QA Engineer finished in 50m 34s: 20 specs with 197 tests (16 tagged <code>@smoke</code>) and 20 page objects. 24 tests track defects it found in the app.</p></div></div>
+        <div class="msg ai"><span class="av">AQ</span><div class="body"><p>The QA Engineer finished in 50m 34s: 20 specs with 197 tests (16 tagged <code>@smoke</code>) and 20 page objects. 24 tests track defects it found in the app.</p></div></div>
         <div class="msg you">Which defects did it find?</div>
-        <div class="msg ai"><span class="av">AIQA</span><div class="body"><p>For example: a made-up product id can still be added to the cart; the cart survives logout; checkout works with an empty cart; an unknown address shows no 404 page.</p></div></div>
+        <div class="msg ai"><span class="av">AQ</span><div class="body"><p>For example: a made-up product id can still be added to the cart; the cart survives logout; checkout works with an empty cart; an unknown address shows no 404 page.</p></div></div>
         <div class="gap">… the QA Reporter runs …</div>
-        <div class="msg ai"><span class="av">AIQA</span><div class="body"><p><strong>Status: ✅ PASSED.</strong> 16 of 16 smoke tests passed on Chromium in 35 s. The report is in <code>.aiqa/reports/summary_report.md</code>. The slow reviewer was left for later: <code>/aiqa:qa-pipeline qa-reviewer</code>.</p></div></div>
+        <div class="msg ai"><span class="av">AQ</span><div class="body"><p><strong>Status: ✅ PASSED.</strong> 16 of 16 smoke tests passed on Chromium in 35 s. The report is in <code>.aiqa/reports/summary_report.md</code>. The slow reviewer was left for later: <code>/agentic-qa:qa-pipeline qa-reviewer</code>.</p></div></div>
       </div>
 
       <h3>Ask in plain words</h3>
@@ -498,9 +501,9 @@ claude plugin install aiqa@agents-forge --scope project</code></pre></div>
         <li>"Why did TC-CART-N-002 fail? Show me the snapshot it used."<span>Reads the results and the snapshots, and explains.</span></li>
         <li>"The reviewer flagged a <code>networkidle</code> wait. Fix it."<span>Edits the spec; then you re-run the tests.</span></li>
         <li>"Add test cases for the promo-code field to the checkout module."<span>Extends the test cases and the spec.</span></li>
-        <li>"Run the regression tests, then summarise what failed."<span>Same as <code>/aiqa:qa-pipeline qa-reporter --grep @regression</code>.</span></li>
+        <li>"Run the regression tests, then summarise what failed."<span>Same as <code>/agentic-qa:qa-pipeline qa-reporter --grep @regression</code>.</span></li>
       </ul>
-      <p>You can also call one agent directly, for example: "Use the <code>aiqa:qa-reviewer</code> agent to review the generated suite."</p>
+      <p>You can also call one agent directly, for example: "Use the <code>agentic-qa:qa-reviewer</code> agent to review the generated suite."</p>
 
       <h3>Claude Code or Copilot</h3>
       <div class="tabs" data-tabs>
@@ -511,7 +514,7 @@ claude plugin install aiqa@agents-forge --scope project</code></pre></div>
         <div class="tabpanel" role="tabpanel" id="p-cc" aria-labelledby="t-cc">
           <ol class="plain">
             <li>Open Claude Code in your project folder: the terminal (<code>claude</code>), the desktop app or the IDE extension.</li>
-            <li>Type <code>/aiqa:qa-pipeline &lt;your url&gt;</code>. Type <code>/aiqa</code> to see all four commands.</li>
+            <li>Type <code>/agentic-qa:qa-pipeline &lt;your url&gt;</code>. Type <code>/agentic-qa</code> to see all four commands.</li>
             <li>Each step runs as its own agent, so your chat stays short and readable while the agents work.</li>
             <li>Pick each agent's model on the dashboard, or with <code>--model</code> options (step 9).</li>
           </ol>
@@ -519,7 +522,7 @@ claude plugin install aiqa@agents-forge --scope project</code></pre></div>
         <div class="tabpanel" role="tabpanel" id="p-gh" aria-labelledby="t-gh" hidden>
           <ol class="plain">
             <li>Open Copilot Chat in VS Code, in your repository with the copied <code>.github/agents/</code> and <code>.github/skills/</code>.</li>
-            <li>Type <code>/qa-pipeline &lt;your url&gt;</code>, or pick an AIQA agent, such as <code>analyst</code>, in the agent picker and ask it directly.</li>
+            <li>Type <code>/qa-pipeline &lt;your url&gt;</code>, or pick an Agentic QA agent, such as <code>analyst</code>, in the agent picker and ask it directly.</li>
             <li>Where Copilot can't hand a step to another agent, the command tells Copilot to follow that agent's instructions itself.</li>
             <li>Copilot uses its own model picker, so the dashboard's model choices don't apply.</li>
           </ol>
@@ -534,7 +537,7 @@ claude plugin install aiqa@agents-forge --scope project</code></pre></div>
       <ol class="steps">
         <li><strong>Start the pipeline</strong>
           <div class="code"><button class="copy" type="button">Copy</button>
-<pre><code>/aiqa:qa-pipeline https://www.saucedemo.com</code></pre></div>
+<pre><code>/agentic-qa:qa-pipeline https://www.saucedemo.com</code></pre></div>
           It checks that the tools are installed, shows which model each agent will use, and starts the analyst.</li>
         <li><strong>Read each step's output, then continue</strong>
           By default it pauses after each step and shows you what was written. Answer <em>Continue</em> to go on, or <em>Stop</em> to look closer first.</li>
@@ -545,13 +548,13 @@ claude plugin install aiqa@agents-forge --scope project</code></pre></div>
         <li><strong>Run the review when you have time</strong>
           The reviewer is the slow step, so step-by-step runs leave it for later:
           <div class="code"><button class="copy" type="button">Copy</button>
-<pre><code>/aiqa:qa-pipeline qa-reviewer</code></pre></div></li>
+<pre><code>/agentic-qa:qa-pipeline qa-reviewer</code></pre></div></li>
       </ol>
 
       <h3>Run it without pauses</h3>
       <p>Add <code>--auto</code> to run all five steps in one go, the reviewer included:</p>
       <div class="code"><button class="copy" type="button">Copy</button>
-<pre><code>/aiqa:qa-pipeline https://www.saucedemo.com --auto</code></pre></div>
+<pre><code>/agentic-qa:qa-pipeline https://www.saucedemo.com --auto</code></pre></div>
 
       <h3>Options</h3>
       <div class="table-wrap"><table>
@@ -571,7 +574,7 @@ claude plugin install aiqa@agents-forge --scope project</code></pre></div>
       <h3>Run one step again</h3>
       <p>Give a step name instead of the address. It runs just that step, as part of the last run:</p>
       <div class="code"><button class="copy" type="button">Copy</button>
-<pre><code>/aiqa:qa-pipeline qa-reporter --grep @regression</code></pre></div>
+<pre><code>/agentic-qa:qa-pipeline qa-reporter --grep @regression</code></pre></div>
 
       <h3>What it writes</h3>
       <p>Everything goes under <code>.aiqa/</code>, except <code>playwright.config.ts</code> at the root. If you already have one, it asks before replacing it.</p>
@@ -595,7 +598,7 @@ playwright.config.ts</div>
     <!-- 7 -->
     <section id="story">
       <h2><span class="n">7</span>Test one user story</h2>
-      <p class="intro">Working on a single feature? Give AIQA the story, and it designs, checks and automates its tests.</p>
+      <p class="intro">Working on a single feature? Give Agentic QA the story, and it designs, checks and automates its tests.</p>
       <ol class="steps">
         <li><strong>Write the story</strong>
           Save it as <code>.aiqa/stories/&lt;KEY&gt;-&lt;name&gt;.md</code>. Or paste the story text in chat and ask the lead to save it. It can also read the story from Jira, Rally or Octane if one is connected.
@@ -614,7 +617,7 @@ As a shopper I want to sign in so I can buy things.
 - A locked-out user sees "Sorry, this user has been locked out."</code></pre></div></li>
         <li><strong>Run it</strong>
           <div class="code"><button class="copy" type="button">Copy</button>
-<pre><code>/aiqa:qa-story SD-1 --url https://www.saucedemo.com</code></pre></div>
+<pre><code>/agentic-qa:qa-story SD-1 --url https://www.saucedemo.com</code></pre></div>
           Add <code>--url</code> the first time, or save the address as <code>appUrl</code> in <code>.aiqa/workspace.json</code>.</li>
         <li><strong>Review the test cases when it pauses</strong>
           It stops after Design and after Explore. Open <code>.aiqa/test-cases/SD-1-login.md</code>, then edit, add or delete cases before you continue. Add <code>--auto</code> to skip the pauses.</li>
@@ -639,7 +642,7 @@ As a shopper I want to sign in so I can buy things.
       <h2><span class="n">8</span>The dashboard</h2>
       <p class="intro">A small local page that follows a run as it happens and shows everything the agents wrote.</p>
       <div class="code"><button class="copy" type="button">Copy</button>
-<pre><code>/aiqa:qa-dashboard</code></pre></div>
+<pre><code>/agentic-qa:qa-dashboard</code></pre></div>
       <p>It gives you a link like <code>http://127.0.0.1:52341/3f9c…/</code>. The page refreshes every two seconds. The left rail has four views: <strong>Full suite</strong>, <strong>Stories</strong>, <strong>Results</strong> and <strong>Models</strong>. Select any image to see it full size.</p>
 
       <div class="gallery">
@@ -695,7 +698,7 @@ As a shopper I want to sign in so I can buy things.
       <ul class="plain" style="margin-top:22px">
         <li><strong>Private:</strong> it serves on your computer only (127.0.0.1), behind a random link.</li>
         <li><strong>Read-only:</strong> it only reads <code>.aiqa/</code>. The one exception is the Models page, which saves your choices.</li>
-        <li><strong>Shareable:</strong> <code>/aiqa:qa-dashboard --static</code> saves one self-contained file, <code>.aiqa/reports/dashboard.html</code>, that you can attach or send.</li>
+        <li><strong>Shareable:</strong> <code>/agentic-qa:qa-dashboard --static</code> saves one self-contained file, <code>.aiqa/reports/dashboard.html</code>, that you can attach or send.</li>
       </ul>
     </section>
 
@@ -711,7 +714,7 @@ As a shopper I want to sign in so I can buy things.
       </figure>
       <p><strong>For one run:</strong></p>
       <div class="code"><button class="copy" type="button">Copy</button>
-<pre><code>/aiqa:qa-pipeline https://my-app.com --model-qa-planner opus --model-qa-reporter sonnet</code></pre></div>
+<pre><code>/agentic-qa:qa-pipeline https://my-app.com --model-qa-planner opus --model-qa-reporter sonnet</code></pre></div>
       <p>When several choices apply, the first one in this list wins:</p>
       <ol class="plain">
         <li>an option on the command;</li>
@@ -748,7 +751,7 @@ As a shopper I want to sign in so I can buy things.
   }
 }</code></pre></div>
       <div class="code"><button class="copy" type="button">Copy</button>
-<pre><code>claude -p "/aiqa:qa-pipeline https://my-app.com --auto" --permission-mode acceptEdits</code></pre></div>
+<pre><code>claude -p "/agentic-qa:qa-pipeline https://my-app.com --auto" --permission-mode acceptEdits</code></pre></div>
       <div class="callout warn"><span class="ic">!</span><div><p>Use the settings file, not <code>--allowedTools</code>. The command line splits a rule at its spaces, so <code>Bash(npm ls:*)</code> is lost.</p></div></div>
     </section>
 
@@ -758,12 +761,12 @@ As a shopper I want to sign in so I can buy things.
       <details class="faq"><summary>A run stopped halfway (usage limit, closed terminal)</summary><div>
         <p>Nothing is lost: each finished step's files stay on disk.</p>
         <ul class="plain">
-          <li><strong>Full suite:</strong> run the steps that are left by name, e.g. <code>/aiqa:qa-pipeline qa-engineer</code>, then <code>qa-reviewer</code>, then <code>qa-reporter</code>. They join the last run, so the dashboard still shows one run.</li>
-          <li><strong>Story:</strong> run the same <code>/aiqa:qa-story</code> command again. It continues from the first step that isn't done.</li>
+          <li><strong>Full suite:</strong> run the steps that are left by name, e.g. <code>/agentic-qa:qa-pipeline qa-engineer</code>, then <code>qa-reviewer</code>, then <code>qa-reporter</code>. They join the last run, so the dashboard still shows one run.</li>
+          <li><strong>Story:</strong> run the same <code>/agentic-qa:qa-story</code> command again. It continues from the first step that isn't done.</li>
         </ul>
       </div></details>
       <details class="faq"><summary>"playwright-cli: command not found"</summary><div>
-        <p>Run <code>/aiqa:qa-setup</code>, or install it yourself with <code>npm install -g @playwright/cli@latest</code>. Without it, the agents can't open the app.</p>
+        <p>Run <code>/agentic-qa:qa-setup</code>, or install it yourself with <code>npm install -g @playwright/cli@latest</code>. Without it, the agents can't open the app.</p>
       </div></details>
       <details class="faq"><summary>The tests fail because Chrome isn't installed</summary><div>
         <p>The generated <code>playwright.config.ts</code> uses <code>channel: "chrome"</code>, the Chrome already on your computer. If you don't have Chrome, delete that option, and Playwright uses its own Chromium.</p>
@@ -772,10 +775,10 @@ As a shopper I want to sign in so I can buy things.
         <p>The pipeline asks once whether to replace it or keep it. If you keep yours, add <code>.aiqa/test-scripts</code> to its <code>testDir</code>, so the reporter can find the new tests.</p>
       </div></details>
       <details class="faq"><summary>Claude Code asks permission for every browser command</summary><div>
-        <p>Say yes to the permission rules that <code>/aiqa:qa-setup</code> offers. It adds them to <code>.claude/settings.json</code> and keeps your other settings.</p>
+        <p>Say yes to the permission rules that <code>/agentic-qa:qa-setup</code> offers. It adds them to <code>.claude/settings.json</code> and keeps your other settings.</p>
       </div></details>
       <details class="faq"><summary>Only the smoke tests ran</summary><div>
-        <p>That's the default, for fast feedback. Run the rest with <code>/aiqa:qa-pipeline qa-reporter --grep @regression</code>, or <code>--grep all</code> for everything. Firefox, WebKit and mobile are commented out in <code>playwright.config.ts</code>; uncomment them to include them.</p>
+        <p>That's the default, for fast feedback. Run the rest with <code>/agentic-qa:qa-pipeline qa-reporter --grep @regression</code>, or <code>--grep all</code> for everything. Firefox, WebKit and mobile are commented out in <code>playwright.config.ts</code>; uncomment them to include them.</p>
       </div></details>
     </section>
 
@@ -785,10 +788,10 @@ As a shopper I want to sign in so I can buy things.
       <div class="grid2">
         <div class="card"><h4><a href="../../examples/saucedemo/README.md">The saucedemo example</a></h4><p>A full run, step by step: commands, times, counts and excerpts.</p></div>
         <div class="card"><h4><a href="../../README.md">The README</a></h4><p>Every agent, command and option in one place.</p></div>
-        <div class="card"><h4><a href="https://www.npmjs.com/package/@agents-forge/aiqa">@agents-forge/aiqa</a></h4><p>The full product reads the same <code>.aiqa/</code> files: a workspace dashboard, regression runs and Jira.</p></div>
+        <div class="card"><h4><a href="https://www.npmjs.com/package/@agents-forge/aiqa">AIQA, for enterprises</a></h4><p>The Agents Forge product for larger teams reads the same <code>.aiqa/</code> files. It adds a workspace dashboard, regression runs, sending results to Jira, and approval checks in code.</p></div>
         <div class="card"><h4><a href="../../CHANGELOG.md">What's changed</a></h4><p>New features and fixes in each release.</p></div>
       </div>
-      <footer>AIQA agents for Claude Code and GitHub Copilot · MIT license</footer>
+      <footer>Agentic QA, QA agents for Claude Code and GitHub Copilot · MIT license</footer>
     </section>
   </main>
 </div>

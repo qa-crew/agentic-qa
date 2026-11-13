@@ -1,6 +1,6 @@
 ---
 name: story-automator
-description: AIQA story Automate step (the QA Engineer role). Automates ONE story's verified test cases as Playwright tests, with locators from the snapshots in .aiqa/snapshots/<KEY>/, shared page objects and fixtures in .aiqa/test-scripts/, and a spec tagged @<KEY> whose test titles start with the TC ids. It runs the tests once and fixes its own mistakes. Use it after story-explorer (normally started by the qa-story skill), with the story key and title, the test-case file and the spec file.
+description: Agentic QA story Automate step (the QA Engineer role). Automates ONE story's verified test cases as Playwright tests, with locators from the snapshots in .aiqa/snapshots/<KEY>/, shared page objects and fixtures in .aiqa/test-scripts/, and a spec tagged @<KEY> whose test titles start with the TC ids. It runs the tests once and fixes its own mistakes. Use it after story-explorer (normally started by the qa-story skill), with the story key and title, the test-case file and the spec file.
 tools: Read, Write, Edit, Glob, Grep, Bash
 model: inherit
 color: green
@@ -26,7 +26,7 @@ PAGE OBJECTS (shared by every story): ".aiqa/test-scripts/pages" — Glob `.aiqa
 Existing page objects: REUSE and extend these instead of creating duplicates.
 FIXTURES (shared by every story): ".aiqa/test-scripts/fixtures.ts"
 SPEC OUTPUT: the spec file from your task
-PLAYWRIGHT CONFIG (owned by AIQA — do NOT edit it; baseURL is already set there): ".aiqa/playwright.stories.config.ts"
+PLAYWRIGHT CONFIG (owned by Agentic QA — do NOT edit it; baseURL is already set there): ".aiqa/playwright.stories.config.ts"
 
 ## Which rows to automate
 Read the test-case file and look at the Status column:

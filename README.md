@@ -1,6 +1,6 @@
-# AIQA agents
+# Agentic QA
 
-AIQA's QA agents for **Claude Code** and **GitHub Copilot**. Give them a URL and they produce:
+Open-source QA agents for **Claude Code** and **GitHub Copilot**, from Agents Forge. Give them a URL and they produce:
 - requirements;
 - a risk-based test plan;
 - test cases;
@@ -13,10 +13,10 @@ They can also work one user story at a time. A small live dashboard shows the pr
 agents in Claude Code or Copilot, and the dashboard, with screenshots. Open the file in a browser from a clone or
 download.
 
-These agents started as those of the npm package
-[`@agents-forge/aiqa`](https://www.npmjs.com/package/@agents-forge/aiqa), as plain agent and skill files: no SDK and no
-package to install. They write the same `.aiqa/` files, so you can move to the full product later (see
-[Same files as the npm package](#same-files-as-the-npm-package)).
+Agentic QA is the open-source side of [AIQA](https://www.npmjs.com/package/@agents-forge/aiqa), the Agents Forge
+product for enterprises. The agents started as AIQA's and come here as plain agent and skill files: no SDK and no
+package to install. Both write the same `.aiqa/` files, so you can move to AIQA later (see
+[Agentic QA and AIQA](#agentic-qa-and-aiqa)).
 
 ## What's inside
 
@@ -47,27 +47,35 @@ package to install. They write the same `.aiqa/` files, so you can move to the f
 ### Claude Code, as a plugin
 In Claude Code:
 ```
-/plugin marketplace add rohan12patil/AIQA
-/plugin install aiqa@agents-forge
+/plugin marketplace add agents-forge/agentic-qa
+/plugin install agentic-qa@agents-forge
 ```
-Or from a terminal: `claude plugin marketplace add rohan12patil/AIQA`, then `claude plugin install aiqa@agents-forge`.
+Or from a terminal, in one step: `claude plugin install agentic-qa --marketplace agents-forge/agentic-qa`.
 
-Installed this way, the names carry the plugin's prefix: agents are `aiqa:analyst` …, and skills are
-`/aiqa:qa-pipeline` …
+Installed this way, the names carry the plugin's prefix: agents are `agentic-qa:analyst` …, and skills are
+`/agentic-qa:qa-pipeline` …
 
 ### For a whole team
-Commit this to `.claude/settings.json` in the team's repository. Everyone who opens the project in Claude Code is
-offered the plugin:
+Commit this to `.claude/settings.json` in the team's repository:
 ```json
 {
   "extraKnownMarketplaces": {
-    "agents-forge": { "source": { "source": "github", "repo": "rohan12patil/AIQA" } }
+    "agents-forge": { "source": { "source": "github", "repo": "agents-forge/agentic-qa" } }
   },
-  "enabledPlugins": { "aiqa@agents-forge": true }
+  "enabledPlugins": { "agentic-qa@agents-forge": true }
 }
 ```
-`claude plugin marketplace add rohan12patil/AIQA --scope project` followed by
-`claude plugin install aiqa@agents-forge --scope project` writes the same thing for you.
+`claude plugin marketplace add agents-forge/agentic-qa --scope project` followed by
+`claude plugin install agentic-qa@agents-forge --scope project` writes the same thing for you.
+
+The file tells Claude Code where the plugin comes from and turns it on, but it doesn't install it. When a teammate
+opens the project, Claude Code asks them to trust the folder. Then they run this once per clone:
+```
+claude plugin install agentic-qa@agents-forge --scope project
+```
+
+### Try it without installing
+`claude --plugin-dir <path to a clone>` loads the plugin for one session only. It's a quick way to try a branch.
 
 ### Copy the files instead
 Copy `.claude/agents/` and `.claude/skills/` into your project's `.claude/` folder, or into `~/.claude/` to have them in
@@ -84,7 +92,7 @@ Copy `.github/agents/` and `.github/skills/` into your repository's `.github/` f
 These files are generated from `.claude/`, so don't edit them by hand.
 
 ### Then, once per project
-Run `/aiqa:qa-setup`. It checks for and installs what the agents need, asking before each install:
+Run `/agentic-qa:qa-setup`. It checks for and installs what the agents need, asking before each install:
 - Node 20 or newer;
 - `@playwright/test`;
 - [playwright-cli](https://playwright.dev/agent-cli/introduction) (`npm install -g @playwright/cli@latest`);
@@ -95,9 +103,9 @@ performance. It also offers permission rules, so you aren't asked about every `p
 
 ## Quick start
 ```
-/aiqa:qa-setup
-/aiqa:qa-pipeline https://www.saucedemo.com
-/aiqa:qa-dashboard
+/agentic-qa:qa-setup
+/agentic-qa:qa-pipeline https://www.saucedemo.com
+/agentic-qa:qa-dashboard
 ```
 
 ## The full suite: `qa-pipeline`
@@ -108,9 +116,9 @@ explore    plan          automate      review        run + report
 ```
 
 - **Step by step (the default):** it pauses after each step so you can read the output, and asks before going on.
-  The slow **qa-reviewer** is deferred: run it later with `/aiqa:qa-pipeline qa-reviewer`.
+  The slow **qa-reviewer** is deferred: run it later with `/agentic-qa:qa-pipeline qa-reviewer`.
 - **`--auto`:** all five steps in one go, the reviewer included.
-- **One step again:** give a step name in place of the URL, e.g. `/aiqa:qa-pipeline qa-reporter --grep @regression`.
+- **One step again:** give a step name in place of the URL, e.g. `/agentic-qa:qa-pipeline qa-reporter --grep @regression`.
   The target comes from the last run.
 
 | Option | Meaning |
@@ -157,7 +165,7 @@ As a shopper I want to sign in so I can buy things.
 - A standard user reaches the products page
 - A locked-out user sees "Sorry, this user has been locked out."
 ```
-Then run `/aiqa:qa-story SD-1`. Add `--url https://www.saucedemo.com` the first time, or save the URL as `appUrl` in
+Then run `/agentic-qa:qa-story SD-1`. Add `--url https://www.saucedemo.com` the first time, or save the URL as `appUrl` in
 `.aiqa/workspace.json`.
 
 | Step | Who | What happens |
@@ -176,9 +184,9 @@ Then run `/aiqa:qa-story SD-1`. Add `--url https://www.saucedemo.com` the first 
 
 ## The dashboard: `qa-dashboard`
 
-![The AIQA dashboard during a full-suite run](examples/saucedemo/screenshots/dashboard-suite.png)
+![The Agentic QA dashboard during a full-suite run](examples/saucedemo/screenshots/dashboard-suite.png)
 
-- `/aiqa:qa-dashboard` starts a local page and gives you its link. It follows a running pipeline or story every two
+- `/agentic-qa:qa-dashboard` starts a local page and gives you its link. It follows a running pipeline or story every two
   seconds.
 - **Views:**
   - Full suite: the five steps with their outputs;
@@ -194,7 +202,7 @@ Then run `/aiqa:qa-story SD-1`. Add `--url https://www.saucedemo.com` the first 
 Each role's agent can run on its own Claude model.
 - **On the dashboard:** open **Models** and pick Session model, Sonnet, Opus, Haiku or Fable for Default and each of
   the five roles. Then press Save.
-- **For one run:** `/aiqa:qa-pipeline https://my-app.com --model-qa-planner opus`, or `--model haiku` for every
+- **For one run:** `/agentic-qa:qa-pipeline https://my-app.com --model-qa-planner opus`, or `--model haiku` for every
   role. `qa-story` takes the same options.
 
 `qa-pipeline` and `qa-story` start each agent with its role's model, so a change applies from the next step that
@@ -206,7 +214,7 @@ The order of precedence:
 3. the Default pick;
 4. the model of your Claude Code session (the agents' own `model: inherit`).
 
-The picks are saved in `.aiqa/ai.json`, the same file and format that the npm package's Connect → AI uses, so they
+The picks are saved in `.aiqa/ai.json`, the same file and format that AIQA's Connect → AI uses, so they
 carry over in both directions. GitHub Copilot uses its own model picker, so the picks don't apply there.
 
 ![The Models page](examples/saucedemo/screenshots/dashboard-models.png)
@@ -214,25 +222,36 @@ carry over in both directions. GitHub Copilot uses its own model picker, so the 
 ## Updating
 ```
 claude plugin marketplace update agents-forge
-claude plugin update aiqa@agents-forge
+claude plugin update agentic-qa@agents-forge
 ```
-Restart Claude Code after updating.
+Restart Claude Code after updating. To get updates automatically, open `/plugin`, go to **Marketplaces**, pick
+`agents-forge` and turn on auto-update. It's off by default for marketplaces that Anthropic doesn't run.
 
 ## Example
 [examples/saucedemo](examples/saucedemo) walks through a real run of the agents on saucedemo.com: what each step did,
 how long it took, and screenshots of the dashboard. The run's output files aren't committed; this repository holds
 only the agents and skills.
 
-## Same files as the npm package
-The agents write exactly the files `@agents-forge/aiqa` reads, in the same `.aiqa/` layout. That includes the
-test-case table, the story hash and the results columns. On the same project you can later run:
-- `npx @agents-forge/aiqa ui`, for the full workspace dashboard;
-- `aiqa regression` and `aiqa alm push`, for regression runs and sending results to Jira;
-- the approval-before-commit flow.
+## Agentic QA and AIQA
+Agentic QA is the open-source side. [AIQA](https://www.npmjs.com/package/@agents-forge/aiqa)
+(`@agents-forge/aiqa`) is the Agents Forge product for enterprises. Both write the same `.aiqa/` files, including
+the test-case table, the story hash and the results columns. So you can start here and move to AIQA on the same
+project.
+
+| | Agentic QA | AIQA |
+|---|---|---|
+| For | anyone; open source | enterprises |
+| Install | a Claude Code plugin, or copy the `.md` files | the npm package `@agents-forge/aiqa` |
+| Runs in | your Claude Code or Copilot chat | its own CLI and workspace dashboard (`aiqa ui`) |
+| Full suite and story workflow | yes | yes |
+| Regression runs | no | `aiqa regression` |
+| Jira | reads a story through a Jira MCP server, if one is connected | `aiqa alm push` sends results, with change tracking |
+| Approval before commit or Jira | a person reviews; nothing checks it in code | checked in code |
+| Files | `.aiqa/` | the same `.aiqa/` |
 
 ## Safety
 - **No git writes:** every agent prompt forbids git commands that change the repository. A person reviews and
-  commits the work. Unlike the npm package, nothing checks this in code: review what the agents changed before you
+  commits the work. Unlike AIQA, nothing checks this in code: review what the agents changed before you
   commit.
 - **Story text is data:** it's handed to the agents fenced as untrusted data, and instructions found in it are
   recorded as a finding, never followed.
@@ -242,9 +261,11 @@ test-case table, the story hash and the results columns. On the same project you
 - `.claude/` is the source. After changing an agent or a skill, run `npm run build`. It checks every agent's
   frontmatter, updates the plugin's agent list and regenerates the Copilot copies in `.github/`.
 - `npm test` runs the tests. CI runs both and fails when the generated files are out of date.
-- The prompts started as a port of `@agents-forge/aiqa` 2.5. This repository is kept separate from it: change the
-  agents and skills here, list the change in `CHANGELOG.md`, and bump the version in `.claude-plugin/plugin.json`
-  and `marketplace.json` for each release.
+- The prompts started as a port of AIQA (`@agents-forge/aiqa`) 2.5. This repository is kept separate from it: change
+  the agents and skills here, and list the change in `CHANGELOG.md`.
+- Bump the version in `.claude-plugin/plugin.json` and `marketplace.json` for each release. Claude Code only updates
+  an installed plugin when the version changes. The build checks that the two versions match.
+- `claude --plugin-dir .` runs Claude Code with this checkout as the plugin, without installing it.
 
 ## License
 MIT. The bundled fonts (IBM Plex, Barlow) are under the SIL Open Font License; see the files next to them.

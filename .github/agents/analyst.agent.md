@@ -1,6 +1,6 @@
 ---
 name: analyst
-description: "AIQA Analyst, step 1 of the AIQA full-suite pipeline. Explores a web application with playwright-cli, saves an accessibility snapshot of every page and state to .aiqa/snapshots/, and writes .aiqa/requirements/requirements.md (merging an existing requirements document when one is given). Use it to explore a site, capture page snapshots or write requirements for a URL. Give it the target URL, plus an existing requirements file and \"headed\" if wanted."
+description: "Analyst, step 1 of the Agentic QA full-suite pipeline. Explores a web application with playwright-cli, saves an accessibility snapshot of every page and state to .aiqa/snapshots/, and writes .aiqa/requirements/requirements.md (merging an existing requirements document when one is given). Use it to explore a site, capture page snapshots or write requirements for a URL. Give it the target URL, plus an existing requirements file and \"headed\" if wanted."
 tools: ['read', 'edit', 'search', 'execute']
 ---
 <!-- Generated from .claude/agents/analyst.md by scripts/build.mjs. Edit that file, then run: npm run build -->
