@@ -3,7 +3,7 @@
 This is a real run of the Agentic QA agents on [saucedemo.com](https://www.saucedemo.com), the public demo shop by Sauce
 Labs. It shows the commands, what each step wrote, how long each step took, and the dashboard.
 
-The run's own files (`.aiqa/…`) aren't in this repository. This page quotes short parts of them.
+The run's own files (`.agentic-qa/…`) aren't in this repository. This page quotes short parts of them.
 
 | | |
 |---|---|
@@ -12,7 +12,8 @@ The run's own files (`.aiqa/…`) aren't in this repository. This page quotes sh
 | Model | Claude Opus 5.5 for every agent (see [Models](#models)) |
 | Browser | Chromium, through `playwright-cli` and Playwright 1.61.0 |
 
-The run used the plugin's earlier name, `aiqa`. The commands on this page use its current name, `agentic-qa`.
+The run used earlier names for the plugin and its folder. This page uses the current ones: `agentic-qa` and
+`.agentic-qa/`.
 
 ## Setup
 In an empty folder:
@@ -80,7 +81,7 @@ It turned the requirements into a plan by risk. Two of its risks, which later sh
 | # | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|---|
 | R-02 | Cart leaks between users and tests through localStorage surviving logout | High (DEF-002) | High | New browser context per test; never share storage state across personas |
-| R-03 | Stale saved auth state (cookie about 10 min) causes mass "redirect to login" failures | High | High | Log in via a setup project per run; never commit or reuse `.aiqa/auth-state.json` |
+| R-03 | Stale saved auth state (cookie about 10 min) causes mass "redirect to login" failures | High | High | Log in via a setup project per run; never commit or reuse `.agentic-qa/auth-state.json` |
 
 ### Step 3 · QA Engineer
 It wrote the test cases first, then page objects and specs that use names from the snapshots. A test case:
@@ -150,7 +151,7 @@ Claude Code doesn't let a subagent write a file named `summary_report.md`, so th
 `qa-pipeline` saves it.
 
 ## One story: SD-1
-The same folder, after the full suite. The story file `.aiqa/stories/SD-1-login.md`:
+The same folder, after the full suite. The story file `.agentic-qa/stories/SD-1-login.md`:
 ```markdown
 ---
 key: SD-1
@@ -193,7 +194,7 @@ It also listed what the story leaves open, for example:
 > The story does not say whether username and password are case-sensitive or whether leading or trailing spaces are
 > trimmed.
 
-The test cases use the 11-column table that the npm package reads (shown here after the Run step):
+The test cases use an 11-column table (shown here after the Run step):
 
 | ID | AC | Title | Preconditions | Steps | Expected | Tags | Status | Last Result | Evidence | ALM |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -218,15 +219,6 @@ test("TC-SD1-S-002 — Locked-out user sees the locked-out message and stays on 
   // …
 ```
 The Run step filled in **Last Result** and **Evidence** for every row, and added a row to **Run History**.
-
-### Same files as AIQA
-AIQA's `stories status` (run here from the npm package's source) reads the story that the agents wrote:
-```
-   Story        Title                                        Manual   Auto   Last run
-✅   SD-1         Login with the demo accounts                 12       12     12✓ 0✗ 2026-11-12
-```
-Its "Last run" column needs the package's story index (`.aiqa/stories/index.json`). The first `stories status`
-creates it; after that, each story run is recorded there too.
 
 ## The dashboard
 `/agentic-qa:qa-dashboard` showed the run live. The full suite, with each step's time and files:
@@ -254,7 +246,7 @@ To try a lighter model for some roles, pick it on this page and press Save, or p
 
 ## Fixed after this run
 The run showed three problems in the agents, which were then fixed in this repository:
-- **The saved login applied to every test.** The QA Engineer's `playwright.config.ts` loaded `.aiqa/auth-state.json`
+- **The saved login applied to every test.** The QA Engineer's `playwright.config.ts` loaded `.agentic-qa/auth-state.json`
   into every test, against the plan's own risk R-03. Here the saved login had expired, so no test was affected. With
   a fresh one, login tests would have started signed in. Now the config never loads it, and tests that need a
   signed-in user use a sign-in fixture.

@@ -1,9 +1,9 @@
 ---
 name: qa-pipeline
-description: Run the Agentic QA full-suite QA pipeline on a web app (analyst → qa-planner → qa-engineer → qa-reviewer → qa-reporter). It writes requirements, a test plan, test cases, Playwright page objects and specs, and reports under .aiqa/. Pass a URL, or a step name to run one step again.
+description: Run the Agentic QA full-suite QA pipeline on a web app (analyst → qa-planner → qa-engineer → qa-reviewer → qa-reporter). It writes requirements, a test plan, test cases, Playwright page objects and specs, and reports under .agentic-qa/. Pass a URL, or a step name to run one step again.
 argument-hint: "<url> [--grep <tags>|all] [--skip a,b] [--auto] [--requirements <file>] [--headed] [--users N --minutes M] [--model <m>] [--model-<role> <m>]"
 disable-model-invocation: true
-allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/scripts/progress.mjs *) Bash(node ${CLAUDE_SKILL_DIR}/scripts/models.mjs) Bash(node ${CLAUDE_SKILL_DIR}/scripts/models.mjs *) Bash(playwright-cli --version) Bash(npx --no-install playwright --version) Bash(mkdir -p .aiqa/*)
+allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/scripts/progress.mjs *) Bash(node ${CLAUDE_SKILL_DIR}/scripts/models.mjs) Bash(node ${CLAUDE_SKILL_DIR}/scripts/models.mjs *) Bash(playwright-cli --version) Bash(npx --no-install playwright --version) Bash(mkdir -p .agentic-qa/*)
 ---
 
 # Agentic QA full-suite pipeline
@@ -26,7 +26,7 @@ Arguments: $ARGUMENTS
 - `--skip a,b`: steps to skip.
 - `--auto`: run all five steps without pausing.
 - `--requirements <file>`: an existing requirements document for the analyst to merge in. Without it, use the
-  `.md` file the user dropped in `.aiqa/requirements/` (any name except `requirements.md`), if there's exactly one.
+  `.md` file the user dropped in `.agentic-qa/requirements/` (any name except `requirements.md`), if there's exactly one.
 - `--headed`: show the browser while the analyst explores.
 - `--users N --minutes M`: scale of the k6 load test (default 10 users, 2 minutes). Only used with `@performance`.
 - `--model <m>`: the model for every role this run. `--model-<role> <m>` for one role, e.g. `--model-qa-planner opus`.
@@ -43,17 +43,17 @@ Run these before starting any agent:
   (qa-planner, qa-reviewer).
 - `npx --no-install playwright --version`. Missing → @playwright/test isn't installed: the qa-engineer can still
   write the suite, but the qa-reporter can't run it. Say so, and suggest the qa-setup skill.
-- `mkdir -p .aiqa/snapshots .aiqa/requirements .aiqa/test-plan .aiqa/test-cases .aiqa/test-scripts/pages .aiqa/reports/test-results`
+- `mkdir -p .agentic-qa/snapshots .agentic-qa/requirements .agentic-qa/test-plan .agentic-qa/test-cases .agentic-qa/test-scripts/pages .agentic-qa/reports/test-results`
 - **Models:** `node "${CLAUDE_SKILL_DIR}/scripts/models.mjs"`, plus any `--model` / `--model-<role>` options from the
   arguments. It prints each role's model: `model` is an alias (`opus`, `sonnet`, …) or `null`, and `source` says
-  where it came from: the command line, `.aiqa/ai.json` (picked on the dashboard's Models page, or by the npm
-  package) or the session. If it reports an unknown option, tell the user and stop. Show one line, e.g.
-  "Models: qa-planner opus (.aiqa/ai.json); the rest use this session's model", and pass on any `note` it gives.
+  where it came from: the command line, `.agentic-qa/ai.json` (picked on the dashboard's Models page) or the
+  session. If it reports an unknown option, tell the user and stop. Show one line, e.g.
+  "Models: qa-planner opus (.agentic-qa/ai.json); the rest use this session's model", and pass on any `note` it gives.
 
 ## 3. An existing playwright.config.ts
 If `playwright.config.ts` exists at the project root and the qa-engineer will run, ask the user once:
 **overwrite** it with Agentic QA's config, or **keep** it. Keep → tell the qa-engineer "Keep config". A kept config must
-include `.aiqa/test-scripts` in its `testDir` for the qa-reporter's run to find the specs; say so.
+include `.agentic-qa/test-scripts` in its `testDir` for the qa-reporter's run to find the specs; say so.
 
 ## 4. Run the steps
 Steps, in order: **analyst → qa-planner → qa-engineer → qa-reviewer → qa-reporter**. Leave out the `--skip` ones.
@@ -87,17 +87,17 @@ For each step:
    (`.claude/agents/<step>.md`, or `.github/agents/<step>.agent.md` for Copilot) and follow it exactly.
 3. Save what the agent couldn't. Claude Code refuses a subagent's write to a `.md` file whose name starts with
    `report`, `summary`, `findings` or `analysis`, so:
-   - the qa-reporter returns its report: save it to `.aiqa/reports/summary_report.md` exactly as returned;
+   - the qa-reporter returns its report: save it to `.agentic-qa/reports/summary_report.md` exactly as returned;
    - when any other agent says a write was refused and gives the content, save it to the path it names.
 4. Decide whether the step completed from the files on disk, never from what the agent says:
 
    | Step | Done when this exists |
    |---|---|
-   | analyst | `.aiqa/requirements/requirements.md` and at least one `.aiqa/snapshots/*.yml` |
-   | qa-planner | `.aiqa/test-plan/test_plan.md` |
-   | qa-engineer | at least one `.aiqa/test-scripts/*.spec.ts` (and `playwright.config.ts`, unless kept) |
-   | qa-reviewer | `.aiqa/reports/review_report.md` |
-   | qa-reporter | `.aiqa/reports/summary_report.md` |
+   | analyst | `.agentic-qa/requirements/requirements.md` and at least one `.agentic-qa/snapshots/*.yml` |
+   | qa-planner | `.agentic-qa/test-plan/test_plan.md` |
+   | qa-engineer | at least one `.agentic-qa/test-scripts/*.spec.ts` (and `playwright.config.ts`, unless kept) |
+   | qa-reviewer | `.agentic-qa/reports/review_report.md` |
+   | qa-reporter | `.agentic-qa/reports/summary_report.md` |
 
    Then `progress.mjs <step> done --run <run id>`, or `progress.mjs <step> failed --run <run id> --note "<why>"`.
    Record skipped and deferred steps with `progress.mjs <step> skipped --run <run id>`.
@@ -108,13 +108,13 @@ For each step:
 At the end: `progress.mjs pipeline done --run <run id>`. Then print a final summary:
 - every file created, with its size;
 - the reporter's Status line;
-- next steps: `npx playwright show-report .aiqa/reports/playwright-report`, the qa-dashboard skill for a live
+- next steps: `npx playwright show-report .agentic-qa/reports/playwright-report`, the qa-dashboard skill for a live
   view, and the deferred reviewer if it was skipped.
 
 ## Global rules
 1. Announce which step you are starting with a clear header.
 2. After completing each step — confirm the output file was written with its size.
-3. Every step after the analyst uses the analyst's snapshots in `.aiqa/snapshots/`.
+3. Every step after the analyst uses the analyst's snapshots in `.agentic-qa/snapshots/`.
 4. The subagents never ask the user anything. Only you do, at the points above.
 5. NEVER run git commands that change the repository: no git add, commit, push, pull, fetch, merge, rebase, reset,
    checkout, switch, restore, stash, tag, branch -d/-D, clean, cherry-pick, revert or am. Read-only git (status,

@@ -1,6 +1,6 @@
 ---
 name: qa-engineer
-description: QA Engineer, step 3 of the Agentic QA full-suite pipeline. From .aiqa/test-plan/test_plan.md and the page snapshots it writes test-case documents (.aiqa/test-cases/<module>.md), playwright.config.ts, page objects, Playwright fixtures and one spec per module in .aiqa/test-scripts/, plus an axe accessibility spec and a k6 load test when those are selected. Use it after the qa-planner, or to generate snapshot-accurate Playwright tests from a test plan. Give it the base URL and the tag filter.
+description: QA Engineer, step 3 of the Agentic QA full-suite pipeline. From .agentic-qa/test-plan/test_plan.md and the page snapshots it writes test-case documents (.agentic-qa/test-cases/<module>.md), playwright.config.ts, page objects, Playwright fixtures and one spec per module in .agentic-qa/test-scripts/, plus an axe accessibility spec and a k6 load test when those are selected. Use it after the qa-planner, or to generate snapshot-accurate Playwright tests from a test plan. Give it the base URL and the tag filter.
 tools: Read, Write, Edit, Glob, Grep, Bash
 model: inherit
 color: green
@@ -8,7 +8,7 @@ color: green
 
 ## Your inputs (from the task message)
 - **Base URL** (required): the origin of the application, e.g. `https://my-app.com`. If it's missing, take it from
-  `.aiqa/requirements/requirements.md`.
+  `.agentic-qa/requirements/requirements.md`.
 - **Test filter** (optional): the tag pattern for this run, e.g. `@smoke` or `@smoke|@accessibility`. "all" means the
   full suite.
 - **Performance scale** (optional): expected concurrent users `U` and sustained minutes `D` for the k6 script.
@@ -17,19 +17,19 @@ color: green
 You are acting as a Senior QA Engineer with 15+ years experience.
 
 INPUTS:
-- Test plan: ".aiqa/test-plan/test_plan.md"
-- Snapshots: every `.yml` file in ".aiqa/snapshots/" (the Snapshot Index in ".aiqa/requirements/requirements.md"
+- Test plan: ".agentic-qa/test-plan/test_plan.md"
+- Snapshots: every `.yml` file in ".agentic-qa/snapshots/" (the Snapshot Index in ".agentic-qa/requirements/requirements.md"
   gives each one's URL). Ignore `failure-*.yml` files and per-story subfolders.
-- Auth state: ".aiqa/auth-state.json" (if exists)
+- Auth state: ".agentic-qa/auth-state.json" (if exists)
 
 OUTPUTS:
-- Test cases: ".aiqa/test-cases/<module>.md"
+- Test cases: ".agentic-qa/test-cases/<module>.md"
 - Playwright config: "playwright.config.ts" (project root)
-- Page objects: ".aiqa/test-scripts/pages/<module>.page.ts"
-- Fixtures: ".aiqa/test-scripts/fixtures.ts" (one Playwright fixture per page object)
-- Spec files: ".aiqa/test-scripts/<module>.spec.ts"
-- Accessibility spec (only when Step 0 says so): ".aiqa/test-scripts/accessibility/accessibility.spec.ts"
-- Performance test script (only when Step 0 says so): ".aiqa/performance/load-test.js"
+- Page objects: ".agentic-qa/test-scripts/pages/<module>.page.ts"
+- Fixtures: ".agentic-qa/test-scripts/fixtures.ts" (one Playwright fixture per page object)
+- Spec files: ".agentic-qa/test-scripts/<module>.spec.ts"
+- Accessibility spec (only when Step 0 says so): ".agentic-qa/test-scripts/accessibility/accessibility.spec.ts"
+- Performance test script (only when Step 0 says so): ".agentic-qa/performance/load-test.js"
 
 BASE URL: the base URL from your task
 
@@ -75,7 +75,7 @@ For each module, write test-cases/<module>.md:
 Write this BEFORE any page object or spec file — it centralizes `baseURL`
 so every module below can navigate with a plain relative path instead of
 each one re-declaring the target URL itself. The config lives at the
-project root, but ALL generated test artifacts live under .aiqa/. Use these
+project root, but ALL generated test artifacts live under .agentic-qa/. Use these
 exact paths (put the base URL from your task where it says `<BASE URL>`):
 ```typescript
 import { defineConfig, devices } from "@playwright/test";
@@ -85,17 +85,17 @@ import { defineConfig, devices } from "@playwright/test";
 const listing = process.argv.includes("--list");
 
 export default defineConfig({
-  testDir: "./.aiqa/test-scripts",
-  // Keep ALL Playwright output under .aiqa/ so nothing lands in the repo root.
-  outputDir: "./.aiqa/reports/test-results",
+  testDir: "./.agentic-qa/test-scripts",
+  // Keep ALL Playwright output under .agentic-qa/ so nothing lands in the repo root.
+  outputDir: "./.agentic-qa/reports/test-results",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: listing ? "list" : [
-    ["html", { outputFolder: "./.aiqa/reports/playwright-report", open: "never" }],
-    ["json", { outputFile: "./.aiqa/reports/test-results/results.json" }],
-    ["junit", { outputFile: "./.aiqa/reports/test-results/results.xml" }],
+    ["html", { outputFolder: "./.agentic-qa/reports/playwright-report", open: "never" }],
+    ["json", { outputFile: "./.agentic-qa/reports/test-results/results.json" }],
+    ["junit", { outputFile: "./.agentic-qa/reports/test-results/results.xml" }],
   ],
   use: {
     baseURL: process.env.BASE_URL || "<BASE URL>",
@@ -132,7 +132,7 @@ not omitted) so the user can see and enable them later.
 ### Step 4a — FIRST write a Page Object for every module
 
 Before generating any spec file, write one page object per module:
-".aiqa/test-scripts/pages/<module>.page.ts" — a class wrapping this
+".agentic-qa/test-scripts/pages/<module>.page.ts" — a class wrapping this
 module's locators and actions, built from the snapshot's real element refs
 (never guessed). Complete ALL modules' page objects before moving to Step 4b
 — same "finish this step entirely before the next" rule as Step 2.
@@ -166,7 +166,7 @@ Centralizing selectors here means a UI change is fixed in ONE file, not in
 every test that touches this module.
 
 Then expose every page object as a Playwright fixture in
-".aiqa/test-scripts/fixtures.ts", so specs never construct page objects
+".agentic-qa/test-scripts/fixtures.ts", so specs never construct page objects
 or repeat setup. If the file already exists, EXTEND it — keep existing fixtures:
 
 ```typescript
@@ -188,7 +188,7 @@ the saved auth state.
 
 Tests that start signed in get a fixture that signs in through the login page
 object, with the credentials from the requirements. Never put the saved auth
-state (".aiqa/auth-state.json") in playwright.config.ts: it would sign in every
+state (".agentic-qa/auth-state.json") in playwright.config.ts: it would sign in every
 test, login tests included, and saved sessions often expire within minutes.
 
 ### Step 4b — THEN generate spec files for every module, using the page objects
@@ -204,7 +204,7 @@ playwright-cli --version
 
 If available — use it to generate a first draft:
 ```bash
-playwright-cli generate ".aiqa/test-scripts/<module>.spec.ts" --url "<BASE URL>/<module-path>"
+playwright-cli generate ".agentic-qa/test-scripts/<module>.spec.ts" --url "<BASE URL>/<module-path>"
 ```
 playwright-cli has no concept of page objects, so its raw output will have
 inline selectors — extract those into the module's page object from Step 4a
@@ -248,10 +248,10 @@ never a hardcoded delay.
 Follow the ONE case below that matches Step 0.
 
 **Case A — selected, and @axe-core/playwright is available.**
-Write ONE shared file, ".aiqa/test-scripts/accessibility/accessibility.spec.ts"
+Write ONE shared file, ".agentic-qa/test-scripts/accessibility/accessibility.spec.ts"
 (a subfolder of the spec dir — Playwright's default testDir recursion already
 covers it, no playwright.config.ts changes needed), with one test per page
-discovered by the analyst (reuse the Snapshot Index in .aiqa/requirements/requirements.md
+discovered by the analyst (reuse the Snapshot Index in .agentic-qa/requirements/requirements.md
 — don't rescan):
 
 ```typescript
@@ -259,7 +259,7 @@ import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import fs from "fs";
 
-const RESULTS_DIR = ".aiqa/reports/accessibility";
+const RESULTS_DIR = ".agentic-qa/reports/accessibility";
 
 test.describe("Accessibility (WCAG 2.1 AA)", () => {
   test("<page name> @accessibility @p2", async ({ page }, testInfo) => {
@@ -318,7 +318,7 @@ Follow the ONE case below that matches Step 0.
 **Case A — selected, and k6 is available.**
 k6 is a SEPARATE CLI tool, not a Playwright test — it runs via `k6 run`,
 never via `npx playwright test`. Write ONE file,
-".aiqa/performance/load-test.js" (its own top-level .aiqa
+".agentic-qa/performance/load-test.js" (its own top-level .agentic-qa
 folder, entirely separate from the Playwright spec dir — no ambiguity about
 test discovery at all). k6 scripts run in k6's own JS runtime, NOT Node.js —
 do NOT import Node built-ins like "fs", "path", or Node's "http"; only
@@ -418,7 +418,7 @@ export default function () {
 
 export function handleSummary(data) {
   return {
-    ".aiqa/reports/performance/performance-report.html": htmlReport(data),
+    ".agentic-qa/reports/performance/performance-report.html": htmlReport(data),
     stdout: textSummary(data, { indent: " ", enableColors: true }),
   };
 }
@@ -449,17 +449,17 @@ pattern like "@smoke|@performance").
 
 ### Step 5 — Verify files
 ```bash
-find ".aiqa/test-cases" -name "*.md" | sort
-find ".aiqa/test-scripts/pages" -name "*.page.ts" | sort
-ls ".aiqa/test-scripts/fixtures.ts"
-find ".aiqa/test-scripts" -name "*.spec.ts" | sort
-find ".aiqa/performance" -name "*.js" | sort    # only when Step 4d Case A applied
+find ".agentic-qa/test-cases" -name "*.md" | sort
+find ".agentic-qa/test-scripts/pages" -name "*.page.ts" | sort
+ls ".agentic-qa/test-scripts/fixtures.ts"
+find ".agentic-qa/test-scripts" -name "*.spec.ts" | sort
+find ".agentic-qa/performance" -name "*.js" | sort    # only when Step 4d Case A applied
 ```
 Confirm every module in the test plan has a matching page object, a fixture
 for it in fixtures.ts, AND a matching spec file — one without the others means
 Step 4a or 4b was skipped for that module.
-When Step 4c Case A applied: confirm accessibility.spec.ts exists in ".aiqa/test-scripts/accessibility" — it must exist since accessibility testing was selected and @axe-core/playwright is available this run.
-When Step 4d Case A applied: confirm load-test.js exists in ".aiqa/performance" — it must exist since performance testing was selected and k6 is available this run.
+When Step 4c Case A applied: confirm accessibility.spec.ts exists in ".agentic-qa/test-scripts/accessibility" — it must exist since accessibility testing was selected and @axe-core/playwright is available this run.
+When Step 4d Case A applied: confirm load-test.js exists in ".agentic-qa/performance" — it must exist since performance testing was selected and k6 is available this run.
 
 ## Quality standards
 - ALWAYS use selectors from snapshot accessibility trees — never guess

@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-// Agentic QA dashboard: a view of a project's .aiqa/ folder. No dependencies.
+// Agentic QA dashboard: a view of a project's .agentic-qa/ folder. No dependencies.
 //   node server.mjs [--dir <project root>] [--port <n>] [--open]   serve it live on 127.0.0.1
-//   node server.mjs --static [<out.html>]                          write a snapshot (default .aiqa/reports/dashboard.html)
+//   node server.mjs --static [<out.html>]                          write a snapshot (default .agentic-qa/reports/dashboard.html)
 // The server binds to 127.0.0.1 only, uses a random URL token and checks the Host header. It only reads files inside
-// .aiqa/ (plus the root playwright.config.ts), and the only thing it ever writes is .aiqa/ai.json, from the Models
+// .agentic-qa/ (plus the root playwright.config.ts), and the only thing it ever writes is .agentic-qa/ai.json, from the Models
 // page (POST api/models: same-origin, JSON, known roles and model names only).
 import * as fs from "node:fs";
 import * as http from "node:http";
@@ -12,7 +12,7 @@ import { randomBytes } from "node:crypto";
 import { execFile } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { buildState, buildStory, storyKeys } from "./read.mjs";
-import { MODEL_ALIASES, MODEL_KEYS, readAiSettings, resolveRoleModels, writeClaudeModels } from "../../qa-story/scripts/aiqa-files.mjs";
+import { MODEL_ALIASES, MODEL_KEYS, readAiSettings, resolveRoleModels, writeClaudeModels } from "../../qa-story/scripts/qa-files.mjs";
 import { renderMarkdown } from "./md.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -22,7 +22,7 @@ const flag = (name) => {
   return i < 0 ? undefined : args[i + 1] && !args[i + 1].startsWith("--") ? args[i + 1] : true;
 };
 const root = path.resolve(typeof flag("dir") === "string" ? flag("dir") : process.cwd());
-const aiqaDir = path.join(root, ".aiqa");
+const dataDir = path.join(root, ".agentic-qa");
 const posix = (p) => p.replace(/\\/g, "/");
 
 const FONT_FILES = new Set(fs.readdirSync(path.join(HERE, "fonts")).filter((f) => f.endsWith(".woff2")));
@@ -34,10 +34,10 @@ function allowedPath(rel) {
   const abs = path.resolve(root, rel);
   let real;
   try { real = fs.realpathSync(abs); } catch { return undefined; }
-  let realAiqa;
-  try { realAiqa = fs.realpathSync(aiqaDir); } catch { return undefined; }
+  let realData;
+  try { realData = fs.realpathSync(dataDir); } catch { return undefined; }
   if (real === path.join(fs.realpathSync(root), "playwright.config.ts")) return real;
-  return real.startsWith(realAiqa + path.sep) ? real : undefined;
+  return real.startsWith(realData + path.sep) ? real : undefined;
 }
 
 function doc(rel) {
@@ -63,8 +63,8 @@ const ROLE_INFO = {
 function modelsView() {
   const saved = readAiSettings(root).models?.anthropic ?? {};
   return {
-    file: ".aiqa/ai.json",
-    exists: fs.existsSync(path.join(aiqaDir, "ai.json")),
+    file: ".agentic-qa/ai.json",
+    exists: fs.existsSync(path.join(dataDir, "ai.json")),
     options: MODEL_ALIASES,
     roles: MODEL_KEYS.map((key) => ({ key, ...ROLE_INFO[key], saved: saved[key] ?? "" })),
     resolved: resolveRoleModels(root),
@@ -107,7 +107,7 @@ function page(staticData) {
     .replace("<!--THEME_BOOT-->", () => read("theme-boot.html").trim())
     .replace("/*THEME_CSS*/", () => read("theme.css"))
     .replace("<!--THEME_MENU-->", () => read("theme-menu.html").trim());
-  const data = staticData ? `<script>window.__AIQA_STATIC__=${JSON.stringify(staticData).replace(/</g, "\\u003c")};</script>` : "";
+  const data = staticData ? `<script>window.__AGENTIC_QA_STATIC__=${JSON.stringify(staticData).replace(/</g, "\\u003c")};</script>` : "";
   return html.replace("<!--STATIC_DATA-->", () => data);
 }
 
@@ -125,7 +125,7 @@ function send(res, status, body, type = "application/json; charset=utf-8") {
 }
 
 function writeStatic() {
-  const out = path.resolve(root, typeof flag("static") === "string" ? flag("static") : ".aiqa/reports/dashboard.html");
+  const out = path.resolve(root, typeof flag("static") === "string" ? flag("static") : ".agentic-qa/reports/dashboard.html");
   const state = buildState(root);
   const data = { "api/state": state, "api/models": modelsView() };
   const docs = new Set([
@@ -178,7 +178,7 @@ function serve() {
         return send(res, 500, { error: String(err?.message ?? err) });
       }
     }
-    if (req.method !== "GET" && req.method !== "HEAD") return send(res, 405, { error: "Only the Models page can save, and only .aiqa/ai.json." });
+    if (req.method !== "GET" && req.method !== "HEAD") return send(res, 405, { error: "Only the Models page can save, and only .agentic-qa/ai.json." });
     if (url.pathname === `/${token}`) { res.writeHead(302, { Location: base }); return res.end(); }
     if (!url.pathname.startsWith(base)) return send(res, 404, "Not found", "text/plain; charset=utf-8");
     const route = decodeURIComponent(url.pathname.slice(base.length));
@@ -216,7 +216,7 @@ function serve() {
     const link = `http://127.0.0.1:${port}${base}`;
     console.log(`Agentic QA dashboard for ${root}`);
     console.log(`  ${link}`);
-    console.log("  It only reads .aiqa/, except the Models page, which saves .aiqa/ai.json. Press Ctrl+C to stop.");
+    console.log("  It only reads .agentic-qa/, except the Models page, which saves .agentic-qa/ai.json. Press Ctrl+C to stop.");
     if (flag("open")) {
       const [cmd, cmdArgs] = process.platform === "win32" ? ["cmd", ["/c", "start", "", link]] : process.platform === "darwin" ? ["open", [link]] : ["xdg-open", [link]];
       execFile(cmd, cmdArgs, () => {});

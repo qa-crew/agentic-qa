@@ -1,22 +1,22 @@
-// Builds the dashboard's view of a project from the files under .aiqa/ only. Never writes anything.
+// Builds the dashboard's view of a project from the files under .agentic-qa/ only. Never writes anything.
 import * as fs from "node:fs";
 import * as path from "node:path";
 import {
-  aiqaPaths, keyFromFileName, parseFrontMatter, parseResultsJson, parseStoryFile, parseTestCaseFile, statusCounts,
+  qaPaths, keyFromFileName, parseFrontMatter, parseResultsJson, parseStoryFile, parseTestCaseFile, statusCounts,
   stepState, storyFiles, storyHash, STORY_STEPS,
-} from "../../qa-story/scripts/aiqa-files.mjs";
+} from "../../qa-story/scripts/qa-files.mjs";
 import { inline, renderMarkdown, sectionText, stripFrontMatter } from "./md.mjs";
 
 export const SUITE_STEPS = [
-  { id: "analyst", name: "Analyst", role: "Explores the app, saves snapshots, writes the requirements", output: ".aiqa/requirements/requirements.md" },
-  { id: "qa-planner", name: "QA Planner", role: "Risk-based test plan from the requirements and snapshots", output: ".aiqa/test-plan/test_plan.md" },
-  { id: "qa-engineer", name: "QA Engineer", role: "Test cases, page objects, fixtures and specs", output: ".aiqa/test-scripts" },
-  { id: "qa-reviewer", name: "QA Reviewer", role: "Checks every selector against the snapshots", output: ".aiqa/reports/review_report.md" },
-  { id: "qa-reporter", name: "QA Reporter", role: "Runs the suite and writes the executive report", output: ".aiqa/reports/summary_report.md" },
+  { id: "analyst", name: "Analyst", role: "Explores the app, saves snapshots, writes the requirements", output: ".agentic-qa/requirements/requirements.md" },
+  { id: "qa-planner", name: "QA Planner", role: "Risk-based test plan from the requirements and snapshots", output: ".agentic-qa/test-plan/test_plan.md" },
+  { id: "qa-engineer", name: "QA Engineer", role: "Test cases, page objects, fixtures and specs", output: ".agentic-qa/test-scripts" },
+  { id: "qa-reviewer", name: "QA Reviewer", role: "Checks every selector against the snapshots", output: ".agentic-qa/reports/review_report.md" },
+  { id: "qa-reporter", name: "QA Reporter", role: "Runs the suite and writes the executive report", output: ".agentic-qa/reports/summary_report.md" },
 ];
 
 export const STORY_STEP_META = {
-  "story-pull": { name: "Pull", role: "The story file in .aiqa/stories/" },
+  "story-pull": { name: "Pull", role: "The story file in .agentic-qa/stories/" },
   "story-design": { name: "Design", role: "Manual test cases from the acceptance criteria" },
   "story-explore": { name: "Explore", role: "Walks the cases in the app, saves snapshots" },
   "story-script": { name: "Automate", role: "Playwright tests for the verified cases" },
@@ -45,7 +45,7 @@ function list(cwd, rel, ext) {
 /** progress.jsonl lines, oldest first. Lines that don't parse are skipped. */
 export function readProgress(cwd) {
   try {
-    return fs.readFileSync(path.join(cwd, ".aiqa", "progress.jsonl"), "utf-8").split(/\r?\n/).flatMap((l) => {
+    return fs.readFileSync(path.join(cwd, ".agentic-qa", "progress.jsonl"), "utf-8").split(/\r?\n/).flatMap((l) => {
       try { return l.trim() ? [JSON.parse(l)] : []; } catch { return []; }
     });
   } catch {
@@ -115,16 +115,16 @@ function suiteState(cwd, events, keys) {
   const pipelineEnd = runEvents.filter((e) => e.step === "pipeline" && e.event !== "start").at(-1);
 
   const isStorySpec = (f) => keys.some((k) => path.basename(f).startsWith(`${k}-`) || path.basename(f) === `${k}.spec.ts`);
-  const specs = list(cwd, ".aiqa/test-scripts", ".spec.ts").filter((f) => !isStorySpec(f));
+  const specs = list(cwd, ".agentic-qa/test-scripts", ".spec.ts").filter((f) => !isStorySpec(f));
   const steps = SUITE_STEPS.map((s) => {
-    const out = s.id === "qa-engineer" ? { path: ".aiqa/test-scripts", exists: specs.length > 0 } : fileInfo(cwd, s.output);
+    const out = s.id === "qa-engineer" ? { path: ".agentic-qa/test-scripts", exists: specs.length > 0 } : fileInfo(cwd, s.output);
     const p = progress[s.id];
     // Without progress lines (the agents were run by hand) a step counts as done once its output exists.
     const state = p?.state ?? (out.exists ? "done" : "pending");
     return { ...s, ...p, state, outputInfo: out };
   });
 
-  const testCases = list(cwd, ".aiqa/test-cases", ".md").flatMap((f) => {
+  const testCases = list(cwd, ".agentic-qa/test-cases", ".md").flatMap((f) => {
     try {
       const text = fs.readFileSync(path.join(cwd, f), "utf-8");
       if (parseFrontMatter(text).data.story) return [];
@@ -139,19 +139,19 @@ function suiteState(cwd, events, keys) {
     run: runStart ? { run: runStart.run, target: runStart.target, filter: runStart.filter, startedAt: runStart.ts, endedAt: pipelineEnd?.ts, state: pipelineEnd ? EVENT_STATE[pipelineEnd.event] ?? pipelineEnd.event : "running" } : undefined,
     steps,
     documents: [
-      { label: "Requirements", ...fileInfo(cwd, ".aiqa/requirements/requirements.md") },
-      { label: "Test plan", ...fileInfo(cwd, ".aiqa/test-plan/test_plan.md") },
-      { label: "Review report", ...fileInfo(cwd, ".aiqa/reports/review_report.md") },
-      { label: "Summary report", ...fileInfo(cwd, ".aiqa/reports/summary_report.md") },
+      { label: "Requirements", ...fileInfo(cwd, ".agentic-qa/requirements/requirements.md") },
+      { label: "Test plan", ...fileInfo(cwd, ".agentic-qa/test-plan/test_plan.md") },
+      { label: "Review report", ...fileInfo(cwd, ".agentic-qa/reports/review_report.md") },
+      { label: "Summary report", ...fileInfo(cwd, ".agentic-qa/reports/summary_report.md") },
     ].filter((d) => d.exists),
     testCases,
     specs,
-    pageObjects: list(cwd, ".aiqa/test-scripts/pages", ".page.ts"),
-    snapshots: list(cwd, ".aiqa/snapshots", ".yml"),
+    pageObjects: list(cwd, ".agentic-qa/test-scripts/pages", ".page.ts"),
+    snapshots: list(cwd, ".agentic-qa/snapshots", ".yml"),
     config: fileInfo(cwd, "playwright.config.ts"),
-    results: summarizeResults(cwd, ".aiqa/reports/test-results/results.json"),
-    htmlReport: fileInfo(cwd, ".aiqa/reports/playwright-report/index.html"),
-    performanceReport: fileInfo(cwd, ".aiqa/reports/performance/performance-report.html"),
+    results: summarizeResults(cwd, ".agentic-qa/reports/test-results/results.json"),
+    htmlReport: fileInfo(cwd, ".agentic-qa/reports/playwright-report/index.html"),
+    performanceReport: fileInfo(cwd, ".agentic-qa/reports/performance/performance-report.html"),
   };
 }
 
@@ -165,7 +165,7 @@ function lastRunRow(text) {
 }
 
 export function storyKeys(cwd) {
-  const sp = aiqaPaths(cwd);
+  const sp = qaPaths(cwd);
   const keys = new Set();
   for (const dir of [sp.storiesDir, sp.testCasesDir]) {
     try {
@@ -182,7 +182,7 @@ export function storyKeys(cwd) {
 }
 
 function storySummary(cwd, key, events) {
-  const sp = aiqaPaths(cwd);
+  const sp = qaPaths(cwd);
   const files = storyFiles(sp, key);
   let title = key;
   let hash = "";
@@ -233,7 +233,7 @@ export function buildState(cwd) {
   return {
     project: path.basename(cwd),
     generatedAt: new Date().toISOString(),
-    hasAiqa: fs.existsSync(path.join(cwd, ".aiqa")),
+    hasData: fs.existsSync(path.join(cwd, ".agentic-qa")),
     suite: suiteState(cwd, events, keys),
     stories: keys.map((k) => storySummary(cwd, k, events)),
   };
@@ -242,7 +242,7 @@ export function buildState(cwd) {
 /** One story in detail: its sections, the test-case rows, snapshots and results. */
 export function buildStory(cwd, key) {
   const summary = storySummary(cwd, key, readProgress(cwd));
-  const sp = aiqaPaths(cwd);
+  const sp = qaPaths(cwd);
   const files = storyFiles(sp, key);
   let story = "";
   let tc = "";

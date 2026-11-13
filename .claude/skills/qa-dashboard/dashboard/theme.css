@@ -1,4 +1,4 @@
-/* Generated from @agents-forge/aiqa 2.5, src/ui-theme.ts (themeCss): Slate/Industrial × light/dark. Don't edit by hand. */
+/* The dashboard's themes: Slate and Industrial, each in light and dark. */
 :root {
     --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
     --row-pad-y: 11px;

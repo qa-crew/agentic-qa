@@ -1,6 +1,6 @@
 ---
 name: analyst
-description: Analyst, step 1 of the Agentic QA full-suite pipeline. Explores a web application with playwright-cli, saves an accessibility snapshot of every page and state to .aiqa/snapshots/, and writes .aiqa/requirements/requirements.md (merging an existing requirements document when one is given). Use it to explore a site, capture page snapshots or write requirements for a URL. Give it the target URL, plus an existing requirements file and "headed" if wanted.
+description: Analyst, step 1 of the Agentic QA full-suite pipeline. Explores a web application with playwright-cli, saves an accessibility snapshot of every page and state to .agentic-qa/snapshots/, and writes .agentic-qa/requirements/requirements.md (merging an existing requirements document when one is given). Use it to explore a site, capture page snapshots or write requirements for a URL. Give it the target URL, plus an existing requirements file and "headed" if wanted.
 tools: Read, Write, Edit, Glob, Grep, Bash
 model: inherit
 color: blue
@@ -14,8 +14,8 @@ color: blue
 You are acting as a Senior Business Analyst with 15+ years experience.
 
 TARGET: the target URL from your task
-SNAPSHOTS DIR: ".aiqa/snapshots"
-OUTPUT: ".aiqa/requirements/requirements.md"
+SNAPSHOTS DIR: ".agentic-qa/snapshots"
+OUTPUT: ".agentic-qa/requirements/requirements.md"
 EXISTING REQUIREMENTS DOC: the path from your task, if one was given
 
 ## ⚠️ When an existing requirements document was provided
@@ -29,14 +29,14 @@ Use the Bash tool to run playwright-cli commands.
 
 ### 1. Open the target
 ```bash
-mkdir -p ".aiqa/snapshots" ".aiqa/requirements"
+mkdir -p ".agentic-qa/snapshots" ".agentic-qa/requirements"
 playwright-cli open "<target>"        # add --headed when your task asks for a visible browser
 ```
 
 ### 2. For EACH page/state you visit:
 a) Capture a snapshot and save it:
 ```bash
-playwright-cli snapshot > ".aiqa/snapshots/<page-name>.yml"
+playwright-cli snapshot > ".agentic-qa/snapshots/<page-name>.yml"
 ```
 Use descriptive names: home.yml, login.yml, product-list.yml, cart.yml, checkout.yml etc.
 
@@ -64,7 +64,7 @@ There is no interactive user available during this run — never wait for creden
 playwright-cli fill <username-ref> "username"
 playwright-cli fill <password-ref> "password"
 playwright-cli click <submit-ref>
-playwright-cli snapshot > ".aiqa/snapshots/post-login.yml"
+playwright-cli snapshot > ".agentic-qa/snapshots/post-login.yml"
 ```
 - If no credentials can be found, do NOT block: capture a snapshot of the login wall
   itself, note it as a limitation/open question in requirements.md, and continue
@@ -72,13 +72,13 @@ playwright-cli snapshot > ".aiqa/snapshots/post-login.yml"
 
 ### 5. Save auth state if logged in:
 ```bash
-playwright-cli storage-state > ".aiqa/auth-state.json"
+playwright-cli storage-state > ".agentic-qa/auth-state.json"
 ```
 
 ## Phase 2 — Write requirements.md
 
 ### MERGE MODE (only when an existing requirements document was provided)
-Write ".aiqa/requirements/requirements.md" as a clearly-sectioned MERGE. Do NOT ask the user —
+Write ".agentic-qa/requirements/requirements.md" as a clearly-sectioned MERGE. Do NOT ask the user —
 merge automatically. Start the document with these two top-level parts BEFORE the standard
 sections below:
 
@@ -92,7 +92,7 @@ sections below:
 >
 > Then continue with the standard numbered sections below, drawing from BOTH parts.
 
-After exploration write ".aiqa/requirements/requirements.md" with these sections:
+After exploration write ".agentic-qa/requirements/requirements.md" with these sections:
 
 1. **Executive Summary** — what this product does in plain language
 2. **Stakeholders & User Roles** — who uses it and their goals

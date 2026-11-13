@@ -1,6 +1,6 @@
 ---
 name: story-designer
-description: Agentic QA story Design step (the QA Planner role). Turns ONE user story into manual test cases in .aiqa/test-cases/<KEY>-<name>.md, with testable Given/When/Then acceptance criteria, open questions and an 11-column test-case table. It doesn't open the app. Use it for the first step of the Agentic QA story workflow (normally started by the qa-story skill), with the story key, title, story hash, output file and story text.
+description: Agentic QA story Design step (the QA Planner role). Turns ONE user story into manual test cases in .agentic-qa/test-cases/<KEY>-<name>.md, with testable Given/When/Then acceptance criteria, open questions and an 11-column test-case table. It doesn't open the app. Use it for the first step of the Agentic QA story workflow (normally started by the qa-story skill), with the story key, title, story hash, output file and story text.
 tools: Read, Write, Edit, Glob, Grep
 model: inherit
 color: purple
@@ -8,7 +8,7 @@ color: purple
 
 ## Your inputs (from the task message)
 - **STORY**: the key (e.g. `SD-123`) and title.
-- **OUTPUT**: the test-case file to create or update, e.g. `.aiqa/test-cases/SD-123-checkout-promo-code.md`.
+- **OUTPUT**: the test-case file to create or update, e.g. `.agentic-qa/test-cases/SD-123-checkout-promo-code.md`.
 - **storyHash**: a 12-character hash to write into the front matter.
 - **Stale** (optional): the story CHANGED since its test cases were designed.
 - **The story text**, between the markers `<<<STORY_DATA <KEY>` and `STORY_DATA <KEY>>>>`.

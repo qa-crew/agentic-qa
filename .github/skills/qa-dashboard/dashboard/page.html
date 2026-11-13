@@ -141,7 +141,7 @@
 <script>
 (function () {
   "use strict";
-  var STATIC = window.__AIQA_STATIC__ || null;
+  var STATIC = window.__AGENTIC_QA_STATIC__ || null;
   var main = document.getElementById("main");
   var state = null, lastJson = "", route = parseRoute();
 
@@ -230,7 +230,7 @@
     html += "</div><div><h2>Test scripts</h2>";
     var scripts = s.specs.concat(s.pageObjects);
     if (s.config.exists) scripts.unshift("playwright.config.ts");
-    html += scripts.length ? '<ul class="list card">' + scripts.map(function (p) { return '<li><span class="grow mono">' + docLink(p, p.replace(/^\.aiqa\/test-scripts\//, "")) + "</span></li>"; }).join("") + "</ul>" : emptyBox("No specs yet.");
+    html += scripts.length ? '<ul class="list card">' + scripts.map(function (p) { return '<li><span class="grow mono">' + docLink(p, p.replace(/^\.agentic-qa\/test-scripts\//, "")) + "</span></li>"; }).join("") + "</ul>" : emptyBox("No specs yet.");
     html += "<h2>Snapshots</h2>";
     html += s.snapshots.length ? '<ul class="list card">' + s.snapshots.map(function (p) { return '<li><span class="grow mono">' + docLink(p, p.split("/").pop()) + "</span></li>"; }).join("") + "</ul>" : emptyBox("No snapshots yet.");
     html += "</div></div>";
@@ -249,7 +249,7 @@
   function viewStories() {
     var html = "<h1>Stories</h1><p class=\"sub\">One user story at a time: pull → design → explore → automate → run.</p>";
     if (!state.stories.length) {
-      html += emptyBox("<p><b>No stories yet.</b></p><p>Add a story file to <code>.aiqa/stories/</code> (for example <code>SD-1-login.md</code>) and run <code>/qa-story SD-1</code>.</p>");
+      html += emptyBox("<p><b>No stories yet.</b></p><p>Add a story file to <code>.agentic-qa/stories/</code> (for example <code>SD-1-login.md</code>) and run <code>/qa-story SD-1</code>.</p>");
       main.innerHTML = html;
       return;
     }
@@ -345,7 +345,7 @@
       html += '<form id="modelsForm"><div class="table-wrap models"><table><thead><tr><th>Role</th><th class="d-only">Used by</th><th>Model</th><th class="d-only">Runs on now</th></tr></thead><tbody>';
       m.roles.forEach(function (r) {
         var opts = [["", r.key === "default" ? "Session model" : "Default"]].concat(m.options.map(function (o) { return [o, MODEL_LABEL[o] || o]; }));
-        if (r.saved && m.options.indexOf(r.saved) < 0) opts.push([r.saved, r.saved + " (saved by AIQA)"]);
+        if (r.saved && m.options.indexOf(r.saved) < 0) opts.push([r.saved, r.saved + " (saved)"]);
         var res = r.key === "default" ? null : m.resolved[r.key];
         var now = res ? (res.model ? esc(MODEL_LABEL[res.model] || res.model) + ' <span class="small muted">(' + esc(res.source) + ")</span>" : '<span class="muted">Session model</span>') + (res.note ? '<br><span class="small muted">' + esc(res.note) + "</span>" : "") : '<span class="muted">—</span>';
         html += '<tr><td><label for="m-' + esc(r.key) + '">' + esc(r.name) + '</label><span class="m-only small muted">' + esc(r.uses) + (res ? " · now: " + esc(res.model ? MODEL_LABEL[res.model] || res.model : "Session model") : "") + '</span></td><td class="small muted d-only">' + esc(r.uses) + '</td><td><select id="m-' + esc(r.key) + '" name="' + esc(r.key) + '"' + (STATIC ? " disabled" : "") + ">" +
@@ -354,7 +354,7 @@
       html += "</tbody></table></div>";
       html += STATIC
         ? '<p class="small muted">This is a saved snapshot. Open the live dashboard to change the models.</p>'
-        : '<div class="actions"><button class="btn" type="submit" id="saveModels">Save</button><span class="small muted">Saved in <code>' + esc(m.file) + "</code>, the file the npm package's Connect → AI uses too.</span></div>";
+        : '<div class="actions"><button class="btn" type="submit" id="saveModels">Save</button><span class="small muted">Saved in <code>' + esc(m.file) + "</code>.</span></div>";
       html += '</form><div class="card pad small" style="margin-top:20px"><p style="margin-top:0"><b>How the picks apply.</b> <code>/qa-pipeline</code> and <code>/qa-story</code> read them when they start each agent, so the next step that starts uses them. A <code>--model-&lt;role&gt;</code> or <code>--model</code> option on those commands wins for that run. "Session model" means the model of your Claude Code session.</p><p style="margin-bottom:0">GitHub Copilot uses its own model picker; these picks don\'t apply there.</p></div>';
       main.innerHTML = html;
       var form = document.getElementById("modelsForm");
@@ -386,8 +386,8 @@
     if (!state) return;
     document.getElementById("proj").textContent = state.project;
     document.title = state.project + " · Agentic QA Dashboard";
-    if (!state.hasAiqa && route.v !== "doc" && route.v !== "models") {
-      main.innerHTML = "<h1>Nothing here yet</h1>" + emptyBox("<p>This project has no <code>.aiqa/</code> folder yet.</p><p>Run <code>/qa-pipeline &lt;url&gt;</code> for a full suite, or <code>/qa-story &lt;KEY&gt;</code> for one story. This page updates as files appear.</p>");
+    if (!state.hasData && route.v !== "doc" && route.v !== "models") {
+      main.innerHTML = "<h1>Nothing here yet</h1>" + emptyBox("<p>This project has no <code>.agentic-qa/</code> folder yet.</p><p>Run <code>/qa-pipeline &lt;url&gt;</code> for a full suite, or <code>/qa-story &lt;KEY&gt;</code> for one story. This page updates as files appear.</p>");
       return;
     }
     if (route.v === "stories") viewStories();

@@ -32,8 +32,8 @@ test("buildState reads the suite and the stories", () => {
   assert.equal(s.suite.run.target, "https://www.saucedemo.com");
   assert.deepEqual(s.suite.steps.map((x) => x.state), ["done", "done", "running", "pending", "pending"]);
   assert.equal(s.suite.steps[0].durationMs, 90_000);
-  assert.deepEqual(s.suite.specs, [".aiqa/test-scripts/login.spec.ts"], "story specs are left out of the suite");
-  assert.deepEqual(s.suite.testCases.map((t) => [t.path, t.cases]), [[".aiqa/test-cases/login.md", 2]]);
+  assert.deepEqual(s.suite.specs, [".agentic-qa/test-scripts/login.spec.ts"], "story specs are left out of the suite");
+  assert.deepEqual(s.suite.testCases.map((t) => [t.path, t.cases]), [[".agentic-qa/test-cases/login.md", 2]]);
   assert.deepEqual(s.suite.results.stats, { passed: 2, failed: 1, skipped: 0, flaky: 0 });
   assert.equal(s.suite.results.failures[0].error, "Expected: locked");
   assert.equal(s.stories.length, 1);
@@ -49,7 +49,7 @@ test("buildState reads the suite and the stories", () => {
 
 test("a story step left running by a cut-off session isn't shown as running once a newer run starts", () => {
   const dir = makeProject();
-  const log = path.join(dir, ".aiqa", "progress.jsonl");
+  const log = path.join(dir, ".agentic-qa", "progress.jsonl");
   const add = (step, event, run, ts) =>
     fs.appendFileSync(log, JSON.stringify({ ts, kind: "story", story: "SD-1", step, event, run }) + "\n");
   add("story-design", "start", "S1", "2026-11-12T21:41:50Z");
@@ -93,7 +93,7 @@ function post(port, route, body, headers = {}) {
   });
 }
 
-test("the live server reads only .aiqa/ and writes only .aiqa/ai.json", async () => {
+test("the live server reads only .agentic-qa/ and writes only .agentic-qa/ai.json", async () => {
   const dir = makeProject();
   const child = spawn(process.execPath, [SERVER, "--dir", dir], { stdio: ["ignore", "pipe", "inherit"] });
   try {
@@ -115,13 +115,13 @@ test("the live server reads only .aiqa/ and writes only .aiqa/ai.json", async ()
     assert.ok(!pageRes.body.includes("/*THEME_CSS*/"));
     const state = JSON.parse((await get(port, base + "api/state")).body);
     assert.equal(state.stories[0].key, "SD-1");
-    const d = JSON.parse((await get(port, base + "api/doc?path=" + encodeURIComponent(".aiqa/requirements/requirements.md"))).body);
+    const d = JSON.parse((await get(port, base + "api/doc?path=" + encodeURIComponent(".agentic-qa/requirements/requirements.md"))).body);
     assert.equal(d.kind, "md");
     assert.ok(d.html.includes("<h1"));
     assert.equal((await get(port, base + "api/doc?path=" + encodeURIComponent("secret.txt"))).status, 404);
-    assert.equal((await get(port, base + "api/doc?path=" + encodeURIComponent(".aiqa/../secret.txt"))).status, 404);
-    assert.equal((await get(port, base + "raw/.aiqa/%2E%2E/secret.txt")).status, 404);
-    assert.equal((await get(port, base + "raw/.aiqa/snapshots/home.yml")).status, 200);
+    assert.equal((await get(port, base + "api/doc?path=" + encodeURIComponent(".agentic-qa/../secret.txt"))).status, 404);
+    assert.equal((await get(port, base + "raw/.agentic-qa/%2E%2E/secret.txt")).status, 404);
+    assert.equal((await get(port, base + "raw/.agentic-qa/snapshots/home.yml")).status, 200);
     assert.equal((await get(port, base + "fonts/../server.mjs")).status, 404);
     assert.equal((await get(port, base + "fonts/ibm-plex-sans-400.woff2")).type, "font/woff2");
     assert.equal((await get(port, base + "api/story?key=NOPE-1")).status, 404);
@@ -130,7 +130,7 @@ test("the live server reads only .aiqa/ and writes only .aiqa/ai.json", async ()
     const m = JSON.parse((await get(port, base + "api/models")).body);
     assert.deepEqual(m.roles.map((r) => r.key), ["default", "analyst", "qa-planner", "qa-engineer", "qa-reviewer", "qa-reporter"]);
     assert.deepEqual(m.options, ["sonnet", "opus", "haiku", "fable"]);
-    const aiFile = path.join(dir, ".aiqa/ai.json");
+    const aiFile = path.join(dir, ".agentic-qa/ai.json");
     assert.equal((await post(port, base + "api/models", { models: { analyst: "opus" } }, { Origin: "http://evil.example" })).status, 403);
     assert.equal((await post(port, base + "api/models", { models: { analyst: "opus" } }, { Origin: "" })).status, 403);
     assert.equal((await post(port, base + "api/models", "models=1", { "Content-Type": "application/x-www-form-urlencoded" })).status, 415);
@@ -153,12 +153,12 @@ test("--static writes one self-contained snapshot", () => {
   const dir = makeProject();
   const r = spawnSync(process.execPath, [SERVER, "--dir", dir, "--static"], { encoding: "utf-8" });
   assert.equal(r.status, 0, r.stderr);
-  const html = fs.readFileSync(path.join(dir, ".aiqa/reports/dashboard.html"), "utf-8");
-  const m = html.match(/window\.__AIQA_STATIC__=(.*?);<\/script>/s);
+  const html = fs.readFileSync(path.join(dir, ".agentic-qa/reports/dashboard.html"), "utf-8");
+  const m = html.match(/window\.__AGENTIC_QA_STATIC__=(.*?);<\/script>/s);
   assert.ok(m, "data is embedded");
   const data = JSON.parse(m[1]);
   assert.ok(data["api/state"]);
   assert.ok(data["api/story?key=SD-1"]);
-  assert.ok(data["api/doc?path=" + encodeURIComponent(".aiqa/test-cases/SD-1-login.md")]);
+  assert.ok(data["api/doc?path=" + encodeURIComponent(".agentic-qa/test-cases/SD-1-login.md")]);
   assert.ok(!/<\/script>\s*alert/.test(html), "embedded text can't close the script tag");
 });
