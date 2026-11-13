@@ -47,10 +47,10 @@ package to install. Both write the same `.aiqa/` files, so you can move to AIQA 
 ### Claude Code, as a plugin
 In Claude Code:
 ```
-/plugin marketplace add agents-forge/agentic-qa
-/plugin install agentic-qa@agents-forge
+/plugin marketplace add qa-crew/agentic-qa
+/plugin install agentic-qa@qa-crew
 ```
-Or from a terminal, in one step: `claude plugin install agentic-qa --marketplace agents-forge/agentic-qa`.
+Or from a terminal, in one step: `claude plugin install agentic-qa --marketplace qa-crew/agentic-qa`.
 
 Installed this way, the names carry the plugin's prefix: agents are `agentic-qa:analyst` …, and skills are
 `/agentic-qa:qa-pipeline` …
@@ -60,18 +60,18 @@ Commit this to `.claude/settings.json` in the team's repository:
 ```json
 {
   "extraKnownMarketplaces": {
-    "agents-forge": { "source": { "source": "github", "repo": "agents-forge/agentic-qa" } }
+    "qa-crew": { "source": { "source": "github", "repo": "qa-crew/agentic-qa" } }
   },
-  "enabledPlugins": { "agentic-qa@agents-forge": true }
+  "enabledPlugins": { "agentic-qa@qa-crew": true }
 }
 ```
-`claude plugin marketplace add agents-forge/agentic-qa --scope project` followed by
-`claude plugin install agentic-qa@agents-forge --scope project` writes the same thing for you.
+`claude plugin marketplace add qa-crew/agentic-qa --scope project` followed by
+`claude plugin install agentic-qa@qa-crew --scope project` writes the same thing for you.
 
 The file tells Claude Code where the plugin comes from and turns it on, but it doesn't install it. When a teammate
 opens the project, Claude Code asks them to trust the folder. Then they run this once per clone:
 ```
-claude plugin install agentic-qa@agents-forge --scope project
+claude plugin install agentic-qa@qa-crew --scope project
 ```
 
 ### Try it without installing
@@ -221,11 +221,11 @@ carry over in both directions. GitHub Copilot uses its own model picker, so the 
 
 ## Updating
 ```
-claude plugin marketplace update agents-forge
-claude plugin update agentic-qa@agents-forge
+claude plugin marketplace update qa-crew
+claude plugin update agentic-qa@qa-crew
 ```
 Restart Claude Code after updating. To get updates automatically, open `/plugin`, go to **Marketplaces**, pick
-`agents-forge` and turn on auto-update. It's off by default for marketplaces that Anthropic doesn't run.
+`qa-crew` and turn on auto-update. It's off by default for marketplaces that Anthropic doesn't run.
 
 ## Example
 [examples/saucedemo](examples/saucedemo) walks through a real run of the agents on saucedemo.com: what each step did,

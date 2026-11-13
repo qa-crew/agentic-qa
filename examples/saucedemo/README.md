@@ -20,8 +20,8 @@ In an empty folder:
 npm init -y
 npm install -D @playwright/test
 npx playwright install chromium
-claude plugin marketplace add agents-forge/agentic-qa --scope project
-claude plugin install agentic-qa@agents-forge --scope project
+claude plugin marketplace add qa-crew/agentic-qa --scope project
+claude plugin install agentic-qa@qa-crew --scope project
 ```
 `playwright-cli` was already installed (`npm install -g @playwright/cli@latest`). Instead of the first three lines,
 you can install the plugin and then run `/agentic-qa:qa-setup`, which asks and installs the same things.

@@ -308,8 +308,8 @@
       <div class="code labeled">
         <span class="label">Quick start, in Claude Code</span>
         <button class="copy" type="button">Copy</button>
-<pre><code>/plugin marketplace add agents-forge/agentic-qa
-/plugin install agentic-qa@agents-forge
+<pre><code>/plugin marketplace add qa-crew/agentic-qa
+/plugin install agentic-qa@qa-crew
 /agentic-qa:qa-setup
 /agentic-qa:qa-pipeline https://www.saucedemo.com
 /agentic-qa:qa-dashboard</code></pre>
@@ -387,13 +387,13 @@
         <div class="tabpanel" role="tabpanel" id="p-plugin" aria-labelledby="t-plugin">
           <p>In Claude Code, type:</p>
           <div class="code"><button class="copy" type="button">Copy</button>
-<pre><code>/plugin marketplace add agents-forge/agentic-qa
-/plugin install agentic-qa@agents-forge</code></pre></div>
+<pre><code>/plugin marketplace add qa-crew/agentic-qa
+/plugin install agentic-qa@qa-crew</code></pre></div>
           <p>Or from a terminal, in one step:</p>
           <div class="code"><button class="copy" type="button">Copy</button>
-<pre><code>claude plugin install agentic-qa --marketplace agents-forge/agentic-qa</code></pre></div>
+<pre><code>claude plugin install agentic-qa --marketplace qa-crew/agentic-qa</code></pre></div>
           <p>Restart Claude Code. The commands are now <code>/agentic-qa:qa-pipeline</code> and so on, and the agents are <code>agentic-qa:analyst</code> and so on.</p>
-          <p>To update later: <code>claude plugin marketplace update agents-forge</code>, then <code>claude plugin update agentic-qa@agents-forge</code>, and restart. To get updates automatically, open <code>/plugin</code>, go to <strong>Marketplaces</strong>, pick <code>agents-forge</code> and turn on auto-update. It's off by default.</p>
+          <p>To update later: <code>claude plugin marketplace update qa-crew</code>, then <code>claude plugin update agentic-qa@qa-crew</code>, and restart. To get updates automatically, open <code>/plugin</code>, go to <strong>Marketplaces</strong>, pick <code>qa-crew</code> and turn on auto-update. It's off by default.</p>
           <p>Just trying it? <code>claude --plugin-dir &lt;path to a clone&gt;</code> loads the plugin for one session, without installing it.</p>
         </div>
         <div class="tabpanel" role="tabpanel" id="p-team" aria-labelledby="t-team" hidden>
@@ -401,17 +401,17 @@
           <div class="code labeled"><span class="label">.claude/settings.json</span><button class="copy" type="button">Copy</button>
 <pre><code>{
   "extraKnownMarketplaces": {
-    "agents-forge": { "source": { "source": "github", "repo": "agents-forge/agentic-qa" } }
+    "qa-crew": { "source": { "source": "github", "repo": "qa-crew/agentic-qa" } }
   },
-  "enabledPlugins": { "agentic-qa@agents-forge": true }
+  "enabledPlugins": { "agentic-qa@qa-crew": true }
 }</code></pre></div>
           <p>Or let Claude Code write it for you:</p>
           <div class="code"><button class="copy" type="button">Copy</button>
-<pre><code>claude plugin marketplace add agents-forge/agentic-qa --scope project
-claude plugin install agentic-qa@agents-forge --scope project</code></pre></div>
+<pre><code>claude plugin marketplace add qa-crew/agentic-qa --scope project
+claude plugin install agentic-qa@qa-crew --scope project</code></pre></div>
           <p><strong>Then each teammate, once per clone:</strong> the file tells Claude Code where the plugin comes from and turns it on, but it doesn't install it. Open the project, say yes when Claude Code asks to trust the folder, and run:</p>
           <div class="code"><button class="copy" type="button">Copy</button>
-<pre><code>claude plugin install agentic-qa@agents-forge --scope project</code></pre></div>
+<pre><code>claude plugin install agentic-qa@qa-crew --scope project</code></pre></div>
         </div>
         <div class="tabpanel" role="tabpanel" id="p-copy" aria-labelledby="t-copy" hidden>
           <p>Copy <code>.claude/agents/</code> and <code>.claude/skills/</code> from this repository into your project's <code>.claude/</code> folder. Or copy them into <code>~/.claude/</code> to have them in every project.</p>

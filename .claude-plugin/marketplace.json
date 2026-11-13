@@ -1,5 +1,5 @@
 {
-  "name": "agents-forge",
+  "name": "qa-crew",
   "description": "Open-source agents and skills from Agents Forge.",
   "owner": { "name": "Rohan Patil" },
   "plugins": [
