@@ -9,9 +9,14 @@ AIQA's QA agents for **Claude Code** and **GitHub Copilot**. Give them a URL and
 
 They can also work one user story at a time. A small live dashboard shows the progress.
 
-These are the same agents as the npm package [`@agents-forge/aiqa`](https://www.npmjs.com/package/@agents-forge/aiqa),
-as plain agent and skill files: no SDK and no package to install. They write the same `.aiqa/` files, so you can move
-to the full product later (see [Same files as the npm package](#same-files-as-the-npm-package)).
+**New here?** Start with the [tutorial](docs/tutorial/index.html). It covers installing, setting up, working with the
+agents in Claude Code or Copilot, and the dashboard, with screenshots. Open the file in a browser from a clone or
+download.
+
+These agents started as those of the npm package
+[`@agents-forge/aiqa`](https://www.npmjs.com/package/@agents-forge/aiqa), as plain agent and skill files: no SDK and no
+package to install. They write the same `.aiqa/` files, so you can move to the full product later (see
+[Same files as the npm package](#same-files-as-the-npm-package)).
 
 ## What's inside
 

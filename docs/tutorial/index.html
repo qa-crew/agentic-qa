@@ -1,0 +1,898 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AIQA Agents Tutorial</title>
+<meta name="description" content="How to install the AIQA agents for Claude Code or GitHub Copilot, work with them in chat, run a full QA suite or one user story, and read the results on the dashboard.">
+<script>
+  // Apply a saved light/dark choice before the page paints.
+  try { var m = localStorage.getItem("aiqa-tutorial-mode"); if (m === "light" || m === "dark") document.documentElement.setAttribute("data-mode", m); } catch (e) {}
+</script>
+<style>
+  :root {
+    color-scheme: light;
+    --font-sans: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+    --bg-canvas: #EEF1F5; --bg-surface: #FFFFFF; --bg-sunken: #F6F8FA; --bg-code: #0F172A; --fg-code: #E5E9F2;
+    --border: #CDD3DC; --border-subtle: #E2E7EE;
+    --fg: #0F172A; --fg-2: #334155; --fg-muted: #475569;
+    --link: #2B4FD8; --focus: #2B4FD8; --accent: #2B4FD8; --accent-fg: #FFFFFF;
+    --accent-tint: #E8EDFD; --accent-tint-border: #B9C6F5; --accent-tint-fg: #1E2A78;
+    --ok-bg: #DCFCE7; --ok-fg: #14532D; --ok-solid: #166534;
+    --warn-bg: #FEF3C7; --warn-fg: #78350F; --warn-solid: #92400E;
+    --info-bg: #E0F2FE; --info-fg: #0C4A6E; --info-solid: #0369A1;
+    --agent-bg: #EDE9FE; --agent-fg: #4C1D95;
+    --logo-bg: #0F172A; --logo-fg: #FFFFFF; --bg-chrome: #FFFFFF;
+    --bubble-you: #2B4FD8; --bubble-you-fg: #FFFFFF;
+    --shadow-sm: 0 1px 2px rgba(15, 23, 42, .08); --shadow-lg: 0 12px 32px rgba(15, 23, 42, .12);
+    --radius-sm: 6px; --radius-md: 8px; --radius-lg: 12px;
+    --topbar-h: 56px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-mode="light"]) {
+      color-scheme: dark;
+      --bg-canvas: #0E1320; --bg-surface: #151B2B; --bg-sunken: #111726; --bg-code: #0A0E18; --fg-code: #E5E9F2;
+      --border: #2E3A55; --border-subtle: #1E2638;
+      --fg: #E5E9F2; --fg-2: #C3CAD9; --fg-muted: #A6AFC3;
+      --link: #9DB0FF; --focus: #8EA6FF; --accent: #8EA6FF; --accent-fg: #0A1230;
+      --accent-tint: #1A2448; --accent-tint-border: #34478F; --accent-tint-fg: #E0E6FF;
+      --ok-bg: #12321F; --ok-fg: #86EFAC; --ok-solid: #4ADE80;
+      --warn-bg: #3A2A0C; --warn-fg: #FCD34D; --warn-solid: #FBBF24;
+      --info-bg: #0F2B3B; --info-fg: #7DD3FC; --info-solid: #38BDF8;
+      --agent-bg: #2A1F4A; --agent-fg: #C4B5FD;
+      --logo-bg: #E5E9F2; --logo-fg: #0F172A; --bg-chrome: #111726;
+      --bubble-you: #34478F; --bubble-you-fg: #FFFFFF;
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, .4); --shadow-lg: 0 12px 32px rgba(0, 0, 0, .5);
+    }
+  }
+  :root[data-mode="dark"] {
+    color-scheme: dark;
+    --bg-canvas: #0E1320; --bg-surface: #151B2B; --bg-sunken: #111726; --bg-code: #0A0E18; --fg-code: #E5E9F2;
+    --border: #2E3A55; --border-subtle: #1E2638;
+    --fg: #E5E9F2; --fg-2: #C3CAD9; --fg-muted: #A6AFC3;
+    --link: #9DB0FF; --focus: #8EA6FF; --accent: #8EA6FF; --accent-fg: #0A1230;
+    --accent-tint: #1A2448; --accent-tint-border: #34478F; --accent-tint-fg: #E0E6FF;
+    --ok-bg: #12321F; --ok-fg: #86EFAC; --ok-solid: #4ADE80;
+    --warn-bg: #3A2A0C; --warn-fg: #FCD34D; --warn-solid: #FBBF24;
+    --info-bg: #0F2B3B; --info-fg: #7DD3FC; --info-solid: #38BDF8;
+    --agent-bg: #2A1F4A; --agent-fg: #C4B5FD;
+    --logo-bg: #E5E9F2; --logo-fg: #0F172A; --bg-chrome: #111726;
+    --bubble-you: #34478F; --bubble-you-fg: #FFFFFF;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, .4); --shadow-lg: 0 12px 32px rgba(0, 0, 0, .5);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-padding-top: calc(var(--topbar-h) + 16px); }
+  @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+  body { margin: 0; background: var(--bg-canvas); color: var(--fg); font: 16px/1.6 var(--font-sans); -webkit-text-size-adjust: 100%; }
+  a { color: var(--link); text-underline-offset: 2px; }
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  code { font: 500 .9em var(--font-mono); background: var(--bg-sunken); border: 1px solid var(--border-subtle); border-radius: 4px; padding: .05em .35em; overflow-wrap: anywhere; }
+
+  /* Top bar */
+  .top { position: sticky; top: 0; z-index: 20; height: var(--topbar-h); display: flex; align-items: center; gap: 12px; padding: 0 16px; background: var(--bg-chrome); border-bottom: 1px solid var(--border); }
+  .brand { display: flex; align-items: center; gap: 10px; color: var(--fg); text-decoration: none; font-weight: 600; min-width: 0; }
+  .logo { background: var(--logo-bg); color: var(--logo-fg); font: 600 15px/1 var(--font-sans); letter-spacing: .06em; padding: 7px 9px; border-radius: var(--radius-sm); }
+  .brand > span:last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .top .spacer { flex: 1; }
+  .mode { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 6px 12px; border-radius: var(--radius-md); border: 1px solid var(--border); background: var(--bg-surface); color: var(--fg); font: 600 13px var(--font-sans); cursor: pointer; }
+  .mode:hover { background: var(--bg-sunken); }
+
+  /* Layout */
+  .layout { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 40px; max-width: 1200px; margin: 0 auto; padding: 32px 24px 64px; }
+  .toc { position: sticky; top: calc(var(--topbar-h) + 24px); align-self: start; max-height: calc(100vh - var(--topbar-h) - 48px); overflow: auto; }
+  .toc summary { display: none; }
+  .toc h2 { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--fg-muted); margin: 0 0 8px; }
+  .toc ol { list-style: none; margin: 0; padding: 0; counter-reset: toc; }
+  .toc li { counter-increment: toc; }
+  .toc a { display: flex; gap: 10px; padding: 6px 10px; border-radius: var(--radius-md); color: var(--fg-2); text-decoration: none; font-size: 14.5px; border-left: 2px solid transparent; }
+  .toc a::before { content: counter(toc); font: 600 12px/1.9 var(--font-mono); color: var(--fg-muted); min-width: 1.4em; }
+  .toc a:hover { background: var(--bg-surface); color: var(--fg); }
+  .toc a[aria-current="true"] { background: var(--accent-tint); color: var(--accent-tint-fg); border-left-color: var(--accent); }
+  main { min-width: 0; max-width: 820px; }
+
+  /* Hero */
+  .hero { margin: 0 0 44px; }
+  .eyebrow { display: inline-block; font: 600 12px var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--accent-tint-fg); background: var(--accent-tint); border: 1px solid var(--accent-tint-border); border-radius: 999px; padding: 3px 10px; }
+  .hero h1 { font-size: clamp(30px, 5vw, 44px); line-height: 1.12; letter-spacing: -.01em; margin: 14px 0 12px; }
+  .hero .lead { font-size: 18.5px; color: var(--fg-2); margin: 0 0 22px; max-width: 700px; }
+  .outcomes { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 26px; padding: 0; list-style: none; }
+  .outcomes li { font-size: 14px; font-weight: 500; padding: 4px 12px; border-radius: 999px; background: var(--bg-surface); border: 1px solid var(--border); color: var(--fg-2); }
+
+  /* Sections */
+  section { margin: 0 0 60px; }
+  section > h2 { display: flex; align-items: baseline; gap: 12px; font-size: 26px; line-height: 1.25; margin: 0 0 6px; }
+  section > h2 .n { font: 600 14px var(--font-mono); color: var(--accent-tint-fg); background: var(--accent-tint); border-radius: var(--radius-sm); padding: 2px 8px; flex: none; position: relative; top: -3px; }
+  section > .intro { color: var(--fg-muted); margin: 0 0 20px; font-size: 17px; }
+  h3 { font-size: 19px; margin: 32px 0 8px; }
+  p { margin: 0 0 14px; }
+  ul.plain, ol.plain { margin: 0 0 14px; padding-left: 22px; }
+  ul.plain li, ol.plain li { margin: 4px 0; }
+
+  /* Cards, callouts */
+  .card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
+  .callout { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; padding: 14px 16px; border-radius: var(--radius-lg); border: 1px solid; margin: 18px 0; font-size: 15px; }
+  .callout p:last-child, .callout ul:last-child { margin-bottom: 0; }
+  .callout .ic { font: 700 12px/22px var(--font-mono); width: 22px; height: 22px; text-align: center; border-radius: 50%; color: var(--bg-surface); }
+  .callout.tip { background: var(--ok-bg); border-color: color-mix(in srgb, var(--ok-solid) 35%, transparent); color: var(--ok-fg); }
+  .callout.tip .ic { background: var(--ok-solid); }
+  .callout.note { background: var(--info-bg); border-color: color-mix(in srgb, var(--info-solid) 35%, transparent); color: var(--info-fg); }
+  .callout.note .ic { background: var(--info-solid); }
+  .callout.warn { background: var(--warn-bg); border-color: color-mix(in srgb, var(--warn-solid) 35%, transparent); color: var(--warn-fg); }
+  .callout.warn .ic { background: var(--warn-solid); }
+  .callout code { background: transparent; border-color: color-mix(in srgb, currentColor 30%, transparent); }
+  .callout a { color: inherit; }
+
+  /* Code blocks with copy */
+  .code { position: relative; margin: 12px 0 18px; }
+  .code pre { margin: 0; background: var(--bg-code); color: var(--fg-code); border-radius: var(--radius-lg); padding: 14px 16px; padding-right: 76px; overflow-x: auto; font: 14px/1.6 var(--font-mono); border: 1px solid var(--border); }
+  .code pre code { background: none; border: 0; padding: 0; font: inherit; color: inherit; overflow-wrap: normal; }
+  .code .label { position: absolute; left: 14px; top: -10px; font: 600 11px var(--font-mono); letter-spacing: .04em; text-transform: uppercase; background: var(--bg-surface); color: var(--fg-muted); border: 1px solid var(--border); border-radius: 999px; padding: 1px 8px; }
+  .code.labeled pre { padding-top: 20px; }
+  .copy { position: absolute; top: 8px; right: 8px; font: 600 12px var(--font-sans); padding: 5px 10px; border-radius: var(--radius-sm); border: 1px solid rgba(229, 233, 242, .25); background: rgba(229, 233, 242, .08); color: #E5E9F2; cursor: pointer; }
+  .copy:hover { background: rgba(229, 233, 242, .18); }
+  .copy[data-done] { background: #166534; border-color: #166534; color: #FFFFFF; }
+
+  /* Tabs */
+  .tabs { margin: 16px 0 24px; }
+  .tablist { display: flex; flex-wrap: wrap; gap: 6px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+  .tablist button { font: 600 14px var(--font-sans); color: var(--fg-muted); background: none; border: 0; border-bottom: 2px solid transparent; padding: 8px 12px; margin-bottom: -1px; cursor: pointer; }
+  .tablist button:hover { color: var(--fg); }
+  .tablist button[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--accent); }
+  .tabpanel[hidden] { display: none; }
+
+  /* Pipeline cards */
+  .flow { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin: 18px 0 8px; padding: 0; list-style: none; }
+  .flow li { position: relative; padding: 14px 14px 12px; display: flex; flex-direction: column; gap: 4px; }
+  .flow li:not(:last-child)::after { content: ""; position: absolute; right: -10px; top: 26px; width: 8px; height: 8px; border-top: 2px solid var(--fg-muted); border-right: 2px solid var(--fg-muted); transform: rotate(45deg); }
+  .flow .num { font: 600 12px var(--font-mono); color: var(--fg-muted); }
+  .flow .name { font-weight: 600; }
+  .flow .does { font-size: 13.5px; color: var(--fg-muted); flex: 1; }
+  .flow .time { align-self: flex-start; font: 600 12px var(--font-mono); color: var(--accent-tint-fg); background: var(--accent-tint); border-radius: 999px; padding: 1px 8px; }
+  .chip { display: inline-block; font-size: 12px; font-weight: 600; padding: 1px 8px; border-radius: 999px; }
+  .chip.code-chip { background: var(--bg-sunken); color: var(--fg-muted); border: 1px solid var(--border-subtle); }
+  .chip.agent { background: var(--agent-bg); color: var(--agent-fg); }
+  .caption-line { font-size: 13.5px; color: var(--fg-muted); margin: 0 0 18px; }
+
+  /* How it fits together */
+  .roles { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1.3fr) auto minmax(0, 1fr); align-items: stretch; gap: 10px; margin: 18px 0 24px; }
+  .roles .box { padding: 14px 16px; }
+  .roles .box h4 { margin: 0 0 4px; font-size: 15px; }
+  .roles .box p { margin: 0; font-size: 14px; color: var(--fg-muted); }
+  .roles .box .chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+  .roles .arrow { align-self: center; color: var(--fg-muted); font: 600 13px var(--font-mono); text-align: center; line-height: 1.3; }
+  .roles .arrow span { display: block; font-size: 20px; }
+
+  /* Chat */
+  .chat { padding: 18px; display: flex; flex-direction: column; gap: 12px; margin: 14px 0 8px; }
+  .chat .head { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: 13px; color: var(--fg-muted); border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px; }
+  .msg { max-width: 88%; font-size: 15px; }
+  .msg.you { align-self: flex-end; background: var(--bubble-you); color: var(--bubble-you-fg); padding: 9px 14px; border-radius: 14px 14px 4px 14px; }
+  .msg.you code { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .25); color: inherit; }
+  .msg.ai { align-self: flex-start; display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 10px; }
+  .msg.ai .av { width: 30px; height: 30px; border-radius: 8px; background: var(--logo-bg); color: var(--logo-fg); font: 700 10px/30px var(--font-sans); text-align: center; letter-spacing: .04em; }
+  .msg.ai .body { background: var(--bg-sunken); border: 1px solid var(--border-subtle); padding: 9px 14px; border-radius: 4px 14px 14px 14px; }
+  .msg.ai .body p { margin: 0 0 6px; } .msg.ai .body p:last-child { margin: 0; }
+  .handoff { align-self: center; font: 500 12.5px var(--font-mono); color: var(--agent-fg); background: var(--agent-bg); border-radius: 999px; padding: 3px 12px; text-align: center; }
+  .choices { display: flex; gap: 6px; margin-top: 8px; }
+  .choices span { font-size: 13px; font-weight: 600; border: 1px solid var(--border); background: var(--bg-surface); border-radius: var(--radius-sm); padding: 2px 10px; }
+  .choices span:first-child { border-color: var(--accent); color: var(--link); }
+  .gap { align-self: center; font-size: 13px; color: var(--fg-muted); }
+
+  /* Steps (numbered tutorial steps) */
+  .steps { list-style: none; counter-reset: s; margin: 16px 0; padding: 0; }
+  .steps > li { counter-increment: s; position: relative; padding: 0 0 18px 44px; }
+  .steps > li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: var(--accent-fg); font: 700 14px/28px var(--font-sans); text-align: center; }
+  .steps > li:not(:last-child)::after { content: ""; position: absolute; left: 13px; top: 32px; bottom: 4px; width: 2px; background: var(--border); }
+  .steps > li > strong:first-child { display: block; margin-bottom: 2px; }
+
+  /* Tables */
+  .table-wrap { overflow-x: auto; margin: 12px 0 20px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg-surface); }
+  table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+  th, td { text-align: left; vertical-align: top; padding: 10px 14px; border-top: 1px solid var(--border-subtle); }
+  thead th { border-top: 0; background: var(--bg-sunken); font-size: 13px; color: var(--fg-muted); font-weight: 600; white-space: nowrap; }
+  td code { white-space: nowrap; }
+
+  /* File tree */
+  .tree { font: 14px/1.7 var(--font-mono); background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px 16px; overflow-x: auto; white-space: pre; margin: 12px 0 18px; }
+  .tree .d { color: var(--fg-muted); }
+
+  /* Figures and gallery */
+  figure { margin: 18px 0 26px; }
+  .shot { display: block; position: relative; border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border); box-shadow: var(--shadow-lg); background: var(--bg-surface); cursor: zoom-in; }
+  .shot img { display: block; width: 100%; height: auto; }
+  .shot.crop { aspect-ratio: 16 / 10; }
+  .shot.crop img { height: 100%; object-fit: cover; object-position: top; }
+  .shot .zoom { position: absolute; right: 10px; bottom: 10px; font: 600 12px var(--font-sans); background: rgba(15, 23, 42, .78); color: #FFFFFF; border-radius: var(--radius-sm); padding: 3px 9px; opacity: 0; transition: opacity .15s; }
+  .shot:hover .zoom, .shot:focus-visible .zoom { opacity: 1; }
+  figcaption { font-size: 14px; color: var(--fg-muted); margin-top: 10px; }
+  figcaption strong { color: var(--fg); }
+  .gallery { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 18px; margin: 20px 0 26px; }
+  .gallery figure { margin: 0; }
+  .gallery .wide { grid-column: 1 / -1; }
+  .phone-row { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 18px; align-items: start; }
+  .phone-row .shot.crop { aspect-ratio: auto; }
+
+  dialog.viewer { border: 0; padding: 0; background: transparent; max-width: min(96vw, 1400px); max-height: 94vh; }
+  dialog.viewer::backdrop { background: rgba(9, 11, 16, .78); }
+  dialog.viewer .frame { position: relative; padding-top: 44px; }
+  dialog.viewer img { display: block; max-width: min(96vw, 1400px); max-height: calc(88vh - 44px); width: auto; height: auto; border-radius: var(--radius-md); background: #FFFFFF; }
+  dialog.viewer p { color: #E5E9F2; font-size: 14px; margin: 8px 0 0; text-align: center; }
+  dialog.viewer button { position: absolute; top: 0; right: 0; font: 600 13px var(--font-sans); background: rgba(15, 23, 42, .85); color: #FFFFFF; border: 1px solid rgba(255, 255, 255, .3); border-radius: var(--radius-sm); padding: 6px 12px; cursor: pointer; }
+
+  /* FAQ */
+  details.faq { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); margin: 10px 0; }
+  details.faq > summary { cursor: pointer; padding: 13px 16px; font-weight: 600; list-style: none; display: flex; gap: 10px; align-items: baseline; }
+  details.faq > summary::-webkit-details-marker { display: none; }
+  details.faq > summary::before { content: "+"; font: 700 16px var(--font-mono); color: var(--fg-muted); width: 14px; flex: none; }
+  details.faq[open] > summary::before { content: "−"; }
+  details.faq > div { padding: 0 16px 6px 40px; }
+
+  .grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 14px 0 20px; }
+  .grid2 .card { padding: 14px 16px; }
+  .grid2 h4 { margin: 0 0 4px; font-size: 15.5px; }
+  .grid2 p { margin: 0; font-size: 14.5px; color: var(--fg-muted); }
+  .asks { list-style: none; padding: 0; margin: 10px 0 18px; display: grid; gap: 8px; }
+  .asks li { background: var(--bg-surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--radius-md); padding: 8px 14px; font-size: 15px; }
+  .asks li span { display: block; font-size: 13px; color: var(--fg-muted); }
+
+  footer { border-top: 1px solid var(--border); margin-top: 24px; padding-top: 20px; font-size: 14px; color: var(--fg-muted); }
+
+  @media (max-width: 960px) {
+    .layout { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 20px 16px 48px; }
+    .toc { position: static; max-height: none; margin: 0 0 28px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+    .toc summary { display: flex; justify-content: space-between; cursor: pointer; padding: 12px 16px; font-weight: 600; list-style: none; }
+    .toc summary::-webkit-details-marker { display: none; }
+    .toc summary::after { content: "▾"; color: var(--fg-muted); }
+    .toc[open] summary::after { content: "▴"; }
+    .toc h2 { display: none; }
+    .toc ol { padding: 0 8px 10px; }
+    .flow { grid-template-columns: minmax(0, 1fr); }
+    .flow li:not(:last-child)::after { right: auto; left: 22px; top: auto; bottom: -10px; transform: rotate(135deg); }
+    .roles { grid-template-columns: minmax(0, 1fr); }
+    .roles .arrow span { transform: rotate(90deg); }
+    .grid2, .gallery { grid-template-columns: minmax(0, 1fr); }
+    .phone-row { grid-template-columns: minmax(0, 1fr); }
+    .phone-row figure:last-child { max-width: 260px; }
+    .msg { max-width: 100%; }
+  }
+  @media (max-width: 520px) {
+    .brand .full { display: none; }
+    section > h2 { font-size: 22px; }
+    .hero .lead { font-size: 17px; }
+  }
+  @media print {
+    .top, .toc, .copy, .mode { display: none !important; }
+    .layout { display: block; padding: 0; }
+    .tabpanel[hidden] { display: block; }
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="#top"><span class="logo">AIQA</span><span><span class="full">Agents · </span>Tutorial</span></a>
+  <span class="spacer"></span>
+  <button class="mode" id="mode" type="button" aria-label="Switch between light and dark">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></svg>
+    <span id="mode-label">Dark</span>
+  </button>
+</header>
+
+<div class="layout" id="top">
+  <details class="toc" id="toc" open>
+    <summary>On this page</summary>
+    <h2>On this page</h2>
+    <ol>
+      <li><a href="#what">What you get</a></li>
+      <li><a href="#before">Before you start</a></li>
+      <li><a href="#install">Install</a></li>
+      <li><a href="#setup">Set up your project</a></li>
+      <li><a href="#chat">Work with Claude or Copilot</a></li>
+      <li><a href="#suite">Run the full suite</a></li>
+      <li><a href="#story">Test one user story</a></li>
+      <li><a href="#dashboard">The dashboard</a></li>
+      <li><a href="#models">Choose the models</a></li>
+      <li><a href="#tips">Tips from a real run</a></li>
+      <li><a href="#help">When something goes wrong</a></li>
+      <li><a href="#next">Where to go next</a></li>
+    </ol>
+  </details>
+
+  <main>
+    <div class="hero">
+      <span class="eyebrow">Tutorial · about 15 minutes to read</span>
+      <h1>From a URL to a tested Playwright suite</h1>
+      <p class="lead">AIQA is a team of QA agents for Claude Code and GitHub Copilot. You give them your web app's address, in chat.
+        They explore it, plan the testing, write the tests, check them and run them. This page walks you through it, step by step.</p>
+      <div class="code labeled">
+        <span class="label">Quick start, in Claude Code</span>
+        <button class="copy" type="button">Copy</button>
+<pre><code>/plugin marketplace add rohan12patil/AIQA
+/plugin install aiqa@agents-forge
+/aiqa:qa-setup
+/aiqa:qa-pipeline https://www.saucedemo.com
+/aiqa:qa-dashboard</code></pre>
+      </div>
+      <ul class="outcomes" aria-label="What you have at the end">
+        <li>Requirements</li><li>Risk-based test plan</li><li>Test cases</li><li>Playwright page objects &amp; specs</li><li>A review of every selector</li><li>An executive test report</li>
+      </ul>
+      <figure>
+        <a class="shot crop" href="images/suite.png" data-caption="The dashboard after a full-suite run on saucedemo.com: five steps done, with their times and files.">
+          <img src="images/suite.png" alt="The AIQA dashboard's Full suite view: five step cards marked Done with their times, then the documents, test cases and test scripts." width="1366" height="1120"><span class="zoom">Open</span></a>
+        <figcaption>The dashboard after a real run on saucedemo.com. Every image on this page comes from that run.</figcaption>
+      </figure>
+    </div>
+
+    <!-- 1 -->
+    <section id="what">
+      <h2><span class="n">1</span>What you get</h2>
+      <p class="intro">Eight agents, each with one job, and four commands that run them for you.</p>
+
+      <h3>The full suite: five agents, one after another</h3>
+      <ol class="flow">
+        <li class="card"><span class="num">1 · analyst</span><span class="name">Explore</span><span class="does">Walks every page, saves a snapshot of each, writes the requirements</span><span class="time">25 min</span></li>
+        <li class="card"><span class="num">2 · qa-planner</span><span class="name">Plan</span><span class="does">A test plan ranked by risk</span><span class="time">11 min</span></li>
+        <li class="card"><span class="num">3 · qa-engineer</span><span class="name">Automate</span><span class="does">Test cases, page objects, fixtures and specs</span><span class="time">51 min</span></li>
+        <li class="card"><span class="num">4 · qa-reviewer</span><span class="name">Review</span><span class="does">Checks every selector against the snapshots</span><span class="time">19 min</span></li>
+        <li class="card"><span class="num">5 · qa-reporter</span><span class="name">Report</span><span class="does">Runs the tests and writes the report</span><span class="time">5–8 min</span></li>
+      </ol>
+      <p class="caption-line">Times are from real runs on saucedemo.com with Claude Opus 5.5. Your app and model will change them.</p>
+
+      <h3>One user story at a time</h3>
+      <ol class="flow">
+        <li class="card"><span class="num"><span class="chip code-chip">code</span></span><span class="name">Pull</span><span class="does">Finds the story file</span></li>
+        <li class="card"><span class="num"><span class="chip agent">story-designer</span></span><span class="name">Design</span><span class="does">Testable criteria and manual test cases</span></li>
+        <li class="card"><span class="num"><span class="chip agent">story-explorer</span></span><span class="name">Explore</span><span class="does">Tries every case in the real app</span></li>
+        <li class="card"><span class="num"><span class="chip agent">story-automator</span></span><span class="name">Automate</span><span class="does">Playwright tests for the verified cases</span></li>
+        <li class="card"><span class="num"><span class="chip code-chip">code</span></span><span class="name">Run</span><span class="does">Runs them and writes the results into the cases</span></li>
+      </ol>
+
+      <h3>The four commands</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td><code>/aiqa:qa-setup</code></td><td>Checks and installs what the agents need. It asks before installing anything.</td></tr>
+          <tr><td><code>/aiqa:qa-pipeline &lt;url&gt;</code></td><td>Runs the five full-suite agents in order.</td></tr>
+          <tr><td><code>/aiqa:qa-story &lt;KEY&gt;</code></td><td>Runs one story: Design, Explore, Automate, Run.</td></tr>
+          <tr><td><code>/aiqa:qa-dashboard</code></td><td>Opens a live page that shows progress, files and results.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout note"><span class="ic">i</span><div><p>The <code>aiqa:</code> prefix appears when you install AIQA as a Claude Code plugin. If you copy the files, or use GitHub Copilot, the commands have no prefix: <code>/qa-pipeline</code>, <code>/qa-story</code> and so on.</p></div></div>
+    </section>
+
+    <!-- 2 -->
+    <section id="before">
+      <h2><span class="n">2</span>Before you start</h2>
+      <p class="intro">You need three things. Setup (step 4) installs the rest.</p>
+      <ul class="plain">
+        <li><strong>Claude Code</strong> (the terminal, the desktop app or the IDE extension), or <strong>GitHub Copilot</strong> in VS Code.</li>
+        <li><strong>Node.js 20 or newer.</strong> Check with <code>node --version</code>.</li>
+        <li><strong>A project folder</strong> for the tests, and the address of the app you want to test. It can be a local address, such as <code>http://localhost:3000</code>.</li>
+      </ul>
+      <div class="callout tip"><span class="ic">✓</span><div><p>Want to try it first? Use <code>https://www.saucedemo.com</code>, a public demo shop. Every example on this page comes from a real run on it.</p></div></div>
+    </section>
+
+    <!-- 3 -->
+    <section id="install">
+      <h2><span class="n">3</span>Install</h2>
+      <p class="intro">Pick the way that fits you. You only do this once.</p>
+      <div class="tabs" data-tabs>
+        <div class="tablist" role="tablist" aria-label="Ways to install">
+          <button role="tab" id="t-plugin" aria-controls="p-plugin" aria-selected="true">Claude Code plugin</button>
+          <button role="tab" id="t-team" aria-controls="p-team" aria-selected="false" tabindex="-1">For a whole team</button>
+          <button role="tab" id="t-copy" aria-controls="p-copy" aria-selected="false" tabindex="-1">Copy the files</button>
+          <button role="tab" id="t-copilot" aria-controls="p-copilot" aria-selected="false" tabindex="-1">GitHub Copilot</button>
+        </div>
+        <div class="tabpanel" role="tabpanel" id="p-plugin" aria-labelledby="t-plugin">
+          <p>In Claude Code, type:</p>
+          <div class="code"><button class="copy" type="button">Copy</button>
+<pre><code>/plugin marketplace add rohan12patil/AIQA
+/plugin install aiqa@agents-forge</code></pre></div>
+          <p>Or from a terminal:</p>
+          <div class="code"><button class="copy" type="button">Copy</button>
+<pre><code>claude plugin marketplace add rohan12patil/AIQA
+claude plugin install aiqa@agents-forge</code></pre></div>
+          <p>Restart Claude Code. The commands are now <code>/aiqa:qa-pipeline</code> and so on, and the agents are <code>aiqa:analyst</code> and so on.</p>
+          <p>To update later: <code>claude plugin marketplace update agents-forge</code>, then <code>claude plugin update aiqa@agents-forge</code>, and restart.</p>
+        </div>
+        <div class="tabpanel" role="tabpanel" id="p-team" aria-labelledby="t-team" hidden>
+          <p>Commit this to <code>.claude/settings.json</code> in your team's repository. Everyone who opens the project in Claude Code is offered the plugin.</p>
+          <div class="code labeled"><span class="label">.claude/settings.json</span><button class="copy" type="button">Copy</button>
+<pre><code>{
+  "extraKnownMarketplaces": {
+    "agents-forge": { "source": { "source": "github", "repo": "rohan12patil/AIQA" } }
+  },
+  "enabledPlugins": { "aiqa@agents-forge": true }
+}</code></pre></div>
+          <p>Or let Claude Code write it for you:</p>
+          <div class="code"><button class="copy" type="button">Copy</button>
+<pre><code>claude plugin marketplace add rohan12patil/AIQA --scope project
+claude plugin install aiqa@agents-forge --scope project</code></pre></div>
+        </div>
+        <div class="tabpanel" role="tabpanel" id="p-copy" aria-labelledby="t-copy" hidden>
+          <p>Copy <code>.claude/agents/</code> and <code>.claude/skills/</code> from this repository into your project's <code>.claude/</code> folder. Or copy them into <code>~/.claude/</code> to have them in every project.</p>
+          <ul class="plain">
+            <li>The commands have no prefix: <code>/qa-pipeline</code>, <code>/qa-story</code>, <code>/qa-setup</code>, <code>/qa-dashboard</code>.</li>
+            <li>Copy all four skill folders. The dashboard uses scripts from <code>qa-story</code>.</li>
+          </ul>
+        </div>
+        <div class="tabpanel" role="tabpanel" id="p-copilot" aria-labelledby="t-copilot" hidden>
+          <p>Copy <code>.github/agents/</code> and <code>.github/skills/</code> from this repository into your repository's <code>.github/</code> folder.</p>
+          <ul class="plain">
+            <li>The eight agents appear in Copilot's agent picker.</li>
+            <li>The commands are <code>/qa-pipeline</code>, <code>/qa-story</code>, <code>/qa-setup</code> and <code>/qa-dashboard</code>.</li>
+            <li>The instructions are the same as Claude Code's, with Copilot's tool names.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 -->
+    <section id="setup">
+      <h2><span class="n">4</span>Set up your project</h2>
+      <p class="intro">Open Claude Code (or Copilot Chat) in your project folder and run setup once.</p>
+      <div class="code"><button class="copy" type="button">Copy</button>
+<pre><code>/aiqa:qa-setup</code></pre></div>
+      <p>It checks each item, shows a short table, and asks before installing what's missing:</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Item</th><th>Why</th><th>Needed?</th></tr></thead>
+        <tbody>
+          <tr><td>Node.js 20+</td><td>Runs everything</td><td>Yes</td></tr>
+          <tr><td>A <code>package.json</code></td><td>Holds the test dependencies</td><td>Yes</td></tr>
+          <tr><td><code>@playwright/test</code></td><td>Runs the tests</td><td>Yes</td></tr>
+          <tr><td><code>playwright-cli</code></td><td>Lets the agents drive a browser</td><td>Yes</td></tr>
+          <tr><td>Chromium</td><td>The browser the tests run in</td><td>Yes</td></tr>
+          <tr><td><code>@axe-core/playwright</code></td><td>Accessibility tests</td><td>Optional</td></tr>
+          <tr><td>k6</td><td>Load tests</td><td>Optional</td></tr>
+        </tbody>
+      </table></div>
+      <p>It also offers two things you should say yes to:</p>
+      <div class="grid2">
+        <div class="card"><h4>Permission rules</h4><p>The agents run <code>playwright-cli</code> many times. These rules stop Claude Code asking you each time.</p></div>
+        <div class="card"><h4>.gitignore lines</h4><p>Keep your saved login, reports and screenshots out of git. The requirements, plan, cases and tests are meant to be committed.</p></div>
+      </div>
+      <div class="code labeled"><span class="label">What it adds to .gitignore</span><button class="copy" type="button">Copy</button>
+<pre><code>.aiqa/auth-state.json
+.aiqa/reports/
+.aiqa/evidence/
+.aiqa/progress.jsonl</code></pre></div>
+      <div class="callout warn"><span class="ic">!</span><div><p><code>.aiqa/auth-state.json</code> holds a signed-in browser session. Never commit it.</p></div></div>
+    </section>
+
+    <!-- 5 -->
+    <section id="chat">
+      <h2><span class="n">5</span>Work with Claude or Copilot</h2>
+      <p class="intro">You don't run AIQA like a program. You talk to it, in the same chat you already use for code.</p>
+
+      <h3>What happens when you type a command</h3>
+      <div class="roles" aria-label="How a command flows">
+        <div class="card box"><h4>You</h4><p>Type a command, read each result, answer the questions, ask for changes.</p></div>
+        <div class="arrow" aria-hidden="true"><span>⇄</span>chat</div>
+        <div class="card box"><h4>Your chat session: the lead</h4><p>Checks the tools, hands each step to the right agent, checks the files it wrote, shows you the result and asks before going on.</p></div>
+        <div class="arrow" aria-hidden="true"><span>→</span>one step each</div>
+        <div class="card box"><h4>The agents</h4><p>Each does one job in its own workspace, writes its files, and never stops to ask you.</p>
+          <div class="chips"><span class="chip agent">analyst</span><span class="chip agent">qa-planner</span><span class="chip agent">qa-engineer</span><span class="chip agent">qa-reviewer</span><span class="chip agent">qa-reporter</span></div></div>
+      </div>
+      <p>Everything the agents make is a plain file under <code>.aiqa/</code>. You, the lead and the dashboard all read the same files, so nothing is hidden in the chat.</p>
+
+      <h3>What a session looks like</h3>
+      <div class="card chat" role="group" aria-label="Example conversation">
+        <div class="head"><span>Example conversation, shortened</span><span>The numbers come from the real saucedemo run</span></div>
+        <div class="msg you"><code>/aiqa:qa-pipeline https://www.saucedemo.com</code></div>
+        <div class="msg ai"><span class="av">AIQA</span><div class="body"><p>playwright-cli and Playwright are installed. Models: every role uses this session's model.</p><p><strong>Step 1 of 5: Analyst.</strong></p></div></div>
+        <div class="handoff">→ hands the step to aiqa:analyst · it explores the app</div>
+        <div class="msg ai"><span class="av">AIQA</span><div class="body"><p>The analyst finished in 25m 35s. It saved 56 page snapshots and wrote <code>requirements.md</code> (51 KB): 13 user journeys, 61 functional and 29 non-functional requirements.</p><p>Go on to the QA Planner?</p><div class="choices" aria-hidden="true"><span>Continue</span><span>Stop</span></div></div></div>
+        <div class="msg you">Continue</div>
+        <div class="gap">… the QA Planner and the QA Engineer run the same way …</div>
+        <div class="msg ai"><span class="av">AIQA</span><div class="body"><p>The QA Engineer finished in 50m 34s: 20 specs with 197 tests (16 tagged <code>@smoke</code>) and 20 page objects. 24 tests track defects it found in the app.</p></div></div>
+        <div class="msg you">Which defects did it find?</div>
+        <div class="msg ai"><span class="av">AIQA</span><div class="body"><p>For example: a made-up product id can still be added to the cart; the cart survives logout; checkout works with an empty cart; an unknown address shows no 404 page.</p></div></div>
+        <div class="gap">… the QA Reporter runs …</div>
+        <div class="msg ai"><span class="av">AIQA</span><div class="body"><p><strong>Status: ✅ PASSED.</strong> 16 of 16 smoke tests passed on Chromium in 35 s. The report is in <code>.aiqa/reports/summary_report.md</code>. The slow reviewer was left for later: <code>/aiqa:qa-pipeline qa-reviewer</code>.</p></div></div>
+      </div>
+
+      <h3>Ask in plain words</h3>
+      <p>Between steps, or after a run, talk to the lead like a colleague. It can read every file the agents wrote. For example:</p>
+      <ul class="asks">
+        <li>"Why did TC-CART-N-002 fail? Show me the snapshot it used."<span>Reads the results and the snapshots, and explains.</span></li>
+        <li>"The reviewer flagged a <code>networkidle</code> wait. Fix it."<span>Edits the spec; then you re-run the tests.</span></li>
+        <li>"Add test cases for the promo-code field to the checkout module."<span>Extends the test cases and the spec.</span></li>
+        <li>"Run the regression tests, then summarise what failed."<span>Same as <code>/aiqa:qa-pipeline qa-reporter --grep @regression</code>.</span></li>
+      </ul>
+      <p>You can also call one agent directly, for example: "Use the <code>aiqa:qa-reviewer</code> agent to review the generated suite."</p>
+
+      <h3>Claude Code or Copilot</h3>
+      <div class="tabs" data-tabs>
+        <div class="tablist" role="tablist" aria-label="Which assistant">
+          <button role="tab" id="t-cc" aria-controls="p-cc" aria-selected="true">Claude Code</button>
+          <button role="tab" id="t-gh" aria-controls="p-gh" aria-selected="false" tabindex="-1">GitHub Copilot</button>
+        </div>
+        <div class="tabpanel" role="tabpanel" id="p-cc" aria-labelledby="t-cc">
+          <ol class="plain">
+            <li>Open Claude Code in your project folder: the terminal (<code>claude</code>), the desktop app or the IDE extension.</li>
+            <li>Type <code>/aiqa:qa-pipeline &lt;your url&gt;</code>. Type <code>/aiqa</code> to see all four commands.</li>
+            <li>Each step runs as its own agent, so your chat stays short and readable while the agents work.</li>
+            <li>Pick each agent's model on the dashboard, or with <code>--model</code> options (step 9).</li>
+          </ol>
+        </div>
+        <div class="tabpanel" role="tabpanel" id="p-gh" aria-labelledby="t-gh" hidden>
+          <ol class="plain">
+            <li>Open Copilot Chat in VS Code, in your repository with the copied <code>.github/agents/</code> and <code>.github/skills/</code>.</li>
+            <li>Type <code>/qa-pipeline &lt;your url&gt;</code>, or pick an AIQA agent, such as <code>analyst</code>, in the agent picker and ask it directly.</li>
+            <li>Where Copilot can't hand a step to another agent, the command tells Copilot to follow that agent's instructions itself.</li>
+            <li>Copilot uses its own model picker, so the dashboard's model choices don't apply.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6 -->
+    <section id="suite">
+      <h2><span class="n">6</span>Run the full suite</h2>
+      <p class="intro">One command takes you from an address to a reviewed, running test suite.</p>
+      <ol class="steps">
+        <li><strong>Start the pipeline</strong>
+          <div class="code"><button class="copy" type="button">Copy</button>
+<pre><code>/aiqa:qa-pipeline https://www.saucedemo.com</code></pre></div>
+          It checks that the tools are installed, shows which model each agent will use, and starts the analyst.</li>
+        <li><strong>Read each step's output, then continue</strong>
+          By default it pauses after each step and shows you what was written. Answer <em>Continue</em> to go on, or <em>Stop</em> to look closer first.</li>
+        <li><strong>Read the report</strong>
+          The last step writes <code>.aiqa/reports/summary_report.md</code>, with a clear status line. For details, open the Playwright report:
+          <div class="code"><button class="copy" type="button">Copy</button>
+<pre><code>npx playwright show-report .aiqa/reports/playwright-report</code></pre></div></li>
+        <li><strong>Run the review when you have time</strong>
+          The reviewer is the slow step, so step-by-step runs leave it for later:
+          <div class="code"><button class="copy" type="button">Copy</button>
+<pre><code>/aiqa:qa-pipeline qa-reviewer</code></pre></div></li>
+      </ol>
+
+      <h3>Run it without pauses</h3>
+      <p>Add <code>--auto</code> to run all five steps in one go, the reviewer included:</p>
+      <div class="code"><button class="copy" type="button">Copy</button>
+<pre><code>/aiqa:qa-pipeline https://www.saucedemo.com --auto</code></pre></div>
+
+      <h3>Options</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Option</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td><code>--grep &lt;tags&gt;</code></td><td>Which tests the reporter runs: <code>@smoke</code> (the default, fast), <code>@regression</code>, <code>"@smoke|@accessibility"</code>, or <code>all</code></td></tr>
+          <tr><td><code>--auto</code></td><td>No pauses between steps</td></tr>
+          <tr><td><code>--skip a,b</code></td><td>Leave steps out, e.g. <code>--skip qa-reviewer</code></td></tr>
+          <tr><td><code>--requirements &lt;file&gt;</code></td><td>An existing requirements document for the analyst to merge with what it finds</td></tr>
+          <tr><td><code>--headed</code></td><td>Show the browser while the analyst explores</td></tr>
+          <tr><td><code>--users N --minutes M</code></td><td>Size of the load test, with <code>@performance</code> (10 users for 2 minutes by default)</td></tr>
+          <tr><td><code>--model</code>, <code>--model-&lt;role&gt;</code></td><td>The model for every agent, or for one, this run (see <a href="#models">step 9</a>)</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout note"><span class="ic">i</span><div><p>Accessibility and load tests are opt-in. They're written only when <code>--grep</code> includes <code>@accessibility</code> or <code>@performance</code>, and when <code>@axe-core/playwright</code> or k6 is installed.</p></div></div>
+
+      <h3>Run one step again</h3>
+      <p>Give a step name instead of the address. It runs just that step, as part of the last run:</p>
+      <div class="code"><button class="copy" type="button">Copy</button>
+<pre><code>/aiqa:qa-pipeline qa-reporter --grep @regression</code></pre></div>
+
+      <h3>What it writes</h3>
+      <p>Everything goes under <code>.aiqa/</code>, except <code>playwright.config.ts</code> at the root. If you already have one, it asks before replacing it.</p>
+<div class="tree">.aiqa/
+├── snapshots/*.yml              <span class="d">one accessibility snapshot per page or state</span>
+├── requirements/requirements.md
+├── test-plan/test_plan.md
+├── test-cases/&lt;module&gt;.md
+├── test-scripts/                <span class="d">&lt;module&gt;.spec.ts, pages/&lt;module&gt;.page.ts, fixtures.ts</span>
+├── reports/                     <span class="d">review_report.md, summary_report.md, test-results/, playwright-report/</span>
+└── progress.jsonl               <span class="d">step progress, for the dashboard</span>
+playwright.config.ts</div>
+      <p>On saucedemo, that came to 56 snapshots, 22 test-case files with 192 cases, 20 page objects and 20 specs with 197 tests. <a href="../../examples/saucedemo/README.md">The example</a> shows excerpts from each step.</p>
+      <figure>
+        <a class="shot crop" href="images/document.png" data-caption="The test plan, opened from the dashboard.">
+          <img src="images/document.png" alt="The dashboard showing the test plan document: a Document Info table and the start of the Executive Summary." loading="lazy" width="1366" height="1100"><span class="zoom">Open</span></a>
+        <figcaption><strong>Read any document on the dashboard:</strong> here, the test plan the QA Planner wrote.</figcaption>
+      </figure>
+    </section>
+
+    <!-- 7 -->
+    <section id="story">
+      <h2><span class="n">7</span>Test one user story</h2>
+      <p class="intro">Working on a single feature? Give AIQA the story, and it designs, checks and automates its tests.</p>
+      <ol class="steps">
+        <li><strong>Write the story</strong>
+          Save it as <code>.aiqa/stories/&lt;KEY&gt;-&lt;name&gt;.md</code>. Or paste the story text in chat and ask the lead to save it. It can also read the story from Jira, Rally or Octane if one is connected.
+          <div class="code labeled"><span class="label">.aiqa/stories/SD-1-login.md</span><button class="copy" type="button">Copy</button>
+<pre><code>---
+key: SD-1
+title: Login with the demo accounts
+---
+# SD-1 — Login with the demo accounts
+
+## Description
+As a shopper I want to sign in so I can buy things.
+
+## Acceptance Criteria
+- A standard user reaches the products page
+- A locked-out user sees "Sorry, this user has been locked out."</code></pre></div></li>
+        <li><strong>Run it</strong>
+          <div class="code"><button class="copy" type="button">Copy</button>
+<pre><code>/aiqa:qa-story SD-1 --url https://www.saucedemo.com</code></pre></div>
+          Add <code>--url</code> the first time, or save the address as <code>appUrl</code> in <code>.aiqa/workspace.json</code>.</li>
+        <li><strong>Review the test cases when it pauses</strong>
+          It stops after Design and after Explore. Open <code>.aiqa/test-cases/SD-1-login.md</code>, then edit, add or delete cases before you continue. Add <code>--auto</code> to skip the pauses.</li>
+        <li><strong>Read the results in the same file</strong>
+          The Run step fills in <strong>Last Result</strong> and <strong>Evidence</strong> (a screenshot) for every case, and adds a row to <strong>Run History</strong>.</li>
+      </ol>
+      <figure>
+        <a class="shot crop" href="images/story-cases.png" data-caption="Story SD-1 on the dashboard: five steps done, 12 verified cases, each with its result and screenshot.">
+          <img src="images/story-cases.png" alt="The dashboard's story view for SD-1: five steps marked Done, 12 Verified, and the test-case table with Passed results and screenshot links." loading="lazy" width="1366" height="1240"><span class="zoom">Open</span></a>
+        <figcaption><strong>SD-1 on the dashboard:</strong> 12 test cases, all verified in the app, all passed.</figcaption>
+      </figure>
+      <div class="grid2">
+        <div class="card"><h4>The defect rule</h4><p>When the app contradicts the story, Explore never changes the expected result to match the app. It marks the case <strong>Possible defect</strong>, and Automate writes it as <code>test.fixme</code>.</p></div>
+        <div class="card"><h4>Results come from code</h4><p>Pass and fail are read from Playwright's own results, never written by an agent. So a result is never made up.</p></div>
+      </div>
+      <p>On saucedemo, SD-1 produced 2 testable criteria, 9 open questions and 12 test cases. All 12 were verified in the app and passed, in about 13 minutes.</p>
+      <p><strong>More options:</strong> <code>--step design|explore|automate|run</code> runs one step, and <code>--force</code> redoes a step that's already done.</p>
+    </section>
+
+    <!-- 8 -->
+    <section id="dashboard">
+      <h2><span class="n">8</span>The dashboard</h2>
+      <p class="intro">A small local page that follows a run as it happens and shows everything the agents wrote.</p>
+      <div class="code"><button class="copy" type="button">Copy</button>
+<pre><code>/aiqa:qa-dashboard</code></pre></div>
+      <p>It gives you a link like <code>http://127.0.0.1:52341/3f9c…/</code>. The page refreshes every two seconds. The left rail has four views: <strong>Full suite</strong>, <strong>Stories</strong>, <strong>Results</strong> and <strong>Models</strong>. Select any image to see it full size.</p>
+
+      <div class="gallery">
+        <figure class="wide">
+          <a class="shot crop" href="images/suite.png" data-caption="Full suite: each step with its time and its files, then the documents, test cases and test scripts.">
+            <img src="images/suite.png" alt="The Full suite view: five step cards marked Done with their times, then lists of documents, test cases and test scripts." loading="lazy" width="1366" height="1120"><span class="zoom">Open</span></a>
+          <figcaption><strong>Full suite:</strong> the run's target, filter and status; each step with its time and file; then every document, test case and script. Select one to read it.</figcaption>
+        </figure>
+        <figure>
+          <a class="shot crop" href="images/stories.png" data-caption="Stories: each story with its progress, case count, status and last run.">
+            <img src="images/stories.png" alt="The Stories view: SD-1 Login with the demo accounts, 12 cases, Done, last run 12 passed and 0 failed." loading="lazy" width="1366" height="900"><span class="zoom">Open</span></a>
+          <figcaption><strong>Stories:</strong> every story with its progress and last run.</figcaption>
+        </figure>
+        <figure>
+          <a class="shot crop" href="images/story-notes.png" data-caption="A story's Exploration notes: what the explorer saw for each case, the snapshots it saved, and any possible defects.">
+            <img src="images/story-notes.png" alt="The SD-1 Exploration notes tab: the snapshots captured, no possible defects, and observations per case." loading="lazy" width="1366" height="1100"><span class="zoom">Open</span></a>
+          <figcaption><strong>Exploration notes:</strong> what the explorer saw, case by case.</figcaption>
+        </figure>
+        <figure>
+          <a class="shot crop" href="images/story-runs.png" data-caption="A story's Runs: the latest totals and every run in the history.">
+            <img src="images/story-runs.png" alt="The SD-1 Runs tab: 12 passed, 0 failed, and a history of three runs." loading="lazy" width="1366" height="915"><span class="zoom">Open</span></a>
+          <figcaption><strong>Runs:</strong> the latest totals and the run history.</figcaption>
+        </figure>
+        <figure>
+          <a class="shot crop" href="images/results.png" data-caption="Results: the latest Playwright run of the suite, per spec file, and each story's last run.">
+            <img src="images/results.png" alt="The Results view: 18 passed, 0 failed, a table per spec file, and the SD-1 story run below." loading="lazy" width="1366" height="1026"><span class="zoom">Open</span></a>
+          <figcaption><strong>Results:</strong> the latest runs, per spec, with a link to the HTML report.</figcaption>
+        </figure>
+      </div>
+
+      <h3>Themes, dark mode and phones</h3>
+      <p>Use the menu at the top right to pick a theme, <strong>Slate</strong> or <strong>Industrial</strong>, and light, dark or your system's setting. The page also works at phone width.</p>
+      <div class="phone-row">
+        <div class="gallery" style="margin:0">
+          <figure>
+            <a class="shot crop" href="images/suite-dark.png" data-caption="The Slate theme in dark mode.">
+              <img src="images/suite-dark.png" alt="The Full suite view in the Slate theme, dark mode." loading="lazy" width="1366" height="900"><span class="zoom">Open</span></a>
+            <figcaption>Slate, dark</figcaption>
+          </figure>
+          <figure>
+            <a class="shot crop" href="images/suite-industrial.png" data-caption="The Industrial theme in light mode.">
+              <img src="images/suite-industrial.png" alt="The Full suite view in the Industrial theme: black rail, yellow logo, condensed headings." loading="lazy" width="1366" height="900"><span class="zoom">Open</span></a>
+            <figcaption>Industrial, light</figcaption>
+          </figure>
+        </div>
+        <figure style="margin:0">
+          <a class="shot crop" href="images/phone-story.png" data-caption="A story on a phone, in dark mode.">
+            <img src="images/phone-story.png" alt="The SD-1 story view at phone width in dark mode: the five steps stacked, then the status and tabs." loading="lazy" width="390" height="1172"><span class="zoom">Open</span></a>
+          <figcaption>On a phone</figcaption>
+        </figure>
+      </div>
+
+      <ul class="plain" style="margin-top:22px">
+        <li><strong>Private:</strong> it serves on your computer only (127.0.0.1), behind a random link.</li>
+        <li><strong>Read-only:</strong> it only reads <code>.aiqa/</code>. The one exception is the Models page, which saves your choices.</li>
+        <li><strong>Shareable:</strong> <code>/aiqa:qa-dashboard --static</code> saves one self-contained file, <code>.aiqa/reports/dashboard.html</code>, that you can attach or send.</li>
+      </ul>
+    </section>
+
+    <!-- 9 -->
+    <section id="models">
+      <h2><span class="n">9</span>Choose the models</h2>
+      <p class="intro">Each agent can run on its own Claude model, so you can spend where it matters.</p>
+      <p><strong>On the dashboard:</strong> open <strong>Models</strong>, pick Session model, Sonnet, Opus, Haiku or Fable for Default and for each role, then press <strong>Save</strong>.</p>
+      <figure>
+        <a class="shot" href="images/models.png" data-caption="The Models page: a model for Default and for each role, saved to .aiqa/ai.json.">
+          <img src="images/models.png" alt="The Models page: a row for Default and each of the five roles, with a model menu and a Save button." loading="lazy" width="1366" height="900"><span class="zoom">Open</span></a>
+        <figcaption>The story steps share the roles: Design = QA Planner, Explore = Analyst, Automate = QA Engineer.</figcaption>
+      </figure>
+      <p><strong>For one run:</strong></p>
+      <div class="code"><button class="copy" type="button">Copy</button>
+<pre><code>/aiqa:qa-pipeline https://my-app.com --model-qa-planner opus --model-qa-reporter sonnet</code></pre></div>
+      <p>When several choices apply, the first one in this list wins:</p>
+      <ol class="plain">
+        <li>an option on the command;</li>
+        <li>the role's own pick on the Models page;</li>
+        <li>the Default pick;</li>
+        <li>the model of your Claude Code session.</li>
+      </ol>
+      <p>The picks are saved in <code>.aiqa/ai.json</code>. A change applies from the next step that starts. In Copilot, use Copilot's own model picker.</p>
+    </section>
+
+    <!-- 10 -->
+    <section id="tips">
+      <h2><span class="n">10</span>Tips from a real run</h2>
+      <p class="intro">What we learned running everything on saucedemo.com.</p>
+      <div class="callout tip"><span class="ic">✓</span><div>
+        <p><strong>Plan for time and usage.</strong> The full suite took about 1 hour 52 minutes of agent time with Opus on every role. On a Claude Pro plan, that needed more than one 5-hour usage window. Use a lighter model for some roles, or run the steps one at a time.</p>
+      </div></div>
+      <div class="callout tip"><span class="ic">✓</span><div>
+        <p><strong>Start with smoke tests.</strong> The default <code>@smoke</code> run takes about half a minute. Run <code>--grep @regression</code> or <code>--grep all</code> once you trust the suite.</p>
+      </div></div>
+      <div class="callout tip"><span class="ic">✓</span><div>
+        <p><strong>Review before you commit.</strong> The agents never run git commands that change your repository. You review what they wrote, and you commit it.</p>
+      </div></div>
+      <h3>Running without anyone watching</h3>
+      <p>You can run a command headless with <code>claude -p</code>. With nobody there to answer, Claude Code needs permission for everything the agents do up front. Put the rules in <code>.claude/settings.local.json</code>:</p>
+      <div class="code labeled"><span class="label">.claude/settings.local.json</span><button class="copy" type="button">Copy</button>
+<pre><code>{
+  "permissions": {
+    "allow": [
+      "Bash(playwright-cli:*)", "Bash(npx:*)", "Bash(node:*)", "Bash(mkdir:*)",
+      "Bash(find:*)", "Bash(ls:*)", "Bash(cat:*)", "Bash(npm ls:*)",
+      "Read", "Write", "Edit", "Glob", "Grep", "Agent"
+    ]
+  }
+}</code></pre></div>
+      <div class="code"><button class="copy" type="button">Copy</button>
+<pre><code>claude -p "/aiqa:qa-pipeline https://my-app.com --auto" --permission-mode acceptEdits</code></pre></div>
+      <div class="callout warn"><span class="ic">!</span><div><p>Use the settings file, not <code>--allowedTools</code>. The command line splits a rule at its spaces, so <code>Bash(npm ls:*)</code> is lost.</p></div></div>
+    </section>
+
+    <!-- 11 -->
+    <section id="help">
+      <h2><span class="n">11</span>When something goes wrong</h2>
+      <details class="faq"><summary>A run stopped halfway (usage limit, closed terminal)</summary><div>
+        <p>Nothing is lost: each finished step's files stay on disk.</p>
+        <ul class="plain">
+          <li><strong>Full suite:</strong> run the steps that are left by name, e.g. <code>/aiqa:qa-pipeline qa-engineer</code>, then <code>qa-reviewer</code>, then <code>qa-reporter</code>. They join the last run, so the dashboard still shows one run.</li>
+          <li><strong>Story:</strong> run the same <code>/aiqa:qa-story</code> command again. It continues from the first step that isn't done.</li>
+        </ul>
+      </div></details>
+      <details class="faq"><summary>"playwright-cli: command not found"</summary><div>
+        <p>Run <code>/aiqa:qa-setup</code>, or install it yourself with <code>npm install -g @playwright/cli@latest</code>. Without it, the agents can't open the app.</p>
+      </div></details>
+      <details class="faq"><summary>The tests fail because Chrome isn't installed</summary><div>
+        <p>The generated <code>playwright.config.ts</code> uses <code>channel: "chrome"</code>, the Chrome already on your computer. If you don't have Chrome, delete that option, and Playwright uses its own Chromium.</p>
+      </div></details>
+      <details class="faq"><summary>I already have a playwright.config.ts</summary><div>
+        <p>The pipeline asks once whether to replace it or keep it. If you keep yours, add <code>.aiqa/test-scripts</code> to its <code>testDir</code>, so the reporter can find the new tests.</p>
+      </div></details>
+      <details class="faq"><summary>Claude Code asks permission for every browser command</summary><div>
+        <p>Say yes to the permission rules that <code>/aiqa:qa-setup</code> offers. It adds them to <code>.claude/settings.json</code> and keeps your other settings.</p>
+      </div></details>
+      <details class="faq"><summary>Only the smoke tests ran</summary><div>
+        <p>That's the default, for fast feedback. Run the rest with <code>/aiqa:qa-pipeline qa-reporter --grep @regression</code>, or <code>--grep all</code> for everything. Firefox, WebKit and mobile are commented out in <code>playwright.config.ts</code>; uncomment them to include them.</p>
+      </div></details>
+    </section>
+
+    <!-- 12 -->
+    <section id="next">
+      <h2><span class="n">12</span>Where to go next</h2>
+      <div class="grid2">
+        <div class="card"><h4><a href="../../examples/saucedemo/README.md">The saucedemo example</a></h4><p>A full run, step by step: commands, times, counts and excerpts.</p></div>
+        <div class="card"><h4><a href="../../README.md">The README</a></h4><p>Every agent, command and option in one place.</p></div>
+        <div class="card"><h4><a href="https://www.npmjs.com/package/@agents-forge/aiqa">@agents-forge/aiqa</a></h4><p>The full product reads the same <code>.aiqa/</code> files: a workspace dashboard, regression runs and Jira.</p></div>
+        <div class="card"><h4><a href="../../CHANGELOG.md">What's changed</a></h4><p>New features and fixes in each release.</p></div>
+      </div>
+      <footer>AIQA agents for Claude Code and GitHub Copilot · MIT license</footer>
+    </section>
+  </main>
+</div>
+
+<dialog class="viewer" id="viewer" aria-label="Screenshot">
+  <div class="frame">
+    <img id="viewer-img" alt="">
+    <button type="button" id="viewer-close">Close</button>
+  </div>
+  <p id="viewer-caption"></p>
+</dialog>
+
+<script>
+(function () {
+  var root = document.documentElement;
+
+  // Light/dark toggle. The choice is kept in this browser only.
+  var btn = document.getElementById("mode"), label = document.getElementById("mode-label");
+  function isDark() {
+    var m = root.getAttribute("data-mode");
+    return m ? m === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  function paint() { label.textContent = isDark() ? "Light" : "Dark"; btn.setAttribute("aria-pressed", String(isDark())); }
+  btn.addEventListener("click", function () {
+    var next = isDark() ? "light" : "dark";
+    root.setAttribute("data-mode", next);
+    try { localStorage.setItem("aiqa-tutorial-mode", next); } catch (e) {}
+    paint();
+  });
+  paint();
+
+  // Copy buttons.
+  document.querySelectorAll(".code .copy").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var code = b.parentNode.querySelector("code"), text = code.innerText;
+      function done(ok) { b.textContent = ok ? "Copied" : "Press Ctrl+C"; if (ok) b.setAttribute("data-done", ""); setTimeout(function () { b.textContent = "Copy"; b.removeAttribute("data-done"); }, 1600); }
+      if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+      else {
+        var r = document.createRange(); r.selectNodeContents(code);
+        var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+        var ok = false; try { ok = document.execCommand("copy"); } catch (e) {}
+        done(ok);
+      }
+    });
+  });
+
+  // Tabs, with arrow-key support.
+  document.querySelectorAll("[data-tabs]").forEach(function (box) {
+    var tabs = Array.prototype.slice.call(box.querySelectorAll('[role="tab"]'));
+    function select(t) {
+      tabs.forEach(function (x) {
+        var on = x === t;
+        x.setAttribute("aria-selected", String(on));
+        x.tabIndex = on ? 0 : -1;
+        document.getElementById(x.getAttribute("aria-controls")).hidden = !on;
+      });
+    }
+    tabs.forEach(function (t, i) {
+      t.addEventListener("click", function () { select(t); });
+      t.addEventListener("keydown", function (e) {
+        var j = e.key === "ArrowRight" ? i + 1 : e.key === "ArrowLeft" ? i - 1 : e.key === "Home" ? 0 : e.key === "End" ? tabs.length - 1 : null;
+        if (j === null) return;
+        e.preventDefault();
+        var n = tabs[(j + tabs.length) % tabs.length]; select(n); n.focus();
+      });
+    });
+  });
+
+  // Screenshot viewer: open full size in a dialog; without dialog support, the link opens the image.
+  var viewer = document.getElementById("viewer");
+  if (viewer && typeof viewer.showModal === "function") {
+    var vImg = document.getElementById("viewer-img"), vCap = document.getElementById("viewer-caption");
+    document.querySelectorAll("a.shot").forEach(function (a) {
+      a.addEventListener("click", function (e) {
+        e.preventDefault();
+        var img = a.querySelector("img");
+        vImg.src = a.getAttribute("href"); vImg.alt = img ? img.alt : "";
+        vCap.textContent = a.getAttribute("data-caption") || "";
+        viewer.showModal();
+      });
+    });
+    document.getElementById("viewer-close").addEventListener("click", function () { viewer.close(); });
+    viewer.addEventListener("click", function (e) { if (e.target === viewer) viewer.close(); });
+  }
+
+  // Table of contents: highlight the section in view; close it after a pick on small screens.
+  var toc = document.getElementById("toc");
+  var links = Array.prototype.slice.call(toc.querySelectorAll("a"));
+  var small = window.matchMedia("(max-width: 960px)");
+  if (small.matches) toc.removeAttribute("open");
+  links.forEach(function (a) { a.addEventListener("click", function () { if (small.matches) toc.removeAttribute("open"); }); });
+  if ("IntersectionObserver" in window) {
+    var byId = {};
+    links.forEach(function (a) { byId[a.getAttribute("href").slice(1)] = a; });
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        links.forEach(function (a) { a.removeAttribute("aria-current"); });
+        var a = byId[en.target.id]; if (a) a.setAttribute("aria-current", "true");
+      });
+    }, { rootMargin: "-20% 0px -70% 0px" });
+    document.querySelectorAll("main section[id]").forEach(function (s) { io.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>
