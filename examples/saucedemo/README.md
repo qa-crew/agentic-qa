@@ -236,8 +236,8 @@ The story, with each step's time and every test case's latest result:
 ![The story view](screenshots/dashboard-story.png)
 
 The latest Playwright runs. The smoke tests were run once more after the story (see
-[What this run showed needs fixing](#what-this-run-showed-needs-fixing)), so this view shows 18 tests: the suite's 16
-and the story's 2 smoke cases, which live in the same folder. The story's own run is listed below them:
+[Fixed after this run](#fixed-after-this-run)), so this view shows 18 tests: the suite's 16 and the story's 2 smoke
+cases, which live in the same folder. The story's own run is listed below them:
 
 ![The results view](screenshots/dashboard-results.png)
 
@@ -250,15 +250,19 @@ shows that each role uses the session model:
 To try a lighter model for some roles, pick it on this page and press Save, or pass it for one run, e.g.
 `--model-qa-reporter sonnet`.
 
-## What this run showed needs fixing
-Three problems in the agents' prompts, which are shared with the npm package:
-- **The saved login applies to every test.** The QA Engineer's `playwright.config.ts` loads `.aiqa/auth-state.json`
+## Fixed after this run
+The run showed three problems in the agents, which were then fixed in this repository:
+- **The saved login applied to every test.** The QA Engineer's `playwright.config.ts` loaded `.aiqa/auth-state.json`
   into every test, against the plan's own risk R-03. Here the saved login had expired, so no test was affected. With
-  a fresh one, login tests would start signed in.
-- **Story runs don't know the suite's test-id attribute.** The suite's config reads element ids from `data-test`.
-  The story config doesn't, so the shared page objects' `getByTestId` finds nothing in a story run. The SD-1 spec
-  sets it itself.
-- **Listing the tests erases the latest results.** The story Automate step and the QA Reporter each ran
-  `npx playwright test --list` to count tests. With the suite's config, that rewrites the JSON and HTML reports with
-  every test marked "skipped". Adding `--reporter=list` avoids it. Because of this, the smoke tests were run once
-  more before the screenshots were taken.
+  a fresh one, login tests would have started signed in. Now the config never loads it, and tests that need a
+  signed-in user use a sign-in fixture.
+- **Story runs didn't know the suite's test-id attribute.** The suite's config reads element ids from `data-test`.
+  The story config didn't, so the shared page objects' `getByTestId` found nothing in a story run, and the SD-1 spec
+  had to set it itself. Now the story config copies the setting from the project's config.
+- **Listing the tests erased the latest results.** The story Automate step and the QA Reporter each ran
+  `npx playwright test --list` to count tests. With the suite's config, that rewrote the JSON and HTML reports with
+  every test marked "skipped". This is why the smoke tests were run once more before the screenshots were taken.
+  Now the config uses the plain list reporter for `--list`, and the prompts give the safe command.
+
+All three fixes were checked on this run's files: a `--list` left the reports unchanged, the 18 smoke tests passed
+without the saved login, and SD-1 passed 12 of 12 without its own `data-test` setting.

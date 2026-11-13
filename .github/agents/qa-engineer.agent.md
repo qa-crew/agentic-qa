@@ -78,7 +78,10 @@ project root, but ALL generated test artifacts live under .aiqa/. Use these
 exact paths (put the base URL from your task where it says `<BASE URL>`):
 ```typescript
 import { defineConfig, devices } from "@playwright/test";
-import fs from "fs";
+
+// `--list` only prints the tests. Without this, the reporters below would
+// overwrite the last real run's reports with every test marked "skipped".
+const listing = process.argv.includes("--list");
 
 export default defineConfig({
   testDir: "./.aiqa/test-scripts",
@@ -88,7 +91,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: [
+  reporter: listing ? "list" : [
     ["html", { outputFolder: "./.aiqa/reports/playwright-report", open: "never" }],
     ["json", { outputFile: "./.aiqa/reports/test-results/results.json" }],
     ["junit", { outputFile: "./.aiqa/reports/test-results/results.xml" }],
@@ -98,9 +101,9 @@ export default defineConfig({
     trace: "on-first-retry",
     screenshot: "only-on-failure",
     video: "on-first-retry",
-    storageState: fs.existsSync("./.aiqa/auth-state.json")
-      ? "./.aiqa/auth-state.json"
-      : undefined,
+    // No storageState here: tests start signed out. Tests that need a signed-in
+    // user get it from a fixture (Step 4a), so login tests are never affected
+    // by a saved session, and an expired one can't break the run.
   },
   projects: [
     // channel: "chrome" launches the machine's existing installed Chrome
@@ -181,6 +184,11 @@ Setup that two or more tests repeat (e.g. "an item already in the cart" before
 every checkout test) becomes a fixture here too, not copy-pasted steps or
 `beforeEach`. Tests of login/logout/sign-up never use a signed-in fixture or
 the saved auth state.
+
+Tests that start signed in get a fixture that signs in through the login page
+object, with the credentials from the requirements. Never put the saved auth
+state (".aiqa/auth-state.json") in playwright.config.ts: it would sign in every
+test, login tests included, and saved sessions often expire within minutes.
 
 ### Step 4b — THEN generate spec files for every module, using the page objects
 
@@ -457,7 +465,8 @@ When Step 4d Case A applied: confirm load-test.js exists in ".aiqa/performance" 
 - Every spec test must map to a TC ID in the corresponding .md file
 - Tests must be fully independent — no shared state
 - Use getByRole(), getByLabel(), getByTestId() — never CSS classes or XPath
-- If auth-state.json exists, use it so tests start authenticated where needed
+- Tests start signed out; tests that need a signed-in user use the sign-in fixture
+- To list tests without running them, use `npx playwright test --list --reporter=list`
 - Selectors live ONLY in page objects (pages/<module>.page.ts) — a spec file
   with a raw page.getByRole(...)-style chain, instead of calling through its
   page object, means Step 4a/4b weren't followed

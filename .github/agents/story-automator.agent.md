@@ -102,7 +102,13 @@ npx playwright test -c ".aiqa/playwright.stories.config.ts" --grep "@<KEY>\b" --
 ```bash
 npx playwright test -c ".aiqa/playwright.stories.config.ts" --grep "@<KEY>\b" --project=chromium --reporter=line
 ```
-3. Fix failures caused by YOUR code (wrong locator, missing wait on a real signal, wrong
+3. If you changed a shared page object or "fixtures.ts", check that the other specs still load:
+```bash
+npx playwright test --list --reporter=list
+```
+   Keep `--reporter=list`: without it, the project's playwright.config.ts can overwrite the full suite's latest
+   results with every test marked "skipped".
+4. Fix failures caused by YOUR code (wrong locator, missing wait on a real signal, wrong
    navigation) and re-run — at most 3 rounds. Never weaken or delete an assertion to make a
    test pass: if the app genuinely contradicts the Expected result, leave the test failing
    and mention it in your summary (the run step will record it).

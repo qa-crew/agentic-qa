@@ -50,6 +50,10 @@ npx playwright test --grep "<filter>" --project=chromium --reporter=json --repor
 
 Note the exit code — 0 means all passed, non-zero means failures.
 
+To count or list tests without running them (e.g. the size of the full suite), use
+`npx playwright test --list --reporter=list`. Without `--reporter=list`, a listing can overwrite the results you
+just produced with every test marked "skipped".
+
 ### Step 2 — Read results
 ```bash
 cat ".aiqa/reports/test-results/results.json"

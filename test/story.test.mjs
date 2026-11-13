@@ -99,6 +99,23 @@ test("story.mjs info, finish-design and progress", () => {
   assert.match(fs.readFileSync(path.join(dir, ".aiqa/playwright.stories.config.ts"), "utf-8"), /baseURL: process\.env\.BASE_URL \|\| "https:\/\/www\.saucedemo\.com"/);
 });
 
+test("the story config takes testIdAttribute from the project's playwright.config.ts", () => {
+  const dir = makeProject();
+  const run = (...args) => spawnSync(process.execPath, [STORY_CLI, ...args], { cwd: dir, encoding: "utf-8" });
+  const storyConfig = () => {
+    assert.equal(run("config", "SD-1", "--url", "https://www.saucedemo.com").status, 0);
+    return fs.readFileSync(path.join(dir, ".aiqa/playwright.stories.config.ts"), "utf-8");
+  };
+  assert.doesNotMatch(storyConfig(), /testIdAttribute/, "no project config: the npm package's story config");
+
+  const projectConfig = path.join(dir, "playwright.config.ts");
+  fs.writeFileSync(projectConfig, '  use: {\n    // testIdAttribute: "data-qa",\n    testIdAttribute: \'data-test\',\n  },\n');
+  assert.match(storyConfig(), /^ {4}testIdAttribute: "data-test",$/m);
+
+  fs.writeFileSync(projectConfig, '  use: {\n    // testIdAttribute: "data-qa",\n  },\n');
+  assert.doesNotMatch(storyConfig(), /testIdAttribute/, "a commented-out setting is ignored");
+});
+
 test("models per role: command line, then .aiqa/ai.json, then the session", async () => {
   const { parseModelFlags, resolveRoleModels, writeClaudeModels, readAiSettings, modelAlias } = await import("../.claude/skills/qa-story/scripts/aiqa-files.mjs");
   const dir = makeProject();

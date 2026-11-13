@@ -211,7 +211,7 @@ carry over in both directions. GitHub Copilot uses its own model picker, so the 
 claude plugin marketplace update agents-forge
 claude plugin update aiqa@agents-forge
 ```
-Restart Claude Code after updating. The plugin's version is the AIQA release its prompts come from: 2.5.0 = AIQA 2.5.
+Restart Claude Code after updating.
 
 ## Example
 [examples/saucedemo](examples/saucedemo) walks through a real run of the agents on saucedemo.com: what each step did,
@@ -237,8 +237,9 @@ test-case table, the story hash and the results columns. On the same project you
 - `.claude/` is the source. After changing an agent or a skill, run `npm run build`. It checks every agent's
   frontmatter, updates the plugin's agent list and regenerates the Copilot copies in `.github/`.
 - `npm test` runs the tests. CI runs both and fails when the generated files are out of date.
-- The prompts are ported from `src/subagents/` in `@agents-forge/aiqa`. When they change there, port the change here
-  and bump the version in `.claude-plugin/plugin.json` and `marketplace.json`.
+- The prompts started as a port of `@agents-forge/aiqa` 2.5. This repository is kept separate from it: change the
+  agents and skills here, list the change in `CHANGELOG.md`, and bump the version in `.claude-plugin/plugin.json`
+  and `marketplace.json` for each release.
 
 ## License
 MIT. The bundled fonts (IBM Plex, Barlow) are under the SIL Open Font License; see the files next to them.
