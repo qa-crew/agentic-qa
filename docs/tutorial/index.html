@@ -501,9 +501,10 @@ claude plugin install agentic-qa@qa-crew --scope project</code></pre></div>
         <li>"Why did TC-CART-N-002 fail? Show me the snapshot it used."<span>Reads the results and the snapshots, and explains.</span></li>
         <li>"The reviewer flagged a <code>networkidle</code> wait. Fix it."<span>Edits the spec; then you re-run the tests.</span></li>
         <li>"Add test cases for the promo-code field to the checkout module."<span>Extends the test cases and the spec.</span></li>
-        <li>"Run the regression tests, then summarise what failed."<span>Same as <code>/agentic-qa:qa-pipeline qa-reporter --grep @regression</code>.</span></li>
+        <li>"Run the regression tests, then summarise what failed."<span>Starts the pipeline's reporter step, like <code>/agentic-qa:qa-pipeline qa-reporter --grep @regression</code>.</span></li>
+        <li>"Test story SD-2." or "Show me the QA dashboard."<span>Starts the story workflow or the dashboard.</span></li>
       </ul>
-      <p>You can also call one agent directly, for example: "Use the <code>agentic-qa:qa-reviewer</code> agent to review the generated suite."</p>
+      <p>The first time Claude starts one of these by itself, Claude Code asks you to allow it. Setup is the one command you always type, <code>/agentic-qa:qa-setup</code>, because it installs software. You can also call one agent directly, for example: "Use the <code>agentic-qa:qa-reviewer</code> agent to review the generated suite."</p>
 
       <h3>Claude Code or Copilot</h3>
       <div class="tabs" data-tabs>

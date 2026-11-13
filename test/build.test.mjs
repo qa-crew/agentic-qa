@@ -62,6 +62,27 @@ test("the docs site only links to files inside docs/, so it works on GitHub Page
   assert.ok(fs.existsSync(path.join(docs, ".nojekyll")), "docs/.nojekyll is missing");
 });
 
+test("every script command in a skill is pre-approved by a rule written the same way", () => {
+  // Claude Code matches a rule against the command as written, quotes included. A skill that runs
+  // node "${CLAUDE_SKILL_DIR}/x.mjs" needs the rule Bash(node "${CLAUDE_SKILL_DIR}/x.mjs" …), or every call asks.
+  const skills = new URL("../.claude/skills/", import.meta.url);
+  let seen = 0;
+  for (const name of fs.readdirSync(skills)) {
+    const file = new URL(`${name}/SKILL.md`, skills);
+    if (!fs.existsSync(file)) continue;
+    const text = fs.readFileSync(file, "utf-8").replace(/\r\n/g, "\n");
+    const [, head, body] = text.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+    const rules = head.match(/^allowed-tools: (.*)$/m)?.[1] ?? "";
+    assert.doesNotMatch(rules, /Bash\(node \$\{CLAUDE_SKILL_DIR\}/, `${name}: a node rule without quotes never matches`);
+    for (const m of body.matchAll(/node "\$\{CLAUDE_SKILL_DIR\}\/([^"]+\.mjs)"( [^`\n]*)?/g)) {
+      seen++;
+      const rule = m[2] ? `Bash(node "\${CLAUDE_SKILL_DIR}/${m[1]}" *)` : `Bash(node "\${CLAUDE_SKILL_DIR}/${m[1]}")`;
+      assert.ok(rules.includes(rule), `${name}: \`${m[0]}\` needs ${rule} in allowed-tools`);
+    }
+  }
+  assert.ok(seen >= 5, `only ${seen} script commands found; did the pattern stop matching?`);
+});
+
 test("every agent carries the git rule and never waits for a user", () => {
   for (const f of fs.readdirSync(new URL("../.claude/agents/", import.meta.url))) {
     const text = fs.readFileSync(new URL(`../.claude/agents/${f}`, import.meta.url), "utf-8");

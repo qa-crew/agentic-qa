@@ -1,9 +1,8 @@
 ---
 name: qa-dashboard
-description: Open Agentic QA's local dashboard (Slate or Industrial theme, light or dark). It shows the full-suite steps as they run, the requirements, test plan and test cases, each story's steps and test cases, snapshots and test results, and a Models page for picking the model each agent runs on. Use --static to save a snapshot file instead.
+description: Open Agentic QA's local dashboard (Slate or Industrial theme, light or dark). It shows the full-suite steps as they run, the requirements, test plan and test cases, each story's steps and test cases, snapshots and test results, and a Models page for picking the model each agent runs on. Use --static to save a snapshot file instead. Use it when the user asks to see the QA progress, documents or results, to change the model for a role, or for a dashboard file to share.
 argument-hint: "[--static [<out.html>]] [--port <n>]"
-disable-model-invocation: true
-allowed-tools: Bash(node .github/skills/qa-dashboard/dashboard/server.mjs) Bash(node .github/skills/qa-dashboard/dashboard/server.mjs *)
+allowed-tools: Bash(node ".github/skills/qa-dashboard/dashboard/server.mjs") Bash(node ".github/skills/qa-dashboard/dashboard/server.mjs" *)
 ---
 <!-- Generated from .claude/skills/qa-dashboard/SKILL.md by scripts/build.mjs. Edit that file, then run: npm run build -->
 
@@ -13,6 +12,8 @@ Arguments: $ARGUMENTS
 
 The dashboard reads `.agentic-qa/` (and the root `playwright.config.ts`). The only thing it ever writes is
 `.agentic-qa/ai.json`, from its Models page. Continuing, re-running or stopping a step happens in the chat.
+
+Run each `node ".github/skills/qa-dashboard/…"` command on its own, exactly as written here, not joined to other commands with `&&` or `;`. Only then does it run without a permission prompt.
 
 ## Live (the default)
 Start the server from the project root, **in the background** (it keeps serving until it's stopped):
