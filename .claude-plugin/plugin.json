@@ -1,0 +1,38 @@
+{
+  "name": "agentic-qa",
+  "displayName": "Agentic QA: open-source QA agents",
+  "version": "2.5.0",
+  "description": "QA agents for Claude Code: analyst, qa-planner, qa-engineer, qa-reviewer and qa-reporter for a full Playwright suite from a URL, plus story-designer, story-explorer and story-automator for one user story at a time. Skills run them, set up Playwright and open a live dashboard.",
+  "author": {
+    "name": "Rohan Patil",
+    "url": "https://github.com/rohan12patil"
+  },
+  "homepage": "https://github.com/qa-crew/agentic-qa",
+  "repository": "https://github.com/qa-crew/agentic-qa",
+  "license": "MIT",
+  "keywords": [
+    "qa",
+    "testing",
+    "playwright",
+    "playwright-cli",
+    "test-automation",
+    "test-cases",
+    "accessibility",
+    "k6",
+    "agents",
+    "open-source"
+  ],
+  "agents": [
+    "./.claude/agents/analyst.md",
+    "./.claude/agents/qa-engineer.md",
+    "./.claude/agents/qa-planner.md",
+    "./.claude/agents/qa-reporter.md",
+    "./.claude/agents/qa-reviewer.md",
+    "./.claude/agents/story-automator.md",
+    "./.claude/agents/story-designer.md",
+    "./.claude/agents/story-explorer.md"
+  ],
+  "skills": [
+    "./.claude/skills/"
+  ]
+}

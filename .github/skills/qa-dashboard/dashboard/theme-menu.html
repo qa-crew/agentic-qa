@@ -1,0 +1,24 @@
+<details class="theme-menu" id="themeMenu">
+      <summary aria-label="Appearance"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg><span id="themeLabel">Appearance</span></summary>
+      <div class="theme-pop theme-fields"><fieldset><legend>Theme</legend><label><input type="radio" name="aiqa-ui-theme" value="slate"> Slate — cool greys, blue accent</label><label><input type="radio" name="aiqa-ui-theme" value="industrial"> Industrial — black chrome, safety yellow</label></fieldset>
+    <fieldset><legend>Mode</legend><label><input type="radio" name="aiqa-ui-mode" value="system"> Match system</label><label><input type="radio" name="aiqa-ui-mode" value="light"> Light</label><label><input type="radio" name="aiqa-ui-mode" value="dark"> Dark</label></fieldset>
+    <fieldset><legend>Density</legend><label><input type="radio" name="aiqa-ui-density" value="comfortable"> Comfortable</label><label><input type="radio" name="aiqa-ui-density" value="compact"> Compact</label></fieldset></div>
+    </details><script>(function(){if(window.aiqaThemeSync)return;var d=document.documentElement;
+  var save=function(k,v){try{window.localStorage.setItem(k,v);}catch(e){}};
+  var dark=function(){var m=d.getAttribute("data-mode");return m?m==="dark":!!(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);};
+  var sync=function(){var t=d.getAttribute("data-theme")==="industrial"?"industrial":"slate",m=d.getAttribute("data-mode")||"system",n=d.getAttribute("data-density")==="compact"?"compact":"comfortable";
+    document.querySelectorAll('input[name^="aiqa-ui-"]').forEach(function(i){i.checked=(i.name==="aiqa-ui-theme"&&i.value===t)||(i.name==="aiqa-ui-mode"&&i.value===m)||(i.name==="aiqa-ui-density"&&i.value===n);});
+    var lbl=document.getElementById("themeLabel");if(lbl)lbl.textContent=(t==="industrial"?"Industrial":"Slate")+" · "+(m==="system"?"System":m==="dark"?"Dark":"Light");
+    var tg=document.getElementById("modeToggle");if(tg)tg.setAttribute("aria-pressed",String(dark()));};
+  window.aiqaThemeSync=sync;
+  document.addEventListener("change",function(e){var i=e.target;if(!i||!i.name||i.name.indexOf("aiqa-ui-")!==0)return;
+    if(i.name==="aiqa-ui-theme")d.setAttribute("data-theme",i.value);
+    if(i.name==="aiqa-ui-mode"){if(i.value==="system")d.removeAttribute("data-mode");else d.setAttribute("data-mode",i.value);}
+    if(i.name==="aiqa-ui-density"){if(i.value==="compact")d.setAttribute("data-density","compact");else d.removeAttribute("data-density");}
+    save(i.name,i.value);sync();});
+  document.addEventListener("click",function(e){var tg=e.target.closest&&e.target.closest("#modeToggle");
+    if(tg){var m=dark()?"light":"dark";d.setAttribute("data-mode",m);save("aiqa-ui-mode",m);sync();return;}
+    var menu=document.getElementById("themeMenu");if(menu&&menu.open&&!menu.contains(e.target))menu.open=false;});
+  document.addEventListener("keydown",function(e){var menu=document.getElementById("themeMenu");if(e.key==="Escape"&&menu&&menu.open){menu.open=false;menu.querySelector("summary").focus();}});
+  if(window.matchMedia)window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change",sync);
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",sync);else sync();})();</script>
