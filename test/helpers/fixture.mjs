@@ -1,4 +1,4 @@
-// A throwaway project with .aiqa/ files in it: a full-suite run in progress and one story.
+// A throwaway project with .agentic-qa/ files in it: a full-suite run in progress and one story.
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
@@ -21,7 +21,7 @@ As a shopper I want to log in.
 1. Wrong password shows an error
 `;
 
-/** storyHash of STORY_SD1, computed by @agents-forge/aiqa 2.5's own storyHash(). */
+/** The known storyHash of STORY_SD1. */
 export const STORY_SD1_HASH = "bb6a15268210";
 
 export const TEST_CASES_SD1 = `---
@@ -64,13 +64,13 @@ export function playwrightReport(shot) {
 }
 
 export function makeProject() {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "aiqa-test-"));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "agentic-qa-test-"));
   const w = (rel, text) => {
     fs.mkdirSync(path.dirname(path.join(dir, rel)), { recursive: true });
     fs.writeFileSync(path.join(dir, rel), text);
   };
   const t = (s) => new Date(Date.parse("2026-11-11T10:00:00Z") + s * 1000).toISOString();
-  w(".aiqa/progress.jsonl", [
+  w(".agentic-qa/progress.jsonl", [
     { ts: t(0), kind: "suite", step: "pipeline", event: "start", run: "R1", target: "https://www.saucedemo.com", filter: "none" },
     { ts: t(1), kind: "suite", step: "analyst", event: "start", run: "R1" },
     { ts: t(91), kind: "suite", step: "analyst", event: "done", run: "R1" },
@@ -78,17 +78,17 @@ export function makeProject() {
     { ts: t(150), kind: "suite", step: "qa-planner", event: "done", run: "R1" },
     { ts: t(151), kind: "suite", step: "qa-engineer", event: "start", run: "R1" },
   ].map((e) => JSON.stringify(e)).join("\n") + "\nnot json\n");
-  w(".aiqa/requirements/requirements.md", "# Requirements\n\n## 1. Executive Summary\nA shop.\n");
-  w(".aiqa/test-plan/test_plan.md", "# Test plan\n");
-  w(".aiqa/snapshots/home.yml", "- button \"Login\"\n");
-  w(".aiqa/test-cases/login.md", "# Login — Test Cases\n\n| ID | Title |\n|---|---|\n| TC-LOGIN-S-001 | a |\n| TC-LOGIN-S-002 | b |\n");
-  w(".aiqa/test-scripts/login.spec.ts", "import { test } from './fixtures';\n");
-  w(".aiqa/test-scripts/pages/login.page.ts", "export class LoginPage {}\n");
-  w(".aiqa/reports/test-results/results.json", JSON.stringify(playwrightReport()));
-  w(".aiqa/stories/SD-1-login.md", STORY_SD1);
-  w(".aiqa/test-cases/SD-1-login.md", TEST_CASES_SD1);
-  w(".aiqa/test-scripts/SD-1-login.spec.ts", "test('TC-SD1-S-001 — Valid login', { tag: ['@SD-1'] }, async () => {});\n");
-  w(".aiqa/snapshots/SD-1/login.yml", "- textbox \"Username\"\n");
+  w(".agentic-qa/requirements/requirements.md", "# Requirements\n\n## 1. Executive Summary\nA shop.\n");
+  w(".agentic-qa/test-plan/test_plan.md", "# Test plan\n");
+  w(".agentic-qa/snapshots/home.yml", "- button \"Login\"\n");
+  w(".agentic-qa/test-cases/login.md", "# Login — Test Cases\n\n| ID | Title |\n|---|---|\n| TC-LOGIN-S-001 | a |\n| TC-LOGIN-S-002 | b |\n");
+  w(".agentic-qa/test-scripts/login.spec.ts", "import { test } from './fixtures';\n");
+  w(".agentic-qa/test-scripts/pages/login.page.ts", "export class LoginPage {}\n");
+  w(".agentic-qa/reports/test-results/results.json", JSON.stringify(playwrightReport()));
+  w(".agentic-qa/stories/SD-1-login.md", STORY_SD1);
+  w(".agentic-qa/test-cases/SD-1-login.md", TEST_CASES_SD1);
+  w(".agentic-qa/test-scripts/SD-1-login.spec.ts", "test('TC-SD1-S-001 — Valid login', { tag: ['@SD-1'] }, async () => {});\n");
+  w(".agentic-qa/snapshots/SD-1/login.yml", "- textbox \"Username\"\n");
   w("secret.txt", "do not serve");
   return dir;
 }

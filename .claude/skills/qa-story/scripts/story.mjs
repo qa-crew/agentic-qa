@@ -1,19 +1,19 @@
 #!/usr/bin/env node
 // The code-owned parts of Agentic QA's story workflow, for the qa-story skill. Run from the project root:
 //   node story.mjs info <KEY>                    where the story stands, its files and hash (JSON)
-//   node story.mjs config <KEY> --url <app>      write .aiqa/playwright.stories.config.ts
+//   node story.mjs config <KEY> --url <app>      write .agentic-qa/playwright.stories.config.ts
 //   node story.mjs finish-design <KEY>           write storyHash into the test cases if the agent left it out
 //   node story.mjs run <KEY> --url <app>         run the story's tests and write the results into its test cases
-//   node story.mjs progress <KEY> <step> <event> append a line to .aiqa/progress.jsonl for the dashboard
+//   node story.mjs progress <KEY> <step> <event> append a line to .agentic-qa/progress.jsonl for the dashboard
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { spawn } from "node:child_process";
 import { createRequire } from "node:module";
 import {
-  aiqaPaths, appendProgress, applyResults, hasSource, isTagSafeKey, nothingToAutomate, parseModelFlags, parseSource,
+  qaPaths, appendProgress, applyResults, hasSource, isTagSafeKey, nothingToAutomate, parseModelFlags, parseSource,
   parseStoryFile, parseTestCaseFile, resolveRoleModels, scriptableRows, setFrontMatterValue, statusCounts, stepDone,
   stepState, STORY_STEP_ROLE, storyFiles, storyGrep, storyHash, writeStoryPlaywrightConfig,
-} from "./aiqa-files.mjs";
+} from "./qa-files.mjs";
 
 const [, , command, key, ...rest] = process.argv;
 const flag = (name) => {
@@ -21,7 +21,7 @@ const flag = (name) => {
   return i >= 0 ? rest[i + 1] : undefined;
 };
 
-const sp = aiqaPaths(process.cwd());
+const sp = qaPaths(process.cwd());
 const rel = (p) => path.relative(sp.cwd, p).replace(/\\/g, "/");
 const listFiles = (dir, ext) => { try { return fs.readdirSync(dir).filter((f) => f.endsWith(ext)).sort(); } catch { return []; } };
 
@@ -101,9 +101,9 @@ function runTests(k, files) {
       stdio: ["ignore", "inherit", "inherit"],
       env: {
         ...process.env,
-        AIQA_STORY_RESULTS: files.resultsFile,
-        AIQA_STORY_HTML: files.reportDir,
-        AIQA_STORY_OUTPUT: files.outputDir,
+        AGENTIC_QA_STORY_RESULTS: files.resultsFile,
+        AGENTIC_QA_STORY_HTML: files.reportDir,
+        AGENTIC_QA_STORY_OUTPUT: files.outputDir,
         FORCE_COLOR: "0",
       },
     });

@@ -7,7 +7,7 @@
 <meta name="description" content="How to install the Agentic QA agents for Claude Code or GitHub Copilot, work with them in chat, run a full QA suite or one user story, and read the results on the dashboard.">
 <script>
   // Apply a saved light/dark choice before the page paints.
-  try { var m = localStorage.getItem("aiqa-tutorial-mode"); if (m === "light" || m === "dark") document.documentElement.setAttribute("data-mode", m); } catch (e) {}
+  try { var m = localStorage.getItem("agentic-qa-tutorial-mode"); if (m === "light" || m === "dark") document.documentElement.setAttribute("data-mode", m); } catch (e) {}
 </script>
 <style>
   :root {
@@ -456,11 +456,11 @@ claude plugin install agentic-qa@qa-crew --scope project</code></pre></div>
         <div class="card"><h4>.gitignore lines</h4><p>Keep your saved login, reports and screenshots out of git. The requirements, plan, cases and tests are meant to be committed.</p></div>
       </div>
       <div class="code labeled"><span class="label">What it adds to .gitignore</span><button class="copy" type="button">Copy</button>
-<pre><code>.aiqa/auth-state.json
-.aiqa/reports/
-.aiqa/evidence/
-.aiqa/progress.jsonl</code></pre></div>
-      <div class="callout warn"><span class="ic">!</span><div><p><code>.aiqa/auth-state.json</code> holds a signed-in browser session. Never commit it.</p></div></div>
+<pre><code>.agentic-qa/auth-state.json
+.agentic-qa/reports/
+.agentic-qa/evidence/
+.agentic-qa/progress.jsonl</code></pre></div>
+      <div class="callout warn"><span class="ic">!</span><div><p><code>.agentic-qa/auth-state.json</code> holds a signed-in browser session. Never commit it.</p></div></div>
     </section>
 
     <!-- 5 -->
@@ -477,7 +477,7 @@ claude plugin install agentic-qa@qa-crew --scope project</code></pre></div>
         <div class="card box"><h4>The agents</h4><p>Each does one job in its own workspace, writes its files, and never stops to ask you.</p>
           <div class="chips"><span class="chip agent">analyst</span><span class="chip agent">qa-planner</span><span class="chip agent">qa-engineer</span><span class="chip agent">qa-reviewer</span><span class="chip agent">qa-reporter</span></div></div>
       </div>
-      <p>Everything the agents make is a plain file under <code>.aiqa/</code>. You, the lead and the dashboard all read the same files, so nothing is hidden in the chat.</p>
+      <p>Everything the agents make is a plain file under <code>.agentic-qa/</code>. You, the lead and the dashboard all read the same files, so nothing is hidden in the chat.</p>
 
       <h3>What a session looks like</h3>
       <div class="card chat" role="group" aria-label="Example conversation">
@@ -492,7 +492,7 @@ claude plugin install agentic-qa@qa-crew --scope project</code></pre></div>
         <div class="msg you">Which defects did it find?</div>
         <div class="msg ai"><span class="av">AQ</span><div class="body"><p>For example: a made-up product id can still be added to the cart; the cart survives logout; checkout works with an empty cart; an unknown address shows no 404 page.</p></div></div>
         <div class="gap">… the QA Reporter runs …</div>
-        <div class="msg ai"><span class="av">AQ</span><div class="body"><p><strong>Status: ✅ PASSED.</strong> 16 of 16 smoke tests passed on Chromium in 35 s. The report is in <code>.aiqa/reports/summary_report.md</code>. The slow reviewer was left for later: <code>/agentic-qa:qa-pipeline qa-reviewer</code>.</p></div></div>
+        <div class="msg ai"><span class="av">AQ</span><div class="body"><p><strong>Status: ✅ PASSED.</strong> 16 of 16 smoke tests passed on Chromium in 35 s. The report is in <code>.agentic-qa/reports/summary_report.md</code>. The slow reviewer was left for later: <code>/agentic-qa:qa-pipeline qa-reviewer</code>.</p></div></div>
       </div>
 
       <h3>Ask in plain words</h3>
@@ -542,9 +542,9 @@ claude plugin install agentic-qa@qa-crew --scope project</code></pre></div>
         <li><strong>Read each step's output, then continue</strong>
           By default it pauses after each step and shows you what was written. Answer <em>Continue</em> to go on, or <em>Stop</em> to look closer first.</li>
         <li><strong>Read the report</strong>
-          The last step writes <code>.aiqa/reports/summary_report.md</code>, with a clear status line. For details, open the Playwright report:
+          The last step writes <code>.agentic-qa/reports/summary_report.md</code>, with a clear status line. For details, open the Playwright report:
           <div class="code"><button class="copy" type="button">Copy</button>
-<pre><code>npx playwright show-report .aiqa/reports/playwright-report</code></pre></div></li>
+<pre><code>npx playwright show-report .agentic-qa/reports/playwright-report</code></pre></div></li>
         <li><strong>Run the review when you have time</strong>
           The reviewer is the slow step, so step-by-step runs leave it for later:
           <div class="code"><button class="copy" type="button">Copy</button>
@@ -577,8 +577,8 @@ claude plugin install agentic-qa@qa-crew --scope project</code></pre></div>
 <pre><code>/agentic-qa:qa-pipeline qa-reporter --grep @regression</code></pre></div>
 
       <h3>What it writes</h3>
-      <p>Everything goes under <code>.aiqa/</code>, except <code>playwright.config.ts</code> at the root. If you already have one, it asks before replacing it.</p>
-<div class="tree">.aiqa/
+      <p>Everything goes under <code>.agentic-qa/</code>, except <code>playwright.config.ts</code> at the root. If you already have one, it asks before replacing it.</p>
+<div class="tree">.agentic-qa/
 ├── snapshots/*.yml              <span class="d">one accessibility snapshot per page or state</span>
 ├── requirements/requirements.md
 ├── test-plan/test_plan.md
@@ -587,7 +587,7 @@ claude plugin install agentic-qa@qa-crew --scope project</code></pre></div>
 ├── reports/                     <span class="d">review_report.md, summary_report.md, test-results/, playwright-report/</span>
 └── progress.jsonl               <span class="d">step progress, for the dashboard</span>
 playwright.config.ts</div>
-      <p>On saucedemo, that came to 56 snapshots, 22 test-case files with 192 cases, 20 page objects and 20 specs with 197 tests. <a href="../../examples/saucedemo/README.md">The example</a> shows excerpts from each step.</p>
+      <p>On saucedemo, that came to 56 snapshots, 22 test-case files with 192 cases, 20 page objects and 20 specs with 197 tests. <a href="https://github.com/qa-crew/agentic-qa/blob/main/examples/saucedemo/README.md">The example</a> shows excerpts from each step.</p>
       <figure>
         <a class="shot crop" href="images/document.png" data-caption="The test plan, opened from the dashboard.">
           <img src="images/document.png" alt="The dashboard showing the test plan document: a Document Info table and the start of the Executive Summary." loading="lazy" width="1366" height="1100"><span class="zoom">Open</span></a>
@@ -601,8 +601,8 @@ playwright.config.ts</div>
       <p class="intro">Working on a single feature? Give Agentic QA the story, and it designs, checks and automates its tests.</p>
       <ol class="steps">
         <li><strong>Write the story</strong>
-          Save it as <code>.aiqa/stories/&lt;KEY&gt;-&lt;name&gt;.md</code>. Or paste the story text in chat and ask the lead to save it. It can also read the story from Jira, Rally or Octane if one is connected.
-          <div class="code labeled"><span class="label">.aiqa/stories/SD-1-login.md</span><button class="copy" type="button">Copy</button>
+          Save it as <code>.agentic-qa/stories/&lt;KEY&gt;-&lt;name&gt;.md</code>. Or paste the story text in chat and ask the lead to save it. It can also read the story from Jira, Rally or Octane if one is connected.
+          <div class="code labeled"><span class="label">.agentic-qa/stories/SD-1-login.md</span><button class="copy" type="button">Copy</button>
 <pre><code>---
 key: SD-1
 title: Login with the demo accounts
@@ -618,9 +618,9 @@ As a shopper I want to sign in so I can buy things.
         <li><strong>Run it</strong>
           <div class="code"><button class="copy" type="button">Copy</button>
 <pre><code>/agentic-qa:qa-story SD-1 --url https://www.saucedemo.com</code></pre></div>
-          Add <code>--url</code> the first time, or save the address as <code>appUrl</code> in <code>.aiqa/workspace.json</code>.</li>
+          Add <code>--url</code> the first time, or save the address as <code>appUrl</code> in <code>.agentic-qa/workspace.json</code>.</li>
         <li><strong>Review the test cases when it pauses</strong>
-          It stops after Design and after Explore. Open <code>.aiqa/test-cases/SD-1-login.md</code>, then edit, add or delete cases before you continue. Add <code>--auto</code> to skip the pauses.</li>
+          It stops after Design and after Explore. Open <code>.agentic-qa/test-cases/SD-1-login.md</code>, then edit, add or delete cases before you continue. Add <code>--auto</code> to skip the pauses.</li>
         <li><strong>Read the results in the same file</strong>
           The Run step fills in <strong>Last Result</strong> and <strong>Evidence</strong> (a screenshot) for every case, and adds a row to <strong>Run History</strong>.</li>
       </ol>
@@ -697,8 +697,8 @@ As a shopper I want to sign in so I can buy things.
 
       <ul class="plain" style="margin-top:22px">
         <li><strong>Private:</strong> it serves on your computer only (127.0.0.1), behind a random link.</li>
-        <li><strong>Read-only:</strong> it only reads <code>.aiqa/</code>. The one exception is the Models page, which saves your choices.</li>
-        <li><strong>Shareable:</strong> <code>/agentic-qa:qa-dashboard --static</code> saves one self-contained file, <code>.aiqa/reports/dashboard.html</code>, that you can attach or send.</li>
+        <li><strong>Read-only:</strong> it only reads <code>.agentic-qa/</code>. The one exception is the Models page, which saves your choices.</li>
+        <li><strong>Shareable:</strong> <code>/agentic-qa:qa-dashboard --static</code> saves one self-contained file, <code>.agentic-qa/reports/dashboard.html</code>, that you can attach or send.</li>
       </ul>
     </section>
 
@@ -708,7 +708,7 @@ As a shopper I want to sign in so I can buy things.
       <p class="intro">Each agent can run on its own Claude model, so you can spend where it matters.</p>
       <p><strong>On the dashboard:</strong> open <strong>Models</strong>, pick Session model, Sonnet, Opus, Haiku or Fable for Default and for each role, then press <strong>Save</strong>.</p>
       <figure>
-        <a class="shot" href="images/models.png" data-caption="The Models page: a model for Default and for each role, saved to .aiqa/ai.json.">
+        <a class="shot" href="images/models.png" data-caption="The Models page: a model for Default and for each role, saved to .agentic-qa/ai.json.">
           <img src="images/models.png" alt="The Models page: a row for Default and each of the five roles, with a model menu and a Save button." loading="lazy" width="1366" height="900"><span class="zoom">Open</span></a>
         <figcaption>The story steps share the roles: Design = QA Planner, Explore = Analyst, Automate = QA Engineer.</figcaption>
       </figure>
@@ -722,7 +722,7 @@ As a shopper I want to sign in so I can buy things.
         <li>the Default pick;</li>
         <li>the model of your Claude Code session.</li>
       </ol>
-      <p>The picks are saved in <code>.aiqa/ai.json</code>. A change applies from the next step that starts. In Copilot, use Copilot's own model picker.</p>
+      <p>The picks are saved in <code>.agentic-qa/ai.json</code>. A change applies from the next step that starts. In Copilot, use Copilot's own model picker.</p>
     </section>
 
     <!-- 10 -->
@@ -772,7 +772,7 @@ As a shopper I want to sign in so I can buy things.
         <p>The generated <code>playwright.config.ts</code> uses <code>channel: "chrome"</code>, the Chrome already on your computer. If you don't have Chrome, delete that option, and Playwright uses its own Chromium.</p>
       </div></details>
       <details class="faq"><summary>I already have a playwright.config.ts</summary><div>
-        <p>The pipeline asks once whether to replace it or keep it. If you keep yours, add <code>.aiqa/test-scripts</code> to its <code>testDir</code>, so the reporter can find the new tests.</p>
+        <p>The pipeline asks once whether to replace it or keep it. If you keep yours, add <code>.agentic-qa/test-scripts</code> to its <code>testDir</code>, so the reporter can find the new tests.</p>
       </div></details>
       <details class="faq"><summary>Claude Code asks permission for every browser command</summary><div>
         <p>Say yes to the permission rules that <code>/agentic-qa:qa-setup</code> offers. It adds them to <code>.claude/settings.json</code> and keeps your other settings.</p>
@@ -786,10 +786,10 @@ As a shopper I want to sign in so I can buy things.
     <section id="next">
       <h2><span class="n">12</span>Where to go next</h2>
       <div class="grid2">
-        <div class="card"><h4><a href="../../examples/saucedemo/README.md">The saucedemo example</a></h4><p>A full run, step by step: commands, times, counts and excerpts.</p></div>
-        <div class="card"><h4><a href="../../README.md">The README</a></h4><p>Every agent, command and option in one place.</p></div>
-        <div class="card"><h4><a href="https://www.npmjs.com/package/@agents-forge/aiqa">AIQA, for enterprises</a></h4><p>The Agents Forge product for larger teams reads the same <code>.aiqa/</code> files. It adds a workspace dashboard, regression runs, sending results to Jira, and approval checks in code.</p></div>
-        <div class="card"><h4><a href="../../CHANGELOG.md">What's changed</a></h4><p>New features and fixes in each release.</p></div>
+        <div class="card"><h4><a href="https://github.com/qa-crew/agentic-qa/blob/main/examples/saucedemo/README.md">The saucedemo example</a></h4><p>A full run, step by step: commands, times, counts and excerpts.</p></div>
+        <div class="card"><h4><a href="https://github.com/qa-crew/agentic-qa/blob/main/README.md">The README</a></h4><p>Every agent, command and option in one place.</p></div>
+        <div class="card"><h4><a href="https://github.com/qa-crew/agentic-qa/issues">Report a problem</a></h4><p>Found a bug, or want a feature? Open an issue on GitHub.</p></div>
+        <div class="card"><h4><a href="https://github.com/qa-crew/agentic-qa/blob/main/CHANGELOG.md">What's changed</a></h4><p>New features and fixes in each release.</p></div>
       </div>
       <footer>Agentic QA, QA agents for Claude Code and GitHub Copilot · MIT license</footer>
     </section>
@@ -818,7 +818,7 @@ As a shopper I want to sign in so I can buy things.
   btn.addEventListener("click", function () {
     var next = isDark() ? "light" : "dark";
     root.setAttribute("data-mode", next);
-    try { localStorage.setItem("aiqa-tutorial-mode", next); } catch (e) {}
+    try { localStorage.setItem("agentic-qa-tutorial-mode", next); } catch (e) {}
     paint();
   });
   paint();

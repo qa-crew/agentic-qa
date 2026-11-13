@@ -22,7 +22,7 @@ Every command below runs from the project root:
 - `--step design|explore|automate|run`: run only that step.
 - `--force`: redo steps that are already done. Without it, done steps are skipped.
 - `--url <app-url>`: the application under test, needed by Explore, Automate and Run. Without it, use `appUrl` in
-  `.aiqa/workspace.json`, then `url` in `aiqa.config.ts`; if there's none, ask.
+  `.agentic-qa/workspace.json`; if there's none, ask.
 - `--auto`: don't pause for review after Design and Explore.
 - `--headed`: show the browser during Explore.
 - `--model <m>` / `--model-<role> <m>`: the model for the agent steps this run. Each step uses its role's model:
@@ -33,14 +33,14 @@ Run `story.mjs info <KEY>`, adding any `--model` / `--model-<role>` options from
 - the story's files, `storyHash` and `stale`;
 - `stage`: which steps are done, the next one, and what's not needed;
 - status counts and the full `storyText`;
-- `models`: the model for each agent step, from the command line, `.aiqa/ai.json` (the dashboard's Models page) or
+- `models`: the model for each agent step, from the command line, `.agentic-qa/ai.json` (the dashboard's Models page) or
   the session. `model: null` means the session's model.
 
-If it reports `"error": "no-story-file"`, the story needs a file in `.aiqa/stories/`. Offer to write it:
+If it reports `"error": "no-story-file"`, the story needs a file in `.agentic-qa/stories/`. Offer to write it:
 - from text the user pastes, or
 - from their ALM through a connected tool (a Jira, Rally or Octane MCP server), if there is one. Only read from the ALM.
 
-Write it as `.aiqa/stories/<KEY>-<short-name>.md`:
+Write it as `.agentic-qa/stories/<KEY>-<short-name>.md`:
 ```markdown
 ---
 key: SD-123
@@ -100,7 +100,7 @@ details are in the Exploration Notes.
 
 ### Automate (story-automator)
 If `nothingToAutomate` is set, skip Automate and Run: they're **Not needed**. Otherwise:
-1. `story.mjs config <KEY> --url <app-url>` writes `.aiqa/playwright.stories.config.ts`.
+1. `story.mjs config <KEY> --url <app-url>` writes `.agentic-qa/playwright.stories.config.ts`.
 2. Task message: STORY `<KEY> — <title>` · TEST CASES `<testCaseFile>` · SPEC OUTPUT `<specFile>`.
 
 Automate is done when `stage.done["story-script"]` is true (a spec tagged `@<KEY>`).
@@ -108,7 +108,7 @@ Automate is done when `stage.done["story-script"]` is true (a spec tagged `@<KEY
 ### Run (code)
 `story.mjs run <KEY> --url <app-url> --run-id <run id>`. It runs the story's tests with Agentic QA's story config, then
 writes into the test-case file: **Last Result**, **Evidence** (screenshots copied to
-`.aiqa/evidence/<KEY>/<run id>/`) and a **Run History** row. Show its summary.
+`.agentic-qa/evidence/<KEY>/<run id>/`) and a **Run History** row. Show its summary.
 
 ## 5. Finish
 Print what each step did, the files written, and what to do next: review failures, re-run a step with

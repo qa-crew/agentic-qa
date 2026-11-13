@@ -29,19 +29,19 @@ these rules to `.claude/settings.json` (merge them with what's there and keep th
 ```json
 {
   "permissions": {
-    "allow": ["Bash(playwright-cli:*)", "Bash(npx playwright:*)", "Bash(mkdir -p .aiqa/*)"]
+    "allow": ["Bash(playwright-cli:*)", "Bash(npx playwright:*)", "Bash(mkdir -p .agentic-qa/*)"]
   }
 }
 ```
 
 ## .gitignore (optional)
-Agentic QA's outputs under `.aiqa/` (requirements, test plan, test cases, test scripts, snapshots) are meant to be
+Agentic QA's outputs under `.agentic-qa/` (requirements, test plan, test cases, test scripts, snapshots) are meant to be
 committed. Offer to add these lines to `.gitignore` for the files that shouldn't be:
 ```
-.aiqa/auth-state.json
-.aiqa/reports/
-.aiqa/evidence/
-.aiqa/progress.jsonl
+.agentic-qa/auth-state.json
+.agentic-qa/reports/
+.agentic-qa/evidence/
+.agentic-qa/progress.jsonl
 ```
 `auth-state.json` holds a signed-in browser session, so it should never be committed.
 

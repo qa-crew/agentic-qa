@@ -1,5 +1,5 @@
 node_modules/
-.aiqa/
+.agentic-qa/
 test-results/
 playwright-report/
 __pycache__/

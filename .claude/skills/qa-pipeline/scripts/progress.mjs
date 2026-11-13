@@ -7,7 +7,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 
-const file = path.join(process.cwd(), ".aiqa", "progress.jsonl");
+const file = path.join(process.cwd(), ".agentic-qa", "progress.jsonl");
 const [, , step, event, ...rest] = process.argv;
 const flag = (name) => {
   const i = rest.indexOf(`--${name}`);

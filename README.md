@@ -9,14 +9,12 @@ Open-source QA agents for **Claude Code** and **GitHub Copilot**, from Agents Fo
 
 They can also work one user story at a time. A small live dashboard shows the progress.
 
-**New here?** Start with the [tutorial](docs/tutorial/index.html). It covers installing, setting up, working with the
-agents in Claude Code or Copilot, and the dashboard, with screenshots. Open the file in a browser from a clone or
-download.
+**New here?** Start with the [tutorial](https://qa-crew.github.io/agentic-qa/tutorial/). It covers installing,
+setting up, working with the agents in Claude Code or Copilot, and the dashboard, with screenshots. Its source is
+[docs/tutorial/index.html](docs/tutorial/index.html).
 
-Agentic QA is the open-source side of [AIQA](https://www.npmjs.com/package/@agents-forge/aiqa), the Agents Forge
-product for enterprises. The agents started as AIQA's and come here as plain agent and skill files: no SDK and no
-package to install. Both write the same `.aiqa/` files, so you can move to AIQA later (see
-[Agentic QA and AIQA](#agentic-qa-and-aiqa)).
+Everything is plain agent and skill files: no SDK and no package to install. The agents write their work to an
+`.agentic-qa/` folder in your project.
 
 ## What's inside
 
@@ -24,14 +22,14 @@ package to install. Both write the same `.aiqa/` files, so you can move to AIQA 
 
 | Agent | Role | Writes |
 |---|---|---|
-| `analyst` | Explores the app with playwright-cli and saves an accessibility snapshot of every page | `.aiqa/snapshots/*.yml`, `.aiqa/requirements/requirements.md` |
-| `qa-planner` | Risk-based test plan, with priorities taken from what the snapshots show | `.aiqa/test-plan/test_plan.md` |
-| `qa-engineer` | Test cases, `playwright.config.ts`, page objects, fixtures and one spec per module; an axe spec and a k6 script when asked | `.aiqa/test-cases/`, `.aiqa/test-scripts/`, `playwright.config.ts` |
-| `qa-reviewer` | Checks every selector against the snapshots, and the traceability from test plan to spec | `.aiqa/reports/review_report.md` |
-| `qa-reporter` | Runs the suite (smoke, Chromium by default), captures failures, writes the report | `.aiqa/reports/summary_report.md` |
-| `story-designer` | One story → testable acceptance criteria and manual test cases | `.aiqa/test-cases/<KEY>-<name>.md` |
-| `story-explorer` | Walks those cases in the real app, saves snapshots, marks each case Verified / Updated / Possible defect… | the same file, `.aiqa/snapshots/<KEY>/` |
-| `story-automator` | Playwright tests for the verified cases, tagged `@<KEY>` | `.aiqa/test-scripts/<KEY>-<name>.spec.ts` |
+| `analyst` | Explores the app with playwright-cli and saves an accessibility snapshot of every page | `.agentic-qa/snapshots/*.yml`, `.agentic-qa/requirements/requirements.md` |
+| `qa-planner` | Risk-based test plan, with priorities taken from what the snapshots show | `.agentic-qa/test-plan/test_plan.md` |
+| `qa-engineer` | Test cases, `playwright.config.ts`, page objects, fixtures and one spec per module; an axe spec and a k6 script when asked | `.agentic-qa/test-cases/`, `.agentic-qa/test-scripts/`, `playwright.config.ts` |
+| `qa-reviewer` | Checks every selector against the snapshots, and the traceability from test plan to spec | `.agentic-qa/reports/review_report.md` |
+| `qa-reporter` | Runs the suite (smoke, Chromium by default), captures failures, writes the report | `.agentic-qa/reports/summary_report.md` |
+| `story-designer` | One story → testable acceptance criteria and manual test cases | `.agentic-qa/test-cases/<KEY>-<name>.md` |
+| `story-explorer` | Walks those cases in the real app, saves snapshots, marks each case Verified / Updated / Possible defect… | the same file, `.agentic-qa/snapshots/<KEY>/` |
+| `story-automator` | Playwright tests for the verified cases, tagged `@<KEY>` | `.agentic-qa/test-scripts/<KEY>-<name>.spec.ts` |
 
 **Skills** (`.claude/skills/`), which you type as slash commands:
 
@@ -125,7 +123,7 @@ explore    plan          automate      review        run + report
 |---|---|
 | `--grep <tags>` | What the reporter runs: `@smoke` (the default), `@regression`, `"@smoke\|@accessibility"`, or `all` for the full suite |
 | `--skip a,b` | Steps to leave out |
-| `--requirements <file>` | An existing requirements document for the analyst to merge with what it finds. A single `.md` file dropped in `.aiqa/requirements/` also works |
+| `--requirements <file>` | An existing requirements document for the analyst to merge with what it finds. A single `.md` file dropped in `.agentic-qa/requirements/` also works |
 | `--headed` | Show the browser while the analyst explores |
 | `--users N --minutes M` | Scale of the k6 load test (10 users, 2 minutes by default), with `@performance` |
 | `--model <m>` / `--model-<role> <m>` | The model for every role, or for one role, this run (see [Models](#models)) |
@@ -133,10 +131,10 @@ explore    plan          automate      review        run + report
 Accessibility (`@accessibility`) and performance (`@performance`) tests are opt-in. They're generated only when
 asked for and when `@axe-core/playwright` or k6 is installed.
 
-**What it writes.** Everything goes under `.aiqa/`, except `playwright.config.ts` at the root. If you already have a
+**What it writes.** Everything goes under `.agentic-qa/`, except `playwright.config.ts` at the root. If you already have a
 `playwright.config.ts`, it asks before replacing it.
 ```
-.aiqa/
+.agentic-qa/
 ├── snapshots/*.yml            accessibility trees, one per page or state
 ├── requirements/requirements.md
 ├── test-plan/test_plan.md
@@ -149,7 +147,7 @@ playwright.config.ts
 
 ## One story at a time: `qa-story`
 
-Write the story as `.aiqa/stories/<KEY>-<name>.md`. The skill can also write this file from text you paste, or read
+Write the story as `.agentic-qa/stories/<KEY>-<name>.md`. The skill can also write this file from text you paste, or read
 the story from your ALM if a Jira, Rally or Octane MCP server is connected.
 ```markdown
 ---
@@ -166,7 +164,7 @@ As a shopper I want to sign in so I can buy things.
 - A locked-out user sees "Sorry, this user has been locked out."
 ```
 Then run `/agentic-qa:qa-story SD-1`. Add `--url https://www.saucedemo.com` the first time, or save the URL as `appUrl` in
-`.aiqa/workspace.json`.
+`.agentic-qa/workspace.json`.
 
 | Step | Who | What happens |
 |---|---|---|
@@ -193,10 +191,10 @@ Then run `/agentic-qa:qa-story SD-1`. Add `--url https://www.saucedemo.com` the 
   - Stories: each story's steps, test cases, notes and runs;
   - Results: the latest Playwright runs, failures, and links to the HTML report;
   - Models: the model each agent starts with (see [Models](#models)).
-- **Looks:** AIQA's Slate and Industrial themes, in light and dark. It works at phone width.
-- **Local and read-only:** it serves on 127.0.0.1 behind a random link and only reads `.aiqa/`. The one exception is
-  the Models page, which saves `.aiqa/ai.json`.
-- `--static` saves a self-contained `.aiqa/reports/dashboard.html` you can attach or share.
+- **Looks:** Slate and Industrial themes, in light and dark. It works at phone width.
+- **Local and read-only:** it serves on 127.0.0.1 behind a random link and only reads `.agentic-qa/`. The one
+  exception is the Models page, which saves `.agentic-qa/ai.json`.
+- `--static` saves a self-contained `.agentic-qa/reports/dashboard.html` you can attach or share.
 
 ## Models
 Each role's agent can run on its own Claude model.
@@ -214,8 +212,8 @@ The order of precedence:
 3. the Default pick;
 4. the model of your Claude Code session (the agents' own `model: inherit`).
 
-The picks are saved in `.aiqa/ai.json`, the same file and format that AIQA's Connect → AI uses, so they
-carry over in both directions. GitHub Copilot uses its own model picker, so the picks don't apply there.
+The picks are saved in `.agentic-qa/ai.json`. GitHub Copilot uses its own model picker, so the picks don't apply
+there.
 
 ![The Models page](examples/saucedemo/screenshots/dashboard-models.png)
 
@@ -232,37 +230,19 @@ Restart Claude Code after updating. To get updates automatically, open `/plugin`
 how long it took, and screenshots of the dashboard. The run's output files aren't committed; this repository holds
 only the agents and skills.
 
-## Agentic QA and AIQA
-Agentic QA is the open-source side. [AIQA](https://www.npmjs.com/package/@agents-forge/aiqa)
-(`@agents-forge/aiqa`) is the Agents Forge product for enterprises. Both write the same `.aiqa/` files, including
-the test-case table, the story hash and the results columns. So you can start here and move to AIQA on the same
-project.
-
-| | Agentic QA | AIQA |
-|---|---|---|
-| For | anyone; open source | enterprises |
-| Install | a Claude Code plugin, or copy the `.md` files | the npm package `@agents-forge/aiqa` |
-| Runs in | your Claude Code or Copilot chat | its own CLI and workspace dashboard (`aiqa ui`) |
-| Full suite and story workflow | yes | yes |
-| Regression runs | no | `aiqa regression` |
-| Jira | reads a story through a Jira MCP server, if one is connected | `aiqa alm push` sends results, with change tracking |
-| Approval before commit or Jira | a person reviews; nothing checks it in code | checked in code |
-| Files | `.aiqa/` | the same `.aiqa/` |
-
 ## Safety
 - **No git writes:** every agent prompt forbids git commands that change the repository. A person reviews and
-  commits the work. Unlike AIQA, nothing checks this in code: review what the agents changed before you
-  commit.
+  commits the work. Nothing checks this in code, so review what the agents changed before you commit.
 - **Story text is data:** it's handed to the agents fenced as untrusted data, and instructions found in it are
   recorded as a finding, never followed.
-- **Saved logins:** `.aiqa/auth-state.json` holds a signed-in browser session. `qa-setup` offers to git-ignore it.
+- **Saved logins:** `.agentic-qa/auth-state.json` holds a signed-in browser session. `qa-setup` offers to git-ignore
+  it.
 
 ## Working on this repository
 - `.claude/` is the source. After changing an agent or a skill, run `npm run build`. It checks every agent's
   frontmatter, updates the plugin's agent list and regenerates the Copilot copies in `.github/`.
 - `npm test` runs the tests. CI runs both and fails when the generated files are out of date.
-- The prompts started as a port of AIQA (`@agents-forge/aiqa`) 2.5. This repository is kept separate from it: change
-  the agents and skills here, and list the change in `CHANGELOG.md`.
+- List every change in `CHANGELOG.md`.
 - Bump the version in `.claude-plugin/plugin.json` and `marketplace.json` for each release. Claude Code only updates
   an installed plugin when the version changes. The build checks that the two versions match.
 - `claude --plugin-dir .` runs Claude Code with this checkout as the plugin, without installing it.

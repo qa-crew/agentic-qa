@@ -7,7 +7,7 @@
       "name": "agentic-qa",
       "source": "./",
       "description": "Agentic QA, open-source QA agents for Claude Code: a full Playwright suite from a URL, or one user story at a time, with a live dashboard.",
-      "version": "2.5.0"
+      "version": "1.0.0"
     }
   ]
 }
