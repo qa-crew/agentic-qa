@@ -10,70 +10,78 @@
   try { var m = localStorage.getItem("agentic-qa-tutorial-mode"); if (m === "light" || m === "dark") document.documentElement.setAttribute("data-mode", m); } catch (e) {}
 </script>
 <style>
+  /* Geist: black and white, one blue accent. The same look as the dashboard's default theme. Fonts: Geist and Geist Mono (SIL OFL, see fonts/). */
+  @font-face { font-family: "Geist"; font-style: normal; font-weight: 400; font-display: swap; src: url("fonts/geist-400.woff2") format("woff2"); }
+  @font-face { font-family: "Geist"; font-style: normal; font-weight: 500; font-display: swap; src: url("fonts/geist-500.woff2") format("woff2"); }
+  @font-face { font-family: "Geist"; font-style: normal; font-weight: 600; font-display: swap; src: url("fonts/geist-600.woff2") format("woff2"); }
+  @font-face { font-family: "Geist"; font-style: normal; font-weight: 700; font-display: swap; src: url("fonts/geist-700.woff2") format("woff2"); }
+  @font-face { font-family: "Geist Mono"; font-style: normal; font-weight: 400; font-display: swap; src: url("fonts/geist-mono-400.woff2") format("woff2"); }
+  @font-face { font-family: "Geist Mono"; font-style: normal; font-weight: 500; font-display: swap; src: url("fonts/geist-mono-500.woff2") format("woff2"); }
   :root {
     color-scheme: light;
-    --font-sans: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
-    --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
-    --bg-canvas: #EEF1F5; --bg-surface: #FFFFFF; --bg-sunken: #F6F8FA; --bg-code: #0F172A; --fg-code: #E5E9F2;
-    --border: #CDD3DC; --border-subtle: #E2E7EE;
-    --fg: #0F172A; --fg-2: #334155; --fg-muted: #475569;
-    --link: #2B4FD8; --focus: #2B4FD8; --accent: #2B4FD8; --accent-fg: #FFFFFF;
-    --accent-tint: #E8EDFD; --accent-tint-border: #B9C6F5; --accent-tint-fg: #1E2A78;
-    --ok-bg: #DCFCE7; --ok-fg: #14532D; --ok-solid: #166534;
-    --warn-bg: #FEF3C7; --warn-fg: #78350F; --warn-solid: #92400E;
-    --info-bg: #E0F2FE; --info-fg: #0C4A6E; --info-solid: #0369A1;
-    --agent-bg: #EDE9FE; --agent-fg: #4C1D95;
-    --logo-bg: #0F172A; --logo-fg: #FFFFFF; --bg-chrome: #FFFFFF;
-    --bubble-you: #2B4FD8; --bubble-you-fg: #FFFFFF;
-    --shadow-sm: 0 1px 2px rgba(15, 23, 42, .08); --shadow-lg: 0 12px 32px rgba(15, 23, 42, .12);
-    --radius-sm: 6px; --radius-md: 8px; --radius-lg: 12px;
+    --font-sans: "Geist", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+    --font-mono: "Geist Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+    --bg-canvas: #FAFAFA; --bg-surface: #FFFFFF; --bg-sunken: #F5F5F5; --bg-code: #0A0A0A; --fg-code: #EDEDED;
+    --border: #D9D9D9; --border-subtle: #EBEBEB;
+    --fg: #171717; --fg-2: #333333; --fg-muted: #666666;
+    --link: #0068D6; --focus: #0070F3; --accent: #0070F3; --accent-fg: #FFFFFF;
+    --accent-tint: #EAF4FF; --accent-tint-border: #9ECBFF; --accent-tint-fg: #0050A8;
+    --ok-bg: #E9F9EE; --ok-fg: #0D5A26; --ok-solid: #1A7F37;
+    --warn-bg: #FFF3E0; --warn-fg: #8A3C00; --warn-solid: #B35400;
+    --info-bg: #EAF4FF; --info-fg: #0055B8; --info-solid: #0070F3;
+    --agent-bg: #F2F2F2; --agent-fg: #171717; --chip-bg: #F2F2F2;
+    --logo-bg: #171717; --logo-fg: #FFFFFF; --bg-chrome: rgba(255, 255, 255, .86);
+    --bubble-you: #171717; --bubble-you-fg: #FFFFFF;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, .06); --shadow-lg: 0 0 0 1px rgba(0, 0, 0, .04), 0 12px 32px rgba(0, 0, 0, .10);
+    --radius-sm: 4px; --radius-md: 6px; --radius-lg: 8px;
     --topbar-h: 56px;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-mode="light"]) {
       color-scheme: dark;
-      --bg-canvas: #0E1320; --bg-surface: #151B2B; --bg-sunken: #111726; --bg-code: #0A0E18; --fg-code: #E5E9F2;
-      --border: #2E3A55; --border-subtle: #1E2638;
-      --fg: #E5E9F2; --fg-2: #C3CAD9; --fg-muted: #A6AFC3;
-      --link: #9DB0FF; --focus: #8EA6FF; --accent: #8EA6FF; --accent-fg: #0A1230;
-      --accent-tint: #1A2448; --accent-tint-border: #34478F; --accent-tint-fg: #E0E6FF;
-      --ok-bg: #12321F; --ok-fg: #86EFAC; --ok-solid: #4ADE80;
-      --warn-bg: #3A2A0C; --warn-fg: #FCD34D; --warn-solid: #FBBF24;
-      --info-bg: #0F2B3B; --info-fg: #7DD3FC; --info-solid: #38BDF8;
-      --agent-bg: #2A1F4A; --agent-fg: #C4B5FD;
-      --logo-bg: #E5E9F2; --logo-fg: #0F172A; --bg-chrome: #111726;
-      --bubble-you: #34478F; --bubble-you-fg: #FFFFFF;
-      --shadow-sm: 0 1px 2px rgba(0, 0, 0, .4); --shadow-lg: 0 12px 32px rgba(0, 0, 0, .5);
+      --bg-canvas: #0A0A0A; --bg-surface: #111111; --bg-sunken: #0F0F0F; --bg-code: #000000; --fg-code: #EDEDED;
+      --border: #333333; --border-subtle: #1F1F1F;
+      --fg: #EDEDED; --fg-2: #D4D4D4; --fg-muted: #A1A1A1;
+      --link: #52A8FF; --focus: #3291FF; --accent: #3291FF; --accent-fg: #0A0A0A;
+      --accent-tint: #0A2540; --accent-tint-border: #1F4F8A; --accent-tint-fg: #CFE6FF;
+      --ok-bg: #0B2E17; --ok-fg: #6FDC8C; --ok-solid: #3FB950;
+      --warn-bg: #3A2105; --warn-fg: #FFB366; --warn-solid: #F0883E;
+      --info-bg: #0A2540; --info-fg: #79B8FF; --info-solid: #3291FF;
+      --agent-bg: #1F1F1F; --agent-fg: #EDEDED; --chip-bg: #1F1F1F;
+      --logo-bg: #EDEDED; --logo-fg: #0A0A0A; --bg-chrome: rgba(10, 10, 10, .86);
+      --bubble-you: #EDEDED; --bubble-you-fg: #0A0A0A;
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, .5); --shadow-lg: 0 0 0 1px rgba(255, 255, 255, .06), 0 12px 32px rgba(0, 0, 0, .6);
     }
   }
   :root[data-mode="dark"] {
     color-scheme: dark;
-    --bg-canvas: #0E1320; --bg-surface: #151B2B; --bg-sunken: #111726; --bg-code: #0A0E18; --fg-code: #E5E9F2;
-    --border: #2E3A55; --border-subtle: #1E2638;
-    --fg: #E5E9F2; --fg-2: #C3CAD9; --fg-muted: #A6AFC3;
-    --link: #9DB0FF; --focus: #8EA6FF; --accent: #8EA6FF; --accent-fg: #0A1230;
-    --accent-tint: #1A2448; --accent-tint-border: #34478F; --accent-tint-fg: #E0E6FF;
-    --ok-bg: #12321F; --ok-fg: #86EFAC; --ok-solid: #4ADE80;
-    --warn-bg: #3A2A0C; --warn-fg: #FCD34D; --warn-solid: #FBBF24;
-    --info-bg: #0F2B3B; --info-fg: #7DD3FC; --info-solid: #38BDF8;
-    --agent-bg: #2A1F4A; --agent-fg: #C4B5FD;
-    --logo-bg: #E5E9F2; --logo-fg: #0F172A; --bg-chrome: #111726;
-    --bubble-you: #34478F; --bubble-you-fg: #FFFFFF;
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, .4); --shadow-lg: 0 12px 32px rgba(0, 0, 0, .5);
+    --bg-canvas: #0A0A0A; --bg-surface: #111111; --bg-sunken: #0F0F0F; --bg-code: #000000; --fg-code: #EDEDED;
+    --border: #333333; --border-subtle: #1F1F1F;
+    --fg: #EDEDED; --fg-2: #D4D4D4; --fg-muted: #A1A1A1;
+    --link: #52A8FF; --focus: #3291FF; --accent: #3291FF; --accent-fg: #0A0A0A;
+    --accent-tint: #0A2540; --accent-tint-border: #1F4F8A; --accent-tint-fg: #CFE6FF;
+    --ok-bg: #0B2E17; --ok-fg: #6FDC8C; --ok-solid: #3FB950;
+    --warn-bg: #3A2105; --warn-fg: #FFB366; --warn-solid: #F0883E;
+    --info-bg: #0A2540; --info-fg: #79B8FF; --info-solid: #3291FF;
+    --agent-bg: #1F1F1F; --agent-fg: #EDEDED; --chip-bg: #1F1F1F;
+    --logo-bg: #EDEDED; --logo-fg: #0A0A0A; --bg-chrome: rgba(10, 10, 10, .86);
+    --bubble-you: #EDEDED; --bubble-you-fg: #0A0A0A;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, .5); --shadow-lg: 0 0 0 1px rgba(255, 255, 255, .06), 0 12px 32px rgba(0, 0, 0, .6);
   }
 
   * { box-sizing: border-box; }
   html { scroll-padding-top: calc(var(--topbar-h) + 16px); }
   @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
-  body { margin: 0; background: var(--bg-canvas); color: var(--fg); font: 16px/1.6 var(--font-sans); -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg-canvas); color: var(--fg); font: 16px/1.65 var(--font-sans); -webkit-text-size-adjust: 100%; -webkit-font-smoothing: antialiased; }
+  h1, h2, h3, h4 { font-weight: 600; letter-spacing: -.015em; }
   a { color: var(--link); text-underline-offset: 2px; }
   :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
   code { font: 500 .9em var(--font-mono); background: var(--bg-sunken); border: 1px solid var(--border-subtle); border-radius: 4px; padding: .05em .35em; overflow-wrap: anywhere; }
 
   /* Top bar */
-  .top { position: sticky; top: 0; z-index: 20; height: var(--topbar-h); display: flex; align-items: center; gap: 12px; padding: 0 16px; background: var(--bg-chrome); border-bottom: 1px solid var(--border); }
+  .top { position: sticky; top: 0; z-index: 20; height: var(--topbar-h); display: flex; align-items: center; gap: 12px; padding: 0 16px; background: var(--bg-chrome); -webkit-backdrop-filter: saturate(1.8) blur(8px); backdrop-filter: saturate(1.8) blur(8px); border-bottom: 1px solid var(--border-subtle); }
   .brand { display: flex; align-items: center; gap: 10px; color: var(--fg); text-decoration: none; font-weight: 600; min-width: 0; }
-  .logo { background: var(--logo-bg); color: var(--logo-fg); font: 600 15px/1 var(--font-sans); letter-spacing: .06em; padding: 7px 9px; border-radius: var(--radius-sm); }
+  .logo { background: var(--logo-bg); color: var(--logo-fg); font: 600 15px/1 var(--font-sans); letter-spacing: -.01em; padding: 7px 10px; border-radius: var(--radius-sm); }
   .brand > span:last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .top .spacer { flex: 1; }
   .mode { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 6px 12px; border-radius: var(--radius-md); border: 1px solid var(--border); background: var(--bg-surface); color: var(--fg); font: 600 13px var(--font-sans); cursor: pointer; }
@@ -83,27 +91,27 @@
   .layout { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 40px; max-width: 1200px; margin: 0 auto; padding: 32px 24px 64px; }
   .toc { position: sticky; top: calc(var(--topbar-h) + 24px); align-self: start; max-height: calc(100vh - var(--topbar-h) - 48px); overflow: auto; }
   .toc summary { display: none; }
-  .toc h2 { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--fg-muted); margin: 0 0 8px; }
+  .toc h2 { font-size: 13px; letter-spacing: 0; color: var(--fg-muted); margin: 0 0 8px 10px; }
   .toc ol { list-style: none; margin: 0; padding: 0; counter-reset: toc; }
   .toc li { counter-increment: toc; }
   .toc a { display: flex; gap: 10px; padding: 6px 10px; border-radius: var(--radius-md); color: var(--fg-2); text-decoration: none; font-size: 14.5px; border-left: 2px solid transparent; }
   .toc a::before { content: counter(toc); font: 600 12px/1.9 var(--font-mono); color: var(--fg-muted); min-width: 1.4em; }
   .toc a:hover { background: var(--bg-surface); color: var(--fg); }
-  .toc a[aria-current="true"] { background: var(--accent-tint); color: var(--accent-tint-fg); border-left-color: var(--accent); }
+  .toc a[aria-current="true"] { background: var(--bg-surface); color: var(--fg); border-left-color: var(--fg); box-shadow: var(--shadow-sm); }
   main { min-width: 0; max-width: 820px; }
 
   /* Hero */
   .hero { margin: 0 0 44px; }
-  .eyebrow { display: inline-block; font: 600 12px var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--accent-tint-fg); background: var(--accent-tint); border: 1px solid var(--accent-tint-border); border-radius: 999px; padding: 3px 10px; }
-  .hero h1 { font-size: clamp(30px, 5vw, 44px); line-height: 1.12; letter-spacing: -.01em; margin: 14px 0 12px; }
+  .eyebrow { display: inline-block; font: 500 13px var(--font-mono); color: var(--fg-muted); background: var(--bg-surface); border: 1px solid var(--border); border-radius: 999px; padding: 3px 12px; }
+  .hero h1 { font-size: clamp(32px, 5.4vw, 52px); line-height: 1.05; letter-spacing: -.035em; margin: 16px 0 14px; text-wrap: balance; }
   .hero .lead { font-size: 18.5px; color: var(--fg-2); margin: 0 0 22px; max-width: 700px; }
   .outcomes { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 26px; padding: 0; list-style: none; }
   .outcomes li { font-size: 14px; font-weight: 500; padding: 4px 12px; border-radius: 999px; background: var(--bg-surface); border: 1px solid var(--border); color: var(--fg-2); }
 
   /* Sections */
   section { margin: 0 0 60px; }
-  section > h2 { display: flex; align-items: baseline; gap: 12px; font-size: 26px; line-height: 1.25; margin: 0 0 6px; }
-  section > h2 .n { font: 600 14px var(--font-mono); color: var(--accent-tint-fg); background: var(--accent-tint); border-radius: var(--radius-sm); padding: 2px 8px; flex: none; position: relative; top: -3px; }
+  section > h2 { display: flex; align-items: baseline; gap: 12px; font-size: 28px; line-height: 1.2; letter-spacing: -.025em; margin: 0 0 6px; }
+  section > h2 .n { font: 500 14px var(--font-mono); letter-spacing: 0; color: var(--fg-muted); border: 1px solid var(--border); background: var(--bg-surface); border-radius: var(--radius-sm); padding: 1px 8px; flex: none; position: relative; top: -4px; }
   section > .intro { color: var(--fg-muted); margin: 0 0 20px; font-size: 17px; }
   h3 { font-size: 19px; margin: 32px 0 8px; }
   p { margin: 0 0 14px; }
@@ -128,11 +136,11 @@
   .code { position: relative; margin: 12px 0 18px; }
   .code pre { margin: 0; background: var(--bg-code); color: var(--fg-code); border-radius: var(--radius-lg); padding: 14px 16px; padding-right: 76px; overflow-x: auto; font: 14px/1.6 var(--font-mono); border: 1px solid var(--border); }
   .code pre code { background: none; border: 0; padding: 0; font: inherit; color: inherit; overflow-wrap: normal; }
-  .code .label { position: absolute; left: 14px; top: -10px; font: 600 11px var(--font-mono); letter-spacing: .04em; text-transform: uppercase; background: var(--bg-surface); color: var(--fg-muted); border: 1px solid var(--border); border-radius: 999px; padding: 1px 8px; }
+  .code .label { position: absolute; left: 14px; top: -11px; font: 500 12px var(--font-mono); background: var(--bg-surface); color: var(--fg-muted); border: 1px solid var(--border); border-radius: 999px; padding: 1px 9px; }
   .code.labeled pre { padding-top: 20px; }
   .copy { position: absolute; top: 8px; right: 8px; font: 600 12px var(--font-sans); padding: 5px 10px; border-radius: var(--radius-sm); border: 1px solid rgba(229, 233, 242, .25); background: rgba(229, 233, 242, .08); color: #E5E9F2; cursor: pointer; }
   .copy:hover { background: rgba(229, 233, 242, .18); }
-  .copy[data-done] { background: #166534; border-color: #166534; color: #FFFFFF; }
+  .copy[data-done] { background: #EDEDED; border-color: #EDEDED; color: #0A0A0A; }
 
   /* Tabs */
   .tabs { margin: 16px 0 24px; }
@@ -149,7 +157,7 @@
   .flow .num { font: 600 12px var(--font-mono); color: var(--fg-muted); }
   .flow .name { font-weight: 600; }
   .flow .does { font-size: 13.5px; color: var(--fg-muted); flex: 1; }
-  .flow .time { align-self: flex-start; font: 600 12px var(--font-mono); color: var(--accent-tint-fg); background: var(--accent-tint); border-radius: 999px; padding: 1px 8px; }
+  .flow .time { align-self: flex-start; font: 500 12px var(--font-mono); color: var(--fg-2); background: var(--chip-bg); border-radius: 999px; padding: 1px 8px; }
   .chip { display: inline-block; font-size: 12px; font-weight: 600; padding: 1px 8px; border-radius: 999px; }
   .chip.code-chip { background: var(--bg-sunken); color: var(--fg-muted); border: 1px solid var(--border-subtle); }
   .chip.agent { background: var(--agent-bg); color: var(--agent-fg); }
@@ -183,7 +191,7 @@
   /* Steps (numbered tutorial steps) */
   .steps { list-style: none; counter-reset: s; margin: 16px 0; padding: 0; }
   .steps > li { counter-increment: s; position: relative; padding: 0 0 18px 44px; }
-  .steps > li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: var(--accent-fg); font: 700 14px/28px var(--font-sans); text-align: center; }
+  .steps > li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 28px; height: 28px; border-radius: 50%; background: var(--fg); color: var(--bg-surface); font: 600 14px/28px var(--font-mono); text-align: center; }
   .steps > li:not(:last-child)::after { content: ""; position: absolute; left: 13px; top: 32px; bottom: 4px; width: 2px; background: var(--border); }
   .steps > li > strong:first-child { display: block; margin-bottom: 2px; }
 
@@ -204,7 +212,7 @@
   .shot img { display: block; width: 100%; height: auto; }
   .shot.crop { aspect-ratio: 16 / 10; }
   .shot.crop img { height: 100%; object-fit: cover; object-position: top; }
-  .shot .zoom { position: absolute; right: 10px; bottom: 10px; font: 600 12px var(--font-sans); background: rgba(15, 23, 42, .78); color: #FFFFFF; border-radius: var(--radius-sm); padding: 3px 9px; opacity: 0; transition: opacity .15s; }
+  .shot .zoom { position: absolute; right: 10px; bottom: 10px; font: 600 12px var(--font-sans); background: rgba(10, 10, 10, .82); color: #FFFFFF; border-radius: var(--radius-sm); padding: 3px 9px; opacity: 0; transition: opacity .15s; }
   .shot:hover .zoom, .shot:focus-visible .zoom { opacity: 1; }
   figcaption { font-size: 14px; color: var(--fg-muted); margin-top: 10px; }
   figcaption strong { color: var(--fg); }
@@ -219,7 +227,7 @@
   dialog.viewer .frame { position: relative; padding-top: 44px; }
   dialog.viewer img { display: block; max-width: min(96vw, 1400px); max-height: calc(88vh - 44px); width: auto; height: auto; border-radius: var(--radius-md); background: #FFFFFF; }
   dialog.viewer p { color: #E5E9F2; font-size: 14px; margin: 8px 0 0; text-align: center; }
-  dialog.viewer button { position: absolute; top: 0; right: 0; font: 600 13px var(--font-sans); background: rgba(15, 23, 42, .85); color: #FFFFFF; border: 1px solid rgba(255, 255, 255, .3); border-radius: var(--radius-sm); padding: 6px 12px; cursor: pointer; }
+  dialog.viewer button { position: absolute; top: 0; right: 0; font: 600 13px var(--font-sans); background: rgba(10, 10, 10, .85); color: #FFFFFF; border: 1px solid rgba(255, 255, 255, .3); border-radius: var(--radius-sm); padding: 6px 12px; cursor: pointer; }
 
   /* FAQ */
   details.faq { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); margin: 10px 0; }
@@ -234,7 +242,7 @@
   .grid2 h4 { margin: 0 0 4px; font-size: 15.5px; }
   .grid2 p { margin: 0; font-size: 14.5px; color: var(--fg-muted); }
   .asks { list-style: none; padding: 0; margin: 10px 0 18px; display: grid; gap: 8px; }
-  .asks li { background: var(--bg-surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--radius-md); padding: 8px 14px; font-size: 15px; }
+  .asks li { background: var(--bg-surface); border: 1px solid var(--border); border-left: 3px solid var(--fg); border-radius: var(--radius-md); padding: 8px 14px; font-size: 15px; }
   .asks li span { display: block; font-size: 13px; color: var(--fg-muted); }
 
   footer { border-top: 1px solid var(--border); margin-top: 24px; padding-top: 20px; font-size: 14px; color: var(--fg-muted); }
@@ -318,9 +326,9 @@
         <li>Requirements</li><li>Risk-based test plan</li><li>Test cases</li><li>Playwright page objects &amp; specs</li><li>A review of every selector</li><li>An executive test report</li>
       </ul>
       <figure>
-        <a class="shot crop" href="images/suite.png" data-caption="The dashboard after a full-suite run on saucedemo.com: five steps done, with their times and files.">
-          <img src="images/suite.png" alt="The Agentic QA dashboard's Full suite view: five step cards marked Done with their times, then the documents, test cases and test scripts." width="1366" height="1120"><span class="zoom">Open</span></a>
-        <figcaption>The dashboard after a real run on saucedemo.com. Every image on this page comes from that run.</figcaption>
+        <a class="shot crop" href="images/now.png" data-caption="The dashboard's Now page during a full-suite run on saucedemo.com: what's running, what's waiting for you, and the last test run.">
+          <img src="images/now.png" alt="The Agentic QA dashboard's Now page: a sentence saying the QA Engineer is writing the tests and two stories wait for review, a track of the five steps sized by time, the stories waiting for review with a copy-command button, the last test run (16 of 18 passed) and the activity feed." width="1366" height="1140"><span class="zoom">Open</span></a>
+        <figcaption>The dashboard's Now page during a run on saucedemo.com. The screens on this page show an example project built on that site.</figcaption>
       </figure>
     </div>
 
@@ -590,9 +598,9 @@ claude plugin install agentic-qa@qa-crew --scope project</code></pre></div>
 playwright.config.ts</div>
       <p>On saucedemo, that came to 56 snapshots, 22 test-case files with 192 cases, 20 page objects and 20 specs with 197 tests. <a href="https://github.com/qa-crew/agentic-qa/blob/main/examples/saucedemo/README.md">The example</a> shows excerpts from each step.</p>
       <figure>
-        <a class="shot crop" href="images/document.png" data-caption="The test plan, opened from the dashboard.">
-          <img src="images/document.png" alt="The dashboard showing the test plan document: a Document Info table and the start of the Executive Summary." loading="lazy" width="1366" height="1100"><span class="zoom">Open</span></a>
-        <figcaption><strong>Read any document on the dashboard:</strong> here, the test plan the QA Planner wrote.</figcaption>
+        <a class="shot crop" href="images/document.png" data-caption="The test plan, open in the Full suite page's reader.">
+          <img src="images/document.png" alt="The Full suite page: the five-step track, then a list of the documents, test cases, specs, page objects and snapshots on the left and the test plan open on the right." loading="lazy" width="1366" height="1000"><span class="zoom">Open</span></a>
+        <figcaption><strong>Read anything the agents wrote on the dashboard:</strong> here, the test plan from the QA Planner.</figcaption>
       </figure>
     </section>
 
@@ -626,9 +634,9 @@ As a shopper I want to sign in so I can buy things.
           The Run step fills in <strong>Last Result</strong> and <strong>Evidence</strong> (a screenshot) for every case, and adds a row to <strong>Run History</strong>.</li>
       </ol>
       <figure>
-        <a class="shot crop" href="images/story-cases.png" data-caption="Story SD-1 on the dashboard: five steps done, 12 verified cases, each with its result and screenshot.">
-          <img src="images/story-cases.png" alt="The dashboard's story view for SD-1: five steps marked Done, 12 Verified, and the test-case table with Passed results and screenshot links." loading="lazy" width="1366" height="1240"><span class="zoom">Open</span></a>
-        <figcaption><strong>SD-1 on the dashboard:</strong> 12 test cases, all verified in the app, all passed.</figcaption>
+        <a class="shot crop" href="images/story-cases.png" data-caption="Story SD-3, waiting for review before Automate. The selected case is a Possible defect: what the story says, next to what the app does.">
+          <img src="images/story-cases.png" alt="The dashboard's story page for SD-3: Pull, Design and Explore done, Automate waiting for your review, a dark bar with the command to continue and a Copy button, then the test cases grouped by acceptance criterion with the Possible defect case open: The story says one message lists all three missing fields; the app shows only the first one." loading="lazy" width="1366" height="1100"><span class="zoom">Open</span></a>
+        <figcaption><strong>Reviewing a story:</strong> cases grouped by acceptance criterion. Use the arrow keys to move through them. A Possible defect shows what the story says next to what the app does.</figcaption>
       </figure>
       <div class="grid2">
         <div class="card"><h4>The defect rule</h4><p>When the app contradicts the story, Explore never changes the expected result to match the app. It marks the case <strong>Possible defect</strong>, and Automate writes it as <code>test.fixme</code>.</p></div>
@@ -644,61 +652,67 @@ As a shopper I want to sign in so I can buy things.
       <p class="intro">A small local page that follows a run as it happens and shows everything the agents wrote.</p>
       <div class="code"><button class="copy" type="button">Copy</button>
 <pre><code>/agentic-qa:qa-dashboard</code></pre></div>
-      <p>It gives you a link like <code>http://127.0.0.1:52341/3f9c…/</code>. The page refreshes every two seconds. The left rail has four views: <strong>Full suite</strong>, <strong>Stories</strong>, <strong>Results</strong> and <strong>Models</strong>. Select any image to see it full size.</p>
+      <p>It gives you a link like <code>http://127.0.0.1:52341/3f9c…/</code>. The page refreshes every two seconds. The left rail has five views: <strong>Now</strong>, <strong>Full suite</strong>, <strong>Stories</strong>, <strong>Results</strong> and <strong>Models</strong>, with <strong>Settings</strong> at the bottom. Start on <strong>Now</strong>: one sentence says what's happening, and anything waiting for your review comes with the command to continue and a Copy button. Select any image to see it full size.</p>
 
       <div class="gallery">
         <figure class="wide">
-          <a class="shot crop" href="images/suite.png" data-caption="Full suite: each step with its time and its files, then the documents, test cases and test scripts.">
-            <img src="images/suite.png" alt="The Full suite view: five step cards marked Done with their times, then lists of documents, test cases and test scripts." loading="lazy" width="1366" height="1120"><span class="zoom">Open</span></a>
-          <figcaption><strong>Full suite:</strong> the run's target, filter and status; each step with its time and file; then every document, test case and script. Select one to read it.</figcaption>
+          <a class="shot crop" href="images/suite.png" data-caption="Full suite: the five steps as a track sized by how long each took, then a reader for everything the agents wrote.">
+            <img src="images/suite.png" alt="The Full suite page: the run's target, filter and config; a track of the five steps where the bars' widths follow their times; then a list of documents, test cases, specs, page objects and snapshots, with the requirements open on the right." loading="lazy" width="1366" height="1180"><span class="zoom">Open</span></a>
+          <figcaption><strong>Full suite:</strong> the run, each step sized by its time, and a reader: pick a document, test-case file, spec or snapshot on the left to read it on the right.</figcaption>
         </figure>
         <figure>
           <a class="shot crop" href="images/stories.png" data-caption="Stories: each story with its progress, case count, status and last run.">
-            <img src="images/stories.png" alt="The Stories view: SD-1 Login with the demo accounts, 12 cases, Done, last run 12 passed and 0 failed." loading="lazy" width="1366" height="900"><span class="zoom">Open</span></a>
+            <img src="images/stories.png" alt="The Stories page: four stories, each with a five-segment progress track, where it is (Done, Review before Explore, Review before Automate, Ready for Design), its test cases and its last run." loading="lazy" width="1366" height="620"><span class="zoom">Open</span></a>
           <figcaption><strong>Stories:</strong> every story with its progress and last run.</figcaption>
         </figure>
         <figure>
           <a class="shot crop" href="images/story-notes.png" data-caption="A story's Exploration notes: what the explorer saw for each case, the snapshots it saved, and any possible defects.">
-            <img src="images/story-notes.png" alt="The SD-1 Exploration notes tab: the snapshots captured, no possible defects, and observations per case." loading="lazy" width="1366" height="1100"><span class="zoom">Open</span></a>
+            <img src="images/story-notes.png" alt="The SD-3 Exploration notes tab: when and where the explorer ran, one line per case that differs from the design, and the test data it used." loading="lazy" width="1366" height="760"><span class="zoom">Open</span></a>
           <figcaption><strong>Exploration notes:</strong> what the explorer saw, case by case.</figcaption>
         </figure>
         <figure>
           <a class="shot crop" href="images/story-runs.png" data-caption="A story's Runs: the latest totals and every run in the history.">
-            <img src="images/story-runs.png" alt="The SD-1 Runs tab: 12 passed, 0 failed, and a history of three runs." loading="lazy" width="1366" height="915"><span class="zoom">Open</span></a>
+            <img src="images/story-runs.png" alt="The SD-1 Runs tab: the last run, 3 of 3 passed, then a history of four runs." loading="lazy" width="1366" height="900"><span class="zoom">Open</span></a>
           <figcaption><strong>Runs:</strong> the latest totals and the run history.</figcaption>
         </figure>
         <figure>
-          <a class="shot crop" href="images/results.png" data-caption="Results: the latest Playwright run of the suite, per spec file, and each story's last run.">
-            <img src="images/results.png" alt="The Results view: 18 passed, 0 failed, a table per spec file, and the SD-1 story run below." loading="lazy" width="1366" height="1026"><span class="zoom">Open</span></a>
-          <figcaption><strong>Results:</strong> the latest runs, per spec, with a link to the HTML report.</figcaption>
+          <a class="shot crop" href="images/results.png" data-caption="Results, failures first: the error, the screenshot at the moment it failed, and the manual test case to check it by hand.">
+            <img src="images/results.png" alt="The Results page: 16 passed, 1 failed, 1 flaky; the failed test with its error, its screenshot and the steps of the matching manual test case; the flaky test; then every spec with bars for its results." loading="lazy" width="1366" height="1180"><span class="zoom">Open</span></a>
+          <figcaption><strong>Results:</strong> failures first, each with its error, screenshot and the matching manual test case; then flaky tests, every spec, and each story's recent runs.</figcaption>
         </figure>
       </div>
 
       <h3>Themes, dark mode and phones</h3>
-      <p>Use the menu at the top right to pick a theme, <strong>Slate</strong> or <strong>Industrial</strong>, and light, dark or your system's setting. The page also works at phone width.</p>
+      <p>Use the menu at the top right to pick a theme, <strong>Geist</strong> (the default), <strong>Carbon</strong>, <strong>Industrial</strong> or <strong>Corporate</strong>, and light, dark or your system's setting. The page also works at phone width.</p>
+      <p>To keep a look, open <strong>Settings</strong> (at the bottom of the left rail). Save it for this browser only, or as the <strong>project default</strong> in <code>.agentic-qa/settings.json</code>; commit that file and your whole team gets the same look.</p>
+      <figure>
+        <a class="shot crop" href="images/settings.png" data-caption="Settings: pick a theme, mode and density, then save it for this browser or as the project default.">
+          <img src="images/settings.png" alt="The Settings page: four theme cards (Geist, Carbon, Industrial, Corporate), mode and density choices, and Save as this browser or the project default." loading="lazy" width="1366" height="1000"><span class="zoom">Open</span></a>
+        <figcaption><strong>Settings:</strong> save a look for this browser, or for the whole project.</figcaption>
+      </figure>
       <div class="phone-row">
         <div class="gallery" style="margin:0">
           <figure>
-            <a class="shot crop" href="images/suite-dark.png" data-caption="The Slate theme in dark mode.">
-              <img src="images/suite-dark.png" alt="The Full suite view in the Slate theme, dark mode." loading="lazy" width="1366" height="900"><span class="zoom">Open</span></a>
-            <figcaption>Slate, dark</figcaption>
+            <a class="shot crop" href="images/now-dark.png" data-caption="The Geist theme in dark mode.">
+              <img src="images/now-dark.png" alt="The Now page in the Geist theme, dark mode." loading="lazy" width="1366" height="900"><span class="zoom">Open</span></a>
+            <figcaption>Geist, dark</figcaption>
           </figure>
           <figure>
-            <a class="shot crop" href="images/suite-industrial.png" data-caption="The Industrial theme in light mode.">
-              <img src="images/suite-industrial.png" alt="The Full suite view in the Industrial theme: black rail, yellow logo, condensed headings." loading="lazy" width="1366" height="900"><span class="zoom">Open</span></a>
+            <a class="shot crop" href="images/story-industrial.png" data-caption="The Industrial theme in light mode.">
+              <img src="images/story-industrial.png" alt="A story page in the Industrial theme: black top bar, yellow logo and your-turn marks, condensed headings." loading="lazy" width="1366" height="900"><span class="zoom">Open</span></a>
             <figcaption>Industrial, light</figcaption>
           </figure>
         </div>
         <figure style="margin:0">
           <a class="shot crop" href="images/phone-story.png" data-caption="A story on a phone, in dark mode.">
-            <img src="images/phone-story.png" alt="The SD-1 story view at phone width in dark mode: the five steps stacked, then the status and tabs." loading="lazy" width="390" height="1172"><span class="zoom">Open</span></a>
+            <img src="images/phone-story.png" alt="The SD-3 story page at phone width in dark mode: the views along the top, the steps in two columns, and the your-turn bar with its Copy button." loading="lazy" width="390" height="1300"><span class="zoom">Open</span></a>
           <figcaption>On a phone</figcaption>
         </figure>
       </div>
 
       <ul class="plain" style="margin-top:22px">
         <li><strong>Private:</strong> it serves on your computer only (127.0.0.1), behind a random link.</li>
-        <li><strong>Read-only:</strong> it only reads <code>.agentic-qa/</code>. The one exception is the Models page, which saves your choices.</li>
+        <li><strong>Read-only:</strong> it only reads <code>.agentic-qa/</code>. The two exceptions are the Models page and the Settings page, which save your choices to <code>.agentic-qa/ai.json</code> and <code>.agentic-qa/settings.json</code>.</li>
         <li><strong>Shareable:</strong> <code>/agentic-qa:qa-dashboard --static</code> saves one self-contained file, <code>.agentic-qa/reports/dashboard.html</code>, that you can attach or send.</li>
       </ul>
     </section>
@@ -710,7 +724,7 @@ As a shopper I want to sign in so I can buy things.
       <p><strong>On the dashboard:</strong> open <strong>Models</strong>, pick Session model, Sonnet, Opus, Haiku or Fable for Default and for each role, then press <strong>Save</strong>.</p>
       <figure>
         <a class="shot" href="images/models.png" data-caption="The Models page: a model for Default and for each role, saved to .agentic-qa/ai.json.">
-          <img src="images/models.png" alt="The Models page: a row for Default and each of the five roles, with a model menu and a Save button." loading="lazy" width="1366" height="900"><span class="zoom">Open</span></a>
+          <img src="images/models.png" alt="The Models page: a row for Default and each of the five roles, with a model menu and a Save button." loading="lazy" width="1366" height="800"><span class="zoom">Open</span></a>
         <figcaption>The story steps share the roles: Design = QA Planner, Explore = Analyst, Automate = QA Engineer.</figcaption>
       </figure>
       <p><strong>For one run:</strong></p>

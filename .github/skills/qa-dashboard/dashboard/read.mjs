@@ -2,7 +2,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import {
-  qaPaths, keyFromFileName, parseFrontMatter, parseResultsJson, parseStoryFile, parseTestCaseFile, statusCounts,
+  extractTcId, qaPaths, keyFromFileName, parseFrontMatter, parseResultsJson, parseStoryFile, parseTestCaseFile, statusCounts,
   stepState, storyFiles, storyHash, STORY_STEPS,
 } from "../../qa-story/scripts/qa-files.mjs";
 import { inline, renderMarkdown, sectionText, stripFrontMatter } from "./md.mjs";
@@ -69,25 +69,66 @@ function stepsFromProgress(events) {
   return steps;
 }
 
-/** Playwright's JSON report → totals, per file, and the failures. */
-export function summarizeResults(cwd, rel) {
+/** An image attachment's path, relative to the project, when it's inside .agentic-qa/ (the only place the dashboard serves). */
+function attachmentPath(cwd, results) {
+  const shot = results.flatMap((r) => (r.attachments ?? []).filter((a) => a?.path && /^image\//.test(a.contentType ?? ""))).at(-1);
+  if (!shot) return undefined;
+  const rel = posix(path.relative(cwd, path.resolve(cwd, shot.path)));
+  return rel.startsWith(".agentic-qa/") ? rel : undefined;
+}
+
+/** Every test-case row in .agentic-qa/test-cases/, by ID, so a failing test can show the manual case it automates.
+ *  Reads any Markdown table whose first column holds TC IDs, so the full suite's simpler tables count too. */
+export function testCaseIndex(cwd) {
+  const index = {};
+  for (const f of list(cwd, ".agentic-qa/test-cases", ".md")) {
+    let text;
+    try { text = fs.readFileSync(path.join(cwd, f), "utf-8"); } catch { continue; }
+    const story = parseFrontMatter(text).data.story;
+    const lines = text.split(/\r?\n/);
+    let headers;
+    for (let i = 0; i < lines.length; i++) {
+      const l = lines[i].trim();
+      if (!l.startsWith("|")) { headers = undefined; continue; }
+      const cells = l.replace(/^\||\|$/g, "").split(/(?<!\\)\|/).map((c) => c.trim());
+      if (/^\|\s*:?-{3,}/.test(lines[i + 1]?.trim() ?? "")) { headers = cells; i++; continue; }
+      if (!headers || !/^TC-[A-Za-z0-9]+-[A-Za-z]-\d+$/.test(cells[0]) || index[cells[0]]) continue;
+      const row = Object.fromEntries(headers.map((h, j) => [h, cells[j] ?? ""]));
+      const cell = (h) => (row[h] && row[h] !== "—" ? inline(row[h].replace(/\\\|/g, "|")) : "");
+      index[cells[0]] = { id: cells[0], file: f, story, title: cell("Title"), steps: cell("Steps"), expected: cell("Expected"), status: row.Status };
+    }
+  }
+  return index;
+}
+
+/** Playwright's JSON report → totals, per file, the failures and the flaky tests. */
+export function summarizeResults(cwd, rel, cases) {
   const info = fileInfo(cwd, rel);
   if (!info.exists) return undefined;
   let report;
   try { report = JSON.parse(fs.readFileSync(path.join(cwd, rel), "utf-8")); } catch { return { ...info, error: "unreadable" }; }
   const files = {};
   const failures = [];
+  const flaky = [];
   const walk = (suite, file, titles) => {
     const f = suite.file ?? file;
     for (const spec of suite.specs ?? []) {
       for (const test of spec.tests ?? []) {
-        const last = (test.results ?? []).at(-1);
+        const results = test.results ?? [];
+        const last = results.at(-1);
         const outcome = test.status === "flaky" ? "flaky" : test.status === "skipped" || last?.status === "skipped" ? "skipped" : test.status === "expected" ? "passed" : "failed";
-        const row = (files[f] ??= { file: f, passed: 0, failed: 0, skipped: 0, flaky: 0 });
+        const row = (files[f] ??= { file: f, passed: 0, failed: 0, skipped: 0, flaky: 0, durationMs: 0 });
         row[outcome]++;
+        row.durationMs += results.reduce((a, r) => a + (Number(r.duration) || 0), 0);
+        const title = [...titles, spec.title].filter(Boolean).join(" › ");
+        const tcId = extractTcId(String(spec.title ?? "")) ?? extractTcId(title);
+        const testCase = tcId && cases?.[tcId] ? cases[tcId] : undefined;
         if (outcome === "failed") {
           const msg = String(last?.error?.message ?? last?.errors?.[0]?.message ?? "").replace(/\x1b\[[0-9;]*m/g, "");
-          failures.push({ title: [...titles, spec.title].filter(Boolean).join(" › "), file: f, error: msg.split(/\r?\n/).find((l) => l.trim())?.trim().slice(0, 300) ?? "" });
+          const lines = msg.split(/\r?\n/).map((l) => l.trimEnd());
+          failures.push({ title, file: f, tcId, testCase, screenshot: attachmentPath(cwd, results), error: lines.find((l) => l.trim())?.trim().slice(0, 300) ?? "", detail: lines.filter((l) => l.trim()).slice(0, 12).join("\n").slice(0, 1500) });
+        } else if (outcome === "flaky") {
+          flaky.push({ title, file: f, tcId, testCase, retries: Math.max(0, results.length - 1) });
         }
       }
     }
@@ -103,10 +144,11 @@ export function summarizeResults(cwd, rel) {
     startedAt: report.stats?.startTime,
     files: rows,
     failures: failures.slice(0, 50),
+    flaky: flaky.slice(0, 50),
   };
 }
 
-function suiteState(cwd, events, keys) {
+function suiteState(cwd, events, keys, cases) {
   const suiteEvents = events.filter((e) => e.kind === "suite");
   const starts = suiteEvents.filter((e) => e.step === "pipeline" && e.event === "start");
   const runStart = starts.at(-1);
@@ -149,19 +191,20 @@ function suiteState(cwd, events, keys) {
     pageObjects: list(cwd, ".agentic-qa/test-scripts/pages", ".page.ts"),
     snapshots: list(cwd, ".agentic-qa/snapshots", ".yml"),
     config: fileInfo(cwd, "playwright.config.ts"),
-    results: summarizeResults(cwd, ".agentic-qa/reports/test-results/results.json"),
+    results: summarizeResults(cwd, ".agentic-qa/reports/test-results/results.json", cases),
     htmlReport: fileInfo(cwd, ".agentic-qa/reports/playwright-report/index.html"),
     performanceReport: fileInfo(cwd, ".agentic-qa/reports/performance/performance-report.html"),
   };
 }
 
-function lastRunRow(text) {
+/** The Run History table's rows, oldest first. */
+function runRows(text) {
   const body = sectionText(text, "Run History");
   const rows = body.split(/\r?\n/).filter((l) => /^\|\s*[^|-]/.test(l.trim()) && !/^\|\s*Run\s*\|/i.test(l.trim()));
-  const last = rows.at(-1);
-  if (!last) return undefined;
-  const [run, date, passed, failed, flaky, skipped] = last.replace(/^\||\|$/g, "").split("|").map((c) => c.trim());
-  return { run, date, passed: Number(passed) || 0, failed: Number(failed) || 0, flaky: Number(flaky) || 0, skipped: Number(skipped) || 0 };
+  return rows.map((l) => {
+    const [run, date, passed, failed, flaky, skipped] = l.trim().replace(/^\||\|$/g, "").split("|").map((c) => c.trim());
+    return { run, date, passed: Number(passed) || 0, failed: Number(failed) || 0, flaky: Number(flaky) || 0, skipped: Number(skipped) || 0 };
+  });
 }
 
 export function storyKeys(cwd) {
@@ -222,8 +265,35 @@ function storySummary(cwd, key, events) {
     counts: statusCounts(parsed?.table),
     total: parsed?.table?.rows.length ?? 0,
     stale: !!parsed?.frontMatter.storyHash && !!hash && parsed.frontMatter.storyHash !== hash,
-    lastRun: tcText ? lastRunRow(tcText) : undefined,
+    lastRun: tcText ? runRows(tcText).at(-1) : undefined,
+    runs: tcText ? runRows(tcText).slice(-10) : [],
   };
+}
+
+/** The latest progress lines, newest first: what each step did and when. */
+function activity(events) {
+  return events.filter((e) => e.step && e.event && e.ts).sort((a, b) => Date.parse(a.ts) - Date.parse(b.ts)).slice(-30).reverse()
+    .map((e) => ({ ts: e.ts, kind: e.kind, story: e.story, step: e.step, event: e.event, note: e.note, target: e.target }));
+}
+
+/** "- **AC1** — text" lines → [{ id, html }]. */
+function criteriaList(md) {
+  return md.split(/\r?\n/).flatMap((l) => {
+    const m = l.match(/^\s*[-*]\s+\*\*(AC\d+)\*\*\s*[—:–-]?\s*(.*)$/);
+    return m ? [{ id: m[1], html: inline(m[2]) }] : [];
+  });
+}
+
+/** Lines of the Exploration Notes that name a test case, by its ID. */
+function notesByCase(md, ids) {
+  const out = {};
+  const lines = md.split(/\r?\n/).map((l) => l.replace(/^\s*(?:[-*]|\d+\.)\s+/, "").trim()).filter(Boolean);
+  for (const id of ids) {
+    const lead = new RegExp(`^[*_\`]*${id}[*_\`]*\\s*[:—–-]?\\s*`);
+    const hits = lines.filter((l) => l.includes(id)).map((l) => inline(l.replace(lead, "").replace(/^[a-z]/, (c) => c.toUpperCase())));
+    if (hits.length) out[id] = hits;
+  }
+  return out;
 }
 
 /** Everything the dashboard shows on its main views. */
@@ -234,8 +304,9 @@ export function buildState(cwd) {
     project: path.basename(cwd),
     generatedAt: new Date().toISOString(),
     hasData: fs.existsSync(path.join(cwd, ".agentic-qa")),
-    suite: suiteState(cwd, events, keys),
+    suite: suiteState(cwd, events, keys, testCaseIndex(cwd)),
     stories: keys.map((k) => storySummary(cwd, k, events)),
+    activity: activity(events),
   };
 }
 
@@ -250,17 +321,28 @@ export function buildStory(cwd, key) {
   try { tc = fs.readFileSync(files.testCaseFile, "utf-8"); } catch {}
   const parsed = tc ? parseTestCaseFile(tc) : undefined;
   const html = (md) => (md ? renderMarkdown(md) : "");
+  const resultsRel = posix(path.relative(cwd, files.resultsFile));
+  let byCase = {};
+  try {
+    for (const r of parseResultsJson(JSON.parse(fs.readFileSync(files.resultsFile, "utf-8"))).results) {
+      byCase[r.tcId] = { outcome: r.outcome, durationMs: r.durationMs, error: r.error, screenshot: attachmentPath(cwd, [{ attachments: r.screenshot ? [{ path: r.screenshot, contentType: "image/png" }] : [] }]) };
+    }
+  } catch { byCase = {}; }
+  const notes = sectionText(tc, "Exploration Notes");
   return {
     ...summary,
     storyHtml: story ? html(stripFrontMatter(story).replace(/^#\s+.+$/m, "")) : "",
     criteriaHtml: html(sectionText(tc, "Testable Acceptance Criteria")),
+    criteria: criteriaList(sectionText(tc, "Testable Acceptance Criteria")),
+    notesByCase: notesByCase(notes, parsed?.table?.rows.map((r) => r.cells.ID).filter(Boolean) ?? []),
+    resultsByCase: byCase,
     questionsHtml: html(sectionText(tc, "Open Questions")),
-    notesHtml: html(sectionText(tc, "Exploration Notes")),
+    notesHtml: html(notes),
     historyHtml: html(sectionText(tc, "Run History")),
     headers: parsed?.table?.headers ?? [],
     rows: parsed?.table?.rows.map((r) => ({ cells: r.cells, html: Object.fromEntries(parsed.table.headers.map((h) => [h, inline((r.cells[h] ?? "").replace(/\\\|/g, "|"))])) })) ?? [],
     snapshots: list(cwd, posix(path.relative(cwd, files.snapshotsDir)), ".yml"),
-    results: summarizeResults(cwd, posix(path.relative(cwd, files.resultsFile))),
+    results: summarizeResults(cwd, resultsRel, testCaseIndex(cwd)),
     htmlReport: fileInfo(cwd, posix(path.relative(cwd, path.join(files.reportDir, "index.html")))),
   };
 }

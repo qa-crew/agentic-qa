@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="slate">
+<html lang="en" data-theme="geist">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -36,14 +36,15 @@
   .step .name { font-weight: 600; }
   .step .role { font-size: 13px; color: var(--fg-muted); flex: 1; }
   .step .meta { font-size: 12.5px; color: var(--fg-muted); display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; }
-  .step.running { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-tint-border); }
+  .step.running { border-color: var(--fg); box-shadow: 0 0 0 1px var(--fg); }
   .chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: var(--radius-pill); background: var(--neutral-bg); color: var(--neutral-fg); white-space: nowrap; }
   .chip.ok { background: var(--ok-bg); color: var(--ok-fg); }
   .chip.warn { background: var(--warn-bg); color: var(--warn-fg); }
   .chip.err { background: var(--err-bg); color: var(--err-fg); }
   .chip.info { background: var(--info-bg); color: var(--info-fg); }
   .chip.agent { background: var(--agent-bg); color: var(--agent-fg); }
-  .chip.accent { background: var(--accent-tint); color: var(--accent-tint-fg); }
+  .chip.accent { background: var(--accent); color: var(--accent-fg); }
+  .chip.line { background: transparent; color: var(--fg-2); box-shadow: inset 0 0 0 1px var(--fg-muted); }
   .chip.running::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; animation: pulse 1.2s ease-in-out infinite; }
   @keyframes pulse { 50% { opacity: .25; } }
   @media (prefers-reduced-motion: reduce) { .chip.running::before { animation: none; } }
@@ -79,7 +80,7 @@
   pre.text { margin: 0; padding: 14px 16px; overflow: auto; font: 13px/1.5 var(--font-mono); background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); white-space: pre; }
   .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 20px 0 14px; }
   .tabs a { padding: 6px 12px; border-radius: var(--radius-pill); border: 1px solid var(--border); text-decoration: none; color: var(--fg); font-size: 13.5px; font-weight: 600; background: var(--bg-surface); }
-  .tabs a[aria-current="true"] { background: var(--accent); color: var(--accent-fg); border-color: transparent; }
+  .tabs a[aria-current="true"] { background: var(--fg); color: var(--bg-surface); border-color: transparent; }
   .bar { display: flex; height: 8px; border-radius: 999px; overflow: hidden; background: var(--bg-sunken); min-width: 80px; }
   .bar span { display: block; height: 100%; }
   .empty { padding: 32px 20px; text-align: center; color: var(--fg-muted); }
@@ -103,11 +104,43 @@
   .models td { vertical-align: middle; }
   .models label { font-weight: 600; }
   .m-only { display: none; }
-  @media (max-width: 1000px) { .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } .grid2 { grid-template-columns: 1fr; } }
+  .rail .rail-end { margin-top: auto; }
+  .settings { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 340px); gap: 28px; align-items: start; }
+  .settings fieldset { border: 0; margin: 0 0 24px; padding: 0; min-width: 0; }
+  .settings legend { padding: 0 0 10px; font: var(--display-weight) 17px/1.3 var(--font-display); }
+  .theme-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+  .theme-card { display: flex; flex-direction: column; gap: 8px; padding: 10px 12px 12px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg-surface); cursor: pointer; }
+  .theme-card:has(input:checked) { border-color: var(--focus); box-shadow: 0 0 0 1px var(--focus); }
+  .theme-card:has(input:focus-visible) { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .theme-card .head { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+  .theme-card input, .choice input { margin: 0; width: 16px; height: 16px; accent-color: var(--focus); flex: 0 0 auto; }
+  .theme-card .desc { font-size: 13px; color: var(--fg-muted); line-height: 1.4; }
+  .swatch { display: flex; flex-direction: column; height: 64px; border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
+  .swatch .sw-top { height: 14px; display: flex; align-items: center; padding: 0 6px; }
+  .swatch .sw-top i { display: block; width: 22px; height: 6px; border-radius: 1px; }
+  .swatch .sw-body { flex: 1; display: flex; align-items: flex-end; justify-content: space-between; padding: 7px; }
+  .swatch .sw-dots { display: flex; gap: 4px; }
+  .swatch .sw-dots i { display: block; width: 8px; height: 8px; border-radius: 50%; }
+  .swatch .sw-btn { font: 600 9px/1 sans-serif; padding: 4px 7px; border-radius: 3px; }
+  .choices { display: flex; flex-wrap: wrap; gap: 8px; }
+  .choice { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 6px 14px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg-surface); cursor: pointer; font-size: 14px; }
+  .choice:has(input:checked) { border-color: var(--focus); box-shadow: 0 0 0 1px var(--focus); }
+  .choice.block { display: flex; align-items: flex-start; width: 100%; padding: 10px 14px; }
+  .choice.block span { display: flex; flex-direction: column; gap: 2px; }
+  .choice.block small { color: var(--fg-muted); font-size: 13px; }
+  .choice:has(input:disabled) { opacity: .65; cursor: default; }
+  .save-box { padding: 18px 20px; }
+  .save-box pre { margin: 12px 0 0; padding: 10px 12px; background: var(--bg-sunken); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); font: 12.5px/1.55 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+  .wins ol { margin: 0 0 14px; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+  .wins dl { margin: 0 0 14px; display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 14px; font-size: 14px; }
+  .wins dt { color: var(--fg-muted); }
+  .wins dd { margin: 0; }
+  @media (max-width: 1000px) { .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } .grid2, .settings { grid-template-columns: 1fr; } }
   @media (max-width: 720px) {
     .shell { grid-template-columns: minmax(0, 1fr); }
     .rail { z-index: 20; height: auto; flex-direction: row; justify-content: space-around; padding: 6px; }
-    .rail a { flex-direction: row; font-size: 13px; padding: 8px 10px; }
+    .rail a { flex: 1 1 0; min-width: 0; flex-direction: column; gap: 2px; font-size: 11px; padding: 6px 2px; }
+    .rail .rail-end { margin-top: 0; }
     .steps { grid-template-columns: 1fr; }
     .live #liveText, #themeLabel { display: none; }
     h1 { font-size: 22px; }
@@ -120,20 +153,227 @@
     .models td { border: 0; padding: 2px 0; }
     .models select { width: 100%; margin-top: 6px; }
   }
+  /* Phase 2 screens: Now, the suite track and reader, story review, failure-first results. */
+  .lead { font-size: 17px; max-width: 70ch; margin: 4px 0 18px; color: var(--fg-2); }
+  .sect { margin: 0 0 32px; }
+  .sect > h2, .sec-head h2 { margin: 0; }
+  .sect > h2 { margin-bottom: 12px; }
+  .sec-head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin: 0 0 14px; }
+  .push { margin-left: auto; }
+  .strong-link { font-weight: 600; text-decoration: none; }
+  .strong-link:hover { text-decoration: underline; }
+  .strong { font-weight: 600; }
+  .kt { display: inline-flex; gap: 10px; align-items: baseline; min-width: 0; }
+  .kt h3 { margin: 0; }
+  .row-meta { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .stack { display: flex; flex-direction: column; gap: 12px; }
+  .plain { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; font-size: 14.5px; }
+  .plain li { display: flex; gap: 10px; align-items: baseline; }
+  .facts { display: flex; flex-wrap: wrap; gap: 6px 28px; margin: 0 0 22px; font-size: 14px; }
+  .facts div { display: flex; gap: 8px; }
+  .facts dt { color: var(--fg-muted); }
+  .facts dd { margin: 0; }
+  .hero { margin: 4px 0 34px; }
+  .hero p { margin: 0 0 8px; }
+  .hero h1 { font-size: clamp(28px, 3.4vw, 42px); line-height: 1.08; max-width: 26ch; text-wrap: balance; margin: 0; }
+  .now-cols { display: flex; flex-wrap: wrap; gap: 36px; align-items: flex-start; }
+  .now-main { flex: 3 1 560px; min-width: 0; }
+  .now-side { flex: 2 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 32px; }
+  .side-panel { display: flex; flex-direction: column; gap: 14px; }
+  .side-panel h2 { margin: 0; }
+  .big-num { margin: 0; font: var(--display-weight) 36px/1.05 var(--font-display); }
+
+  .tl { list-style: none; margin: 0 0 30px; padding: 0; display: flex; gap: 4px; align-items: stretch; }
+  .tl .seg { min-width: 120px; display: flex; flex-direction: column; gap: 12px; }
+  .tl-bar { display: block; height: 20px; border-radius: 2px; background: var(--bg-sunken); }
+  .tl-text { display: flex; flex-direction: column; gap: 2px; font-size: 14px; min-width: 0; overflow-wrap: anywhere; }
+  .tl-name { display: flex; gap: 8px; align-items: baseline; font-size: 15px; }
+  .s-done .tl-bar { background: var(--fg-2); }
+  .s-running .tl-bar { background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--fg) 22%, transparent) 0 6px, transparent 6px 12px); box-shadow: inset 0 0 0 1.5px var(--fg); }
+  .s-paused .tl-bar { background: var(--accent); }
+  .s-failed .tl-bar { background: var(--err-solid); }
+  .s-skipped .tl-bar { background: transparent; border: 1.5px dashed var(--fg-muted); }
+  .s-pending .tl-bar { background: transparent; border: 1.5px solid var(--fg-muted); }
+  .s-failed .tl-text > span:nth-child(2) { color: var(--err-fg); font-weight: 600; }
+
+  .mini { display: inline-flex; gap: 3px; flex: 0 0 auto; }
+  .mini i { display: block; width: 16px; height: 6px; border-radius: 1px; background: transparent; box-shadow: inset 0 0 0 1px var(--fg-muted); }
+  .mini .m-done { background: var(--fg-2); box-shadow: none; }
+  .mini .m-turn { background: var(--accent); box-shadow: none; }
+  .mini .m-running { background: repeating-linear-gradient(135deg, var(--fg) 0 2px, transparent 2px 4px); }
+  .mini .m-failed { background: var(--err-solid); box-shadow: none; }
+  .mini .m-skip { box-shadow: none; background: repeating-linear-gradient(90deg, var(--fg-muted) 0 3px, transparent 3px 5px); height: 2px; margin-top: 2px; }
+  .prog { display: inline-flex; align-items: center; gap: 10px; }
+  .tbl-card { overflow-x: auto; }
+  .tbl { width: 100%; font-size: 14px; }
+  .tbl th { font-size: 13px; color: var(--fg-muted); background: var(--bg-surface); border-bottom: 1px solid var(--border); }
+  .tbl td, .tbl th { padding: var(--row-pad-y) 14px; vertical-align: middle; }
+  .tbl td .bar { margin-top: 6px; max-width: 160px; }
+  .w-bar { width: 30%; }
+
+  .gate.big { padding: 22px 24px; display: flex; flex-direction: column; gap: 12px; margin: 0 0 12px; }
+  .gate.big h3 { font-size: 22px; margin: 0; }
+  .gate.big p { margin: 0; max-width: 68ch; font-size: 16px; }
+  .gate.row { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; padding: 16px 20px; }
+  .gate.row .grow { display: flex; flex-direction: column; gap: 4px; flex: 1 1 360px; }
+  .gate-muted { opacity: .82; }
+  .gate .btn.gate-btn, .gate-btn { background: var(--gate-btn-bg); color: var(--gate-btn-fg); }
+  .gate .cmd code { color: inherit; border-color: color-mix(in srgb, currentColor 35%, transparent); background: transparent; }
+  .gate .cmd .btn.ghost { background: transparent; color: inherit; border-color: color-mix(in srgb, currentColor 45%, transparent); }
+  .card.wait { padding: 16px 20px; display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin: 0 0 12px; }
+  .card.wait h3 { font-size: 16px; margin: 0; }
+  .card.wait p { margin: 4px 0 0; }
+  .actions.tight { margin: 0; gap: 10px; }
+  .cmd { display: inline-flex; align-items: stretch; gap: 0; }
+  .cmd code { font: 13px/1 var(--font-mono); display: inline-flex; align-items: center; padding: 0 10px; border: 1px solid var(--border); border-right: 0; border-radius: var(--radius-md) 0 0 var(--radius-md); background: var(--bg-sunken); white-space: nowrap; }
+  .cmd .btn { border-radius: 0 var(--radius-md) var(--radius-md) 0; }
+  .btn.sm { min-height: 34px; padding: 6px 12px; font-size: 13.5px; }
+
+  .feed { list-style: none; margin: 0; padding: 0; }
+  .feed li { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border-subtle); font-size: 14.5px; }
+  .feed li .mono { font-size: 12.5px; padding-top: 2px; }
+
+  .reader { display: flex; flex-wrap: wrap; min-height: 560px; overflow: hidden; }
+  .reader-nav { flex: 1 1 260px; max-width: 320px; border-right: 1px solid var(--border); padding: 6px 0 12px; background: var(--bg-surface); }
+  .rg-head { padding: 14px 18px 6px; display: flex; justify-content: space-between; align-items: baseline; font-size: 14px; }
+  .reader-nav ul { list-style: none; margin: 0; padding: 0; }
+  .reader-nav a { display: flex; justify-content: space-between; gap: 10px; padding: 7px 18px; text-decoration: none; color: var(--fg); font-size: 14px; overflow-wrap: anywhere; }
+  .reader-nav a:hover { background: var(--bg-sunken); }
+  .reader-nav a[aria-current="true"], .story-side a[aria-current="page"] { background: var(--accent-tint); box-shadow: inset 3px 0 0 var(--accent); color: var(--fg); }
+  .reader-body { flex: 999 1 480px; min-width: 0; padding: 24px 30px 32px; }
+  .reader-head { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; border-bottom: 1px solid var(--border-subtle); padding-bottom: 14px; margin-bottom: 16px; }
+  .reader-head h3 { font-size: 24px; margin: 0 0 4px; }
+  .reader-body .doc { max-width: 860px; }
+
+  .story-page { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 28px; align-items: start; }
+  .story-side { position: sticky; top: calc(var(--topbar-h) + 16px); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg-surface); overflow: hidden; max-height: calc(100vh - var(--topbar-h) - 40px); overflow-y: auto; }
+  .ss-head { display: flex; justify-content: space-between; align-items: baseline; padding: 14px 16px 10px; border-bottom: 1px solid var(--border-subtle); }
+  .story-side nav a { display: flex; flex-direction: column; gap: 6px; padding: 12px 16px; border-bottom: 1px solid var(--border-subtle); text-decoration: none; color: var(--fg); }
+  .story-side nav a:hover { background: var(--bg-sunken); }
+  .story-side .kt b { font-weight: 600; line-height: 1.3; }
+  .story-main .back { display: none; }
+  .story-head { display: flex; flex-direction: column; gap: 6px; margin: 0 0 18px; }
+  .story-head h1 { font-size: clamp(26px, 2.8vw, 34px); line-height: 1.1; margin: 0; }
+  .ssteps { list-style: none; margin: 0 0 16px; padding: 0; display: flex; flex-wrap: wrap; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg-surface); overflow: hidden; }
+  .ssteps li { flex: 1 1 140px; display: flex; gap: 10px; align-items: center; padding: 10px 14px; border-right: 1px solid var(--border-subtle); }
+  .ssteps li:last-child { border-right: 0; }
+  .ssteps li > span:last-child { display: flex; flex-direction: column; line-height: 1.25; }
+  .ssteps .dot { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; font: 700 13px var(--font-sans); flex: 0 0 auto; box-shadow: inset 0 0 0 1.5px var(--fg-muted); color: var(--fg-muted); }
+  .ss-done .dot { background: var(--fg-2); color: var(--bg-surface); box-shadow: none; }
+  .ss-turn { background: var(--accent-tint); }
+  .ss-turn .dot { background: var(--accent); color: var(--accent-fg); box-shadow: none; }
+  .ss-running .dot { box-shadow: inset 0 0 0 2px var(--fg); color: var(--fg); background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--fg) 20%, transparent) 0 3px, transparent 3px 6px); }
+  .ss-failed .dot { background: var(--err-solid); color: #fff; box-shadow: none; }
+  .ss-next .dot { box-shadow: inset 0 0 0 1.5px var(--fg); color: var(--fg); }
+  .utabs { display: flex; gap: 2px; flex-wrap: wrap; border-bottom: 1px solid var(--border); margin: 18px 0 16px; }
+  .utabs a { padding: 10px 14px; margin-bottom: -1px; border-bottom: 3px solid transparent; text-decoration: none; color: var(--fg-muted); font-weight: 600; font-size: 14.5px; }
+  .utabs a:hover { color: var(--fg); }
+  .utabs a[aria-current="true"] { color: var(--fg); border-bottom-color: var(--fg); }
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 0 0 12px; }
+  .fchip { display: inline-flex; gap: 6px; align-items: center; min-height: 34px; padding: 0 12px; border-radius: var(--radius-md); border: 1px solid var(--border); background: var(--bg-surface); color: var(--fg); font: 600 13.5px var(--font-sans); cursor: pointer; }
+  .fchip span { opacity: .72; }
+  .fchip[aria-pressed="true"] { background: var(--fg); color: var(--bg-surface); border-color: var(--fg); }
+  .md { display: flex; flex-wrap: wrap; min-height: 520px; overflow: hidden; }
+  .md-list { flex: 1 1 340px; max-width: 440px; border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+  .acg { display: flex; gap: 10px; align-items: baseline; padding: 11px 16px 8px; background: var(--bg-sunken); border-bottom: 1px solid var(--border-subtle); font-size: 13.5px; color: var(--fg-2); line-height: 1.35; }
+  .acg .mono { color: var(--fg); }
+  .cl { list-style: none; margin: 0; padding: 0; }
+  .ci { display: flex; flex-direction: column; gap: 6px; width: 100%; text-align: left; padding: 11px 16px; border: 0; border-bottom: 1px solid var(--border-subtle); background: transparent; color: var(--fg); font: 400 14.5px var(--font-sans); cursor: pointer; }
+  .ci:hover { background: var(--bg-sunken); }
+  .ci[aria-current="true"] { background: var(--accent-tint); box-shadow: inset 3px 0 0 var(--accent); }
+  .ci-t { font-weight: 600; line-height: 1.3; }
+  .kbd-hint { margin: auto 0 0; padding: 12px 16px; }
+  .md-detail { flex: 999 1 400px; min-width: 0; padding: 24px 28px 30px; display: flex; flex-direction: column; gap: 18px; }
+  .cd-head { display: flex; flex-direction: column; gap: 10px; }
+  .cd-head h2 { font-size: 24px; line-height: 1.15; margin: 0; max-width: 32ch; }
+  .says-does { display: flex; flex-wrap: wrap; border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
+  .says-does > div { flex: 1 1 240px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
+  .says-does p { margin: 0; max-width: 46ch; }
+  .says-does .does { background: var(--err-bg); color: var(--err-fg); }
+  .says-does .does a { color: inherit; }
+  .hint-text { margin: -6px 0 0; font-size: 14px; color: var(--fg-2); max-width: 70ch; }
+  .note-box { padding: 12px 14px; background: var(--bg-sunken); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--fg-2); font-size: 14.5px; max-width: 72ch; }
+  .note-box p { margin: 0; }
+  .note-box p + p { margin-top: 6px; }
+  .cd { margin: 0; display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 14px 20px; max-width: 780px; }
+  .cd dt { color: var(--fg-muted); font-weight: 600; font-size: 14px; }
+  .cd dd { margin: 0; overflow-wrap: anywhere; }
+  .cd dd p { margin: 0; }
+  .cd dd p + p { margin-top: 4px; }
+  .steps-list ol { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
+  .steps-list p { margin: 0; }
+  .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag { padding: 1px 7px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 12.5px; }
+
+  .runbar { display: flex; height: 12px; gap: 2px; min-width: 80px; }
+  .runbar i, .legend i, .strip i { display: block; border-radius: 1px; }
+  .r-ok { background: var(--ok-solid); } .r-err { background: var(--err-solid); } .r-warn { background: var(--warn-solid); } .r-skip { background: var(--border); }
+  .legend { list-style: none; margin: 0; padding: 0; display: flex; gap: 24px; flex-wrap: wrap; font-size: 14.5px; }
+  .legend li { display: flex; gap: 8px; align-items: center; }
+  .legend i { width: 10px; height: 10px; }
+  .run-sum { display: flex; flex-direction: column; gap: 14px; margin: 0 0 28px; }
+  .fail { overflow: hidden; }
+  .fail > header { padding: 18px 22px 14px; display: flex; flex-direction: column; gap: 6px; border-bottom: 1px solid var(--border-subtle); }
+  .fail h3 { font-size: 21px; margin: 0; }
+  .fail-body { display: flex; flex-wrap: wrap; }
+  .fail-main { flex: 3 1 400px; min-width: 0; padding: 18px 22px; display: flex; flex-direction: column; gap: 14px; border-right: 1px solid var(--border-subtle); }
+  .fail-side { flex: 2 1 280px; min-width: 0; padding: 18px 22px; display: flex; flex-direction: column; gap: 10px; }
+  .fail-side p { margin: 0; }
+  .fail-side .btn { align-self: flex-start; }
+  .err-pre { margin: 0; padding: 12px 14px; background: var(--bg-sunken); border: 1px solid var(--border-subtle); border-left: 3px solid var(--err-solid); border-radius: var(--radius-md); font: 13px/1.55 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+  .shot { display: block; border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; max-width: 560px; }
+  .shot img { display: block; width: 100%; height: auto; }
+  .card.flaky { padding: 14px 22px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+  .strip { display: inline-flex; gap: 3px; }
+  .strip i { width: 10px; height: 18px; }
+  .timebar { display: inline-block; width: 60px; height: 6px; background: var(--bg-sunken); border-radius: 1px; margin-right: 8px; vertical-align: middle; overflow: hidden; }
+  .timebar i { display: block; height: 100%; background: var(--fg-muted); }
+  .kt > .mono, .acg > .mono { white-space: nowrap; flex: 0 0 auto; }
+  main:focus-visible { outline: none; }
+  /* Safety yellow is too light to stand alone as a mark on a light page: give it an ink edge. */
+  :root[data-theme="industrial"] .mini .m-turn, :root[data-theme="industrial"] .s-paused .tl-bar { box-shadow: inset 0 0 0 1px var(--fg); }
+  :root[data-theme="industrial"] .ci[aria-current="true"], :root[data-theme="industrial"] .reader-nav a[aria-current="true"], :root[data-theme="industrial"] .story-side a[aria-current="page"] { box-shadow: inset 4px 0 0 var(--fg); }
+  a.btn { display: inline-flex; align-items: center; text-decoration: none; }
+  .shot img { width: auto; max-width: 100%; max-height: 360px; }
+  @media (max-width: 1100px) { .story-page { grid-template-columns: minmax(0, 1fr); } .story-side { display: none; } .story-main .back { display: inline-block; } }
+  @media (max-width: 900px) { .md-list { max-width: none; border-right: 0; border-bottom: 1px solid var(--border); } .reader-nav { max-width: none; border-right: 0; border-bottom: 1px solid var(--border); max-height: 280px; overflow-y: auto; } .fail-main { border-right: 0; border-bottom: 1px solid var(--border-subtle); } }
+  @media (max-width: 720px) {
+    .tl { flex-direction: column; gap: 10px; }
+    .tl .seg { flex: none !important; min-width: 0; flex-direction: row; gap: 12px; align-items: flex-start; }
+    .tl-bar { width: 8px; height: auto; align-self: stretch; min-height: 44px; flex: 0 0 8px; }
+    .cd { grid-template-columns: 1fr; gap: 4px; }
+    .cd dd { margin-bottom: 10px; }
+    .md-detail, .reader-body { padding: 18px 16px 22px; }
+    .ssteps li { flex: 1 1 45%; border-bottom: 1px solid var(--border-subtle); }
+    .cmd code { max-width: 52vw; overflow: hidden; text-overflow: ellipsis; }
+    .hero h1 { font-size: 26px; }
+    .st-tbl thead { display: none; }
+    .st-tbl, .st-tbl tbody, .st-tbl tr, .st-tbl td { display: block; width: 100%; }
+    .st-tbl tr { padding: 12px 14px; border-top: 1px solid var(--border-subtle); }
+    .st-tbl tr:first-child { border-top: 0; }
+    .st-tbl td { border: 0; padding: 3px 0; }
+    .st-tbl td:nth-child(3) { display: none; }
+    .spec-tbl th:nth-child(n+3):nth-child(-n+6), .spec-tbl td:nth-child(n+3):nth-child(-n+6) { display: none; }
+    .spec-tbl td.mono { overflow-wrap: normal; word-break: normal; }
+    .feed li { grid-template-columns: 74px minmax(0, 1fr); }
+    .feed li .mono { white-space: nowrap; }
+  }
 </style>
 </head>
 <body>
 <header class="top">
-  <a class="brand" href="#suite"><span class="logo">Agentic QA</span><span class="proj" id="proj">Dashboard</span></a>
+  <a class="brand" href="#now"><span class="logo">Agentic QA</span><span class="proj" id="proj">Dashboard</span></a>
   <span class="live" id="live" role="status"><span class="dot"></span><span id="liveText">Connecting…</span></span>
   <!--THEME_MENU-->
 </header>
 <div class="shell">
   <nav class="rail" aria-label="Views">
+    <a href="#now" data-view="now"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Now</a>
     <a href="#suite" data-view="suite"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 3 8l9 5 9-5-9-5z"/><path d="m3 13 9 5 9-5"/></svg>Full suite</a>
     <a href="#stories" data-view="stories"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>Stories</a>
     <a href="#results" data-view="results"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Results</a>
     <a href="#models" data-view="models"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>Models</a>
+    <a href="#settings" data-view="settings" class="rail-end"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2.8v2.4M12 18.8v2.4M4.2 7.5l2.1 1.2M17.7 15.3l2.1 1.2M4.2 16.5l2.1-1.2M17.7 8.7l2.1-1.2"/></svg>Settings</a>
   </nav>
   <main id="main" tabindex="-1"><p class="muted">Loading…</p></main>
 </div>
@@ -155,7 +395,7 @@
   function docKey(p) { return "api/doc?path=" + encodeURIComponent(p); }
   function parseRoute() {
     var h = decodeURIComponent(location.hash.replace(/^#/, ""));
-    if (!h) return { v: "suite" };
+    if (!h) return { v: "now" };
     var i = h.indexOf("/");
     return i < 0 ? { v: h } : { v: h.slice(0, i), arg: h.slice(i + 1) };
   }
@@ -170,13 +410,14 @@
   function rawHref(p) { return STATIC ? "../../" + p.split("/").map(encodeURIComponent).join("/") : "raw/" + p.split("/").map(encodeURIComponent).join("/"); }
 
   var STEP_CHIP = {
-    done: ["ok", "Done"], running: ["accent running", "Running"], failed: ["err", "Failed"], skipped: ["neutral", "Skipped"],
-    paused: ["warn", "Waiting for you"], pending: ["neutral", "Not started"], notNeeded: ["neutral", "Not needed"], next: ["info", "Next"], review: ["warn", "Your turn: review"]
+    done: ["ok", "Done"], running: ["neutral running", "Running"], failed: ["err", "Failed"], skipped: ["neutral", "Skipped"],
+    paused: ["accent", "Waiting for you"], pending: ["neutral", "Not started"], notNeeded: ["neutral", "Not needed"], next: ["neutral", "Next"], review: ["accent", "Your turn: review"]
   };
   function chip(kind) { var c = STEP_CHIP[kind] || ["neutral", kind]; return '<span class="chip ' + c[0] + '">' + esc(c[1]) + "</span>"; }
 
-  var STATUS_TONE = { Draft: "neutral", Verified: "ok", Updated: "info", New: "accent", Blocked: "warn", "Possible defect": "err", Existing: "info", Outdated: "warn", Obsolete: "neutral" };
-  var STATUS_COLOR = { Draft: "var(--border)", Verified: "var(--ok-solid)", Updated: "var(--info-solid)", New: "var(--accent)", Blocked: "var(--warn-solid)", "Possible defect": "var(--err-solid)", Existing: "var(--info-solid)", Outdated: "var(--warn-solid)", Obsolete: "var(--fg-muted)" };
+  // Green, orange and red mean test status; the accent means "your turn"; everything else is neutral.
+  var STATUS_TONE = { Draft: "neutral", Verified: "ok", Updated: "line", New: "neutral", Blocked: "warn", "Possible defect": "err", Existing: "line", Outdated: "warn", Obsolete: "neutral" };
+  var STATUS_COLOR = { Draft: "var(--border)", Verified: "var(--ok-solid)", Updated: "var(--fg-2)", New: "var(--series-3)", Blocked: "var(--warn-solid)", "Possible defect": "var(--err-solid)", Existing: "var(--fg-2)", Outdated: "var(--warn-solid)", Obsolete: "var(--fg-muted)" };
   function statusChip(s) { return '<span class="chip ' + (STATUS_TONE[s] || "neutral") + '">' + esc(s || "—") + "</span>"; }
   function countsBar(counts, total) {
     if (!total) return '<div class="bar" aria-hidden="true"></div>';
@@ -201,127 +442,411 @@
     });
   }
 
-  // ── Views ────────────────────────────────────────────────────────────────
-  function viewSuite() {
-    var s = state.suite, run = s.run;
-    var anything = s.steps.some(function (x) { return x.state !== "pending"; });
-    var html = "<h1>Full suite</h1>";
-    html += '<p class="sub">Five Agentic QA roles, one after another: explore → plan → automate → review → report.</p>';
-    if (run) {
-      html += '<div class="kv"><div><span>Target </span><b>' + esc(run.target || "—") + "</b></div><div><span>Run </span><b class=\"mono\">" + esc(run.run || "—") + "</b></div><div><span>Filter </span><b>" + esc(run.filter && run.filter !== "none" ? run.filter : "@smoke (default)") + "</b></div><div><span>Started </span><b>" + esc(fmtTime(run.startedAt)) + "</b></div><div><span>Status </span>" + chip(run.state === "running" ? "running" : run.state || "pending") + "</div></div>";
-    }
-    var paused = s.steps.filter(function (x) { return x.state === "paused"; })[0];
-    if (paused) html += '<div class="gate" role="status"><b>Your turn.</b> The pipeline is waiting after ' + esc(paused.name) + ". Review the output, then answer in the chat.</div>";
-    if (!anything && !run) {
-      html += emptyBox("<p><b>No full-suite run here yet.</b></p><p>In Claude Code, run <code>/qa-pipeline https://your-app.example</code> (or <code>/agentic-qa:qa-pipeline</code> when Agentic QA is installed as a plugin). This page updates while it runs.</p>");
-    }
-    html += '<div class="steps" role="list">';
-    s.steps.forEach(function (x, i) {
+  // ── Shared pieces ────────────────────────────────────────────────────────
+  var STORY_STEP_NAME = { "story-pull": "Pull", "story-design": "Design", "story-explore": "Explore", "story-script": "Automate", "story-run": "Run" };
+  var SUITE_DOING = { analyst: "The Analyst is exploring the app", "qa-planner": "The QA Planner is writing the test plan", "qa-engineer": "The QA Engineer is writing the test cases and specs", "qa-reviewer": "The QA Reviewer is checking the selectors", "qa-reporter": "The QA Reporter is running the tests" };
+  var NUM = ["no", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
+  function plural(n, one, many) { return n + " " + (n === 1 ? one : many || one + "s"); }
+  function count(n, one, many) { return (n < 10 ? NUM[n] : n) + " " + (n === 1 ? one : many || one + "s"); }
+  function cmdBox(cmd) { return '<span class="cmd"><code>' + esc(cmd) + '</code><button class="btn ghost sm" type="button" data-copy="' + esc(cmd) + '">Copy</button></span>'; }
+  function clock(iso) { if (!iso) return ""; var d = new Date(iso); if (isNaN(d)) return ""; var t = d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" }); return d.toDateString() === new Date().toDateString() ? t : d.toLocaleDateString(undefined, { day: "numeric", month: "short" }) + ", " + t; }
+  function suiteDocLink(p, label) { return '<a href="#suite/' + encodeURIComponent(p) + '">' + esc(label || p.split("/").pop()) + "</a>"; }
+  function stepById(id) { return state.suite.steps.filter(function (x) { return x.id === id; })[0]; }
+  function isWaitingStory(s) { return !!(s.review && s.next && !s.running); }
+  function defectCount(s) { return (s.counts && s.counts["Possible defect"]) || 0; }
+
+  /** The five steps as a track: bar widths follow how long each step took (or has been running). */
+  function timeline(steps, linkFn) {
+    var now = STATIC ? Date.parse(state.generatedAt) : Date.now(), pausedIdx = -1;
+    steps.forEach(function (x, i) { if (x.state === "paused") pausedIdx = i; });
+    return '<ol class="tl" aria-label="Pipeline steps">' + steps.map(function (x, i) {
+      var ms = x.state === "running" && x.startedAt ? now - Date.parse(x.startedAt) : x.durationMs;
+      var sized = ms > 0 && (x.state === "done" || x.state === "running" || x.state === "failed" || x.state === "paused");
+      var style = sized ? "flex:" + Math.max(1, Math.round(ms / 1000)) + " 1 0" : "flex:0 0 150px";
+      var line2 = x.state === "done" ? (x.durationMs ? "Done in " + fmtDur(x.durationMs) : "Done")
+        : x.state === "running" ? "Running" + (ms > 0 ? " for " + fmtDur(ms) : "")
+        : x.state === "paused" ? "Waiting for you"
+        : x.state === "failed" ? "Failed"
+        : x.state === "skipped" ? "Skipped"
+        : pausedIdx >= 0 && i === pausedIdx + 1 ? "Next, after you continue" : "Not started";
       var out = x.outputInfo || {};
-      var outLink = out.exists ? (out.dir ? '<a href="#results">' + esc(s.specs.length + " spec" + (s.specs.length === 1 ? "" : "s")) + "</a>" : docLink(out.path, out.path.split("/").pop())) : "";
-      html += '<div class="card step' + (x.state === "running" ? " running" : "") + '" role="listitem"><span class="num">' + (i + 1) + " · " + esc(x.id) + '</span><span class="name">' + esc(x.name) + '</span><span class="role">' + esc(x.role) + '</span><span class="meta">' + chip(x.state) + (x.durationMs ? "<span>" + esc(fmtDur(x.durationMs)) + "</span>" : "") + (outLink ? "<span>" + outLink + "</span>" : "") + "</span>" + (x.note ? '<span class="small muted">' + esc(x.note) + "</span>" : "") + "</div>";
+      var line3 = x.note ? '<span class="muted">' + esc(x.note) + "</span>"
+        : out.exists && /\.\w+$/.test(out.path) ? '<span class="mono">' + linkFn(out.path) + "</span>"
+        : out.exists && (out.dir || !/\.\w+$/.test(out.path)) ? '<a href="#results">' + esc(plural(state.suite.specs.length, "spec")) + "</a>"
+        : x.state === "running" || x.state === "pending" ? '<span class="muted">' + esc(x.role) + "</span>" : "";
+      return '<li class="seg s-' + esc(x.state) + '" style="' + style + '"><span class="tl-bar" aria-hidden="true"></span><span class="tl-text"><span class="tl-name"><span class="mono muted">' + (i + 1) + "</span><b>" + esc(x.name) + "</b></span>" +
+        '<span class="' + (x.state === "running" || x.state === "paused" || x.state === "failed" ? "" : "muted") + '">' + esc(line2) + "</span>" + line3 + "</span></li>";
+    }).join("") + "</ol>";
+  }
+
+  /** Five small segments for a story's steps. */
+  function storyTrack(s) {
+    var label = storyWhere(s);
+    return '<span class="mini" role="img" aria-label="' + esc(label) + '">' + s.steps.map(function (st) {
+      var k = st.state === "running" ? "running" : st.state === "failed" ? "failed" : st.notNeeded ? "skip" : st.done ? "done" : s.next === st.id && s.review ? "turn" : "todo";
+      return '<i class="m-' + k + '"></i>';
+    }).join("") + "</span>";
+  }
+  function storyWhere(s) {
+    if (s.running) return (STORY_STEP_NAME[s.running] || s.running) + " is running";
+    var failed = s.steps.filter(function (x) { return x.state === "failed"; })[0];
+    if (failed) return failed.name + " failed";
+    if (!s.next) return s.lastRun ? "Done, " + s.lastRun.passed + " of " + (s.lastRun.passed + s.lastRun.failed + s.lastRun.flaky + s.lastRun.skipped) + " passed" : "Done";
+    if (s.review) return "Review before " + (STORY_STEP_NAME[s.next] || s.next);
+    return "Ready for " + (STORY_STEP_NAME[s.next] || s.next);
+  }
+  function lastRunText(r) { return r ? r.passed + " of " + (r.passed + r.failed + r.flaky + r.skipped) + " passed, " + r.date : "Not run yet"; }
+
+  function storiesTable(stories) {
+    return '<div class="card tbl-card"><table class="tbl st-tbl"><thead><tr><th>Story</th><th>Progress</th><th>Test cases</th><th>Last run</th></tr></thead><tbody>' + stories.map(function (s) {
+      return '<tr><td><span class="kt"><span class="mono muted">' + esc(s.key) + '</span><a class="strong-link" href="#story/' + encodeURIComponent(s.key) + '">' + esc(s.title) + "</a></span>" + (s.stale ? ' <span class="chip warn">Story changed</span>' : "") + '</td><td><span class="prog">' + storyTrack(s) + "<span>" + esc(storyWhere(s)) + "</span></span></td><td>" + (s.total ? esc(s.total) + countsBar(s.counts, s.total) : '<span class="muted">None yet</span>') + '</td><td class="muted small">' + esc(lastRunText(s.lastRun)) + "</td></tr>";
+    }).join("") + "</tbody></table></div>";
+  }
+
+  function runBar(st) {
+    var parts = [["ok", st.passed], ["err", st.failed], ["warn", st.flaky], ["skip", st.skipped]].filter(function (p) { return p[1] > 0; });
+    var label = st.passed + " passed, " + st.failed + " failed, " + st.flaky + " flaky, " + st.skipped + " skipped";
+    return '<span class="runbar" role="img" aria-label="' + esc(label) + '">' + parts.map(function (p) { return '<i class="r-' + p[0] + '" style="flex:' + p[1] + ' 1 0"></i>'; }).join("") + "</span>";
+  }
+  function legend(st) {
+    return '<ul class="legend"><li><i class="r-ok"></i><b>' + st.passed + "</b> passed</li><li><i class=\"r-err\"></i><b>" + st.failed + "</b> failed</li><li><i class=\"r-warn\"></i><b>" + st.flaky + '</b> flaky</li><li class="muted"><i class="r-skip"></i><b>' + st.skipped + "</b> skipped</li></ul>";
+  }
+  function testName(title) { var last = String(title || "").split(" › ").pop(); return last.replace(/^TC-[A-Za-z0-9]+-[A-Za-z]-\d+\s*[—–:-]\s*/, ""); }
+  function testPath(title) { var parts = String(title || "").split(" › "); return parts.slice(0, -1).join(" › "); }
+  function specPath(file) { var p = ".agentic-qa/test-scripts/" + file; return state.suite.specs.indexOf(p) >= 0 || /^[^/]+\.spec\.ts$/.test(file) ? p : null; }
+  function caseHref(tc) { return tc.story ? "#story/" + encodeURIComponent(tc.story) + "/cases/" + encodeURIComponent(tc.id) : "#doc/" + encodeURIComponent(tc.file); }
+  function stepsList(html) {
+    if (!html) return "";
+    var items = html.split(/<br\s*\/?>/i).map(function (x) { return x.replace(/^\s*\d+[.)]\s*/, "").trim(); }).filter(Boolean);
+    return items.length > 1 ? "<ol>" + items.map(function (x) { return "<li>" + x + "</li>"; }).join("") + "</ol>" : "<p>" + items.join("") + "</p>";
+  }
+
+  function failureCard(f) {
+    var tc = f.testCase, spec = specPath(f.file);
+    var html = '<article class="card fail"><header><span class="row-meta"><span class="chip err">Failed</span><span class="mono muted">' + esc(f.file) + "</span>" + (f.tcId ? '<span class="mono muted">' + esc(f.tcId) + "</span>" : "") + "</span><h3>" + esc(testName(f.title)) + "</h3>" + (testPath(f.title) ? '<span class="muted small">' + esc(testPath(f.title)) + "</span>" : "") + "</header>";
+    html += '<div class="fail-body"><div class="fail-main"><pre class="err-pre">' + esc(f.detail || f.error || "No error message in the report.") + "</pre>";
+    if (f.screenshot) html += '<a class="shot" href="' + rawHref(f.screenshot) + '" target="_blank" rel="noopener"><img src="' + rawHref(f.screenshot) + '" alt="Screenshot at the moment of failure" loading="lazy"></a>';
+    html += '<div class="actions tight">' + (spec ? '<a class="btn ghost" href="#doc/' + encodeURIComponent(spec) + '">Open the spec</a>' : "") + "</div></div>";
+    html += '<div class="fail-side"><b>Check it by hand</b>';
+    if (tc) {
+      html += '<p class="muted small">The same case, from <span class="mono">' + esc(tc.file.replace(/^\.agentic-qa\//, "")) + "</span>:</p>" + (tc.steps ? '<div class="steps-list">' + stepsList(tc.steps) + "</div>" : "") + (tc.expected ? '<p><span class="muted">Expected:</span> ' + tc.expected + "</p>" : "") + '<a class="btn ghost" href="' + caseHref(tc) + '">Open the test case</a>';
+    } else html += '<p class="muted small">' + (f.tcId ? "No test case with the ID " + esc(f.tcId) + " was found in <code>.agentic-qa/test-cases/</code>." : "This test has no test-case ID in its title, so there's no manual case to link to.") + "</p>";
+    return html + "</div></div></article>";
+  }
+  function flakyRow(f) {
+    return '<article class="card flaky"><span class="chip warn">Flaky</span><b>' + esc(testName(f.title)) + '</b><span class="mono muted">' + esc(f.file) + '</span><span class="muted small">' + (f.retries ? "Failed " + plural(f.retries, "time") + ", then passed on retry" : "Passed on retry") + "</span>" + (f.testCase ? '<a class="push" href="' + caseHref(f.testCase) + '">Open the test case</a>' : "") + "</article>";
+  }
+  function runSummary(r, report, label) {
+    var st = r.stats, total = st.passed + st.failed + st.skipped + st.flaky;
+    return '<section class="card pad run-sum" aria-label="Run summary"><div class="row-meta"><b>' + esc(label) + '</b><span class="muted small">' + esc(plural(total, "test")) + (r.durationMs ? " in " + esc(fmtDur(r.durationMs)) : "") + (r.startedAt || r.mtime ? ", " + esc(fmtTime(r.startedAt || r.mtime)) : "") + "</span>" +
+      (report && report.exists ? '<a class="btn ghost push" href="' + rawHref(report.path) + '" target="_blank" rel="noopener">Open the Playwright report</a>' : "") + "</div>" + runBar(st) + legend(st) + "</section>";
+  }
+
+  // ── Now ──────────────────────────────────────────────────────────────────
+  function headline() {
+    var s = state.suite, parts = [];
+    var running = s.steps.filter(function (x) { return x.state === "running"; })[0];
+    var paused = s.steps.filter(function (x) { return x.state === "paused"; })[0];
+    var waiting = state.stories.filter(isWaitingStory);
+    var storyRunning = state.stories.filter(function (x) { return x.running; });
+    if (running) parts.push(SUITE_DOING[running.id] + ".");
+    if (paused) parts.push("The full suite is waiting for you after the " + paused.name + ".");
+    storyRunning.slice(0, 2).forEach(function (x) { parts.push(x.key + " is in " + (STORY_STEP_NAME[x.running] || x.running) + "."); });
+    if (waiting.length) parts.push(waiting.length === 1 ? waiting[0].key + " is waiting for your review." : count(waiting.length, "story", "stories") + " are waiting for your review.");
+    if (!parts.length) {
+      var r = s.results && s.results.stats;
+      if (r) { var t = r.passed + r.failed + r.flaky + r.skipped; parts.push("Nothing is running. " + (r.failed ? "The last test run had " + plural(r.failed, "failure") + "." : "The last test run passed " + r.passed + " of " + t + ".")); }
+      else parts.push("Nothing is running right now.");
+    }
+    return parts.join(" ");
+  }
+
+  function waitingQueue() {
+    var items = [], s = state.suite;
+    var paused = s.steps.filter(function (x) { return x.state === "paused"; })[0];
+    if (paused) {
+      var out = paused.outputInfo || {};
+      items.push({ key: "Full suite", title: "Check the " + paused.name + "'s work", body: "The pipeline stopped after the " + paused.name + ". Review " + (out.exists && !out.dir ? out.path.split("/").pop() : "what it wrote") + ", then answer in the chat to go on to the next step.", href: out.exists && !out.dir ? "#suite/" + encodeURIComponent(out.path) : "#suite", cta: out.exists && !out.dir ? "Open " + out.path.split("/").pop() : "Open the run" });
+    }
+    state.stories.filter(isWaitingStory).forEach(function (x) {
+      var d = defectCount(x), body;
+      if (x.next === "story-explore") body = "Design wrote " + plural(x.total, "test case") + ". Review them before Explore opens the app.";
+      else if (x.next === "story-script") body = "Explore checked " + plural(x.total, "test case") + " in the app." + (d ? " " + (d === 1 ? "One case doesn't" : count(d, "case") + " don't") + " match the story." : "") + " Review them, then continue to Automate.";
+      else body = "Review the test cases, then continue to " + (STORY_STEP_NAME[x.next] || "the next step") + ".";
+      items.push({ key: x.key, title: x.title, body: body, href: "#story/" + encodeURIComponent(x.key), cta: "Review the " + plural(x.total, "test case"), cmd: "/qa-story " + x.key });
     });
-    html += "</div>";
-
-    html += '<div class="grid2"><div><h2>Documents</h2>';
-    html += s.documents.length ? '<ul class="list card">' + s.documents.map(function (d) { return '<li><span class="grow">' + docLink(d.path, d.label) + '</span><span class="small muted">' + esc(fmtSize(d.size)) + " · " + esc(fmtTime(d.mtime)) + "</span></li>"; }).join("") + "</ul>" : emptyBox("Nothing written yet.");
-    html += "<h2>Test cases</h2>";
-    html += s.testCases.length ? '<ul class="list card">' + s.testCases.map(function (t) { return '<li><span class="grow">' + docLink(t.path, t.title) + '</span><span class="chip">' + t.cases + " case" + (t.cases === 1 ? "" : "s") + "</span></li>"; }).join("") + "</ul>" : emptyBox("No test cases yet.");
-    html += "</div><div><h2>Test scripts</h2>";
-    var scripts = s.specs.concat(s.pageObjects);
-    if (s.config.exists) scripts.unshift("playwright.config.ts");
-    html += scripts.length ? '<ul class="list card">' + scripts.map(function (p) { return '<li><span class="grow mono">' + docLink(p, p.replace(/^\.agentic-qa\/test-scripts\//, "")) + "</span></li>"; }).join("") + "</ul>" : emptyBox("No specs yet.");
-    html += "<h2>Snapshots</h2>";
-    html += s.snapshots.length ? '<ul class="list card">' + s.snapshots.map(function (p) { return '<li><span class="grow mono">' + docLink(p, p.split("/").pop()) + "</span></li>"; }).join("") + "</ul>" : emptyBox("No snapshots yet.");
-    html += "</div></div>";
-    main.innerHTML = html;
+    if (!items.length) return '<p class="muted">Nothing is waiting for you. When a step needs your review, it shows up here.</p>';
+    return items.map(function (it, i) {
+      var head = '<span class="kt"><span class="mono ' + (i === 0 ? "gate-muted" : "muted") + '">' + esc(it.key) + "</span><h3>" + esc(it.title) + "</h3></span>";
+      if (i === 0) return '<article class="gate big">' + head + "<p>" + esc(it.body) + '</p><div class="actions tight"><a class="btn gate-btn" href="' + it.href + '">' + esc(it.cta) + "</a>" + (it.cmd ? cmdBox(it.cmd) : "") + "</div></article>";
+      return '<article class="card wait"><div class="grow">' + head + '<p class="muted">' + esc(it.body) + '</p></div><div class="actions tight"><a class="btn" href="' + it.href + '">' + esc(it.cta) + "</a>" + (it.cmd ? cmdBox(it.cmd) : "") + "</div></article>";
+    }).join("");
   }
 
-  function storyStepChip(st, story) {
-    if (st.state === "running") return chip("running");
-    if (st.state === "failed") return chip("failed");
-    if (st.notNeeded) return chip("notNeeded");
-    if (st.done) return chip("done");
-    if (story.next === st.id) return chip(story.review ? "review" : "next");
-    return chip("pending");
+  function activityText(e) {
+    var isSuite = e.kind === "suite", name;
+    if (isSuite && e.step === "pipeline") {
+      return { start: "Full suite started" + (e.target ? " on " + e.target.replace(/^https?:\/\//, "") : ""), done: "Full suite finished", failed: "Full suite stopped with an error", paused: "Full suite paused for your review", skipped: "Full suite skipped" }[e.event] || "Full suite: " + e.event;
+    }
+    name = isSuite ? ((stepById(e.step) || {}).name || e.step) : (e.story ? e.story + " " : "") + (STORY_STEP_NAME[e.step] || e.step);
+    return name + " " + ({ start: "started", done: "finished", failed: "failed", paused: "paused for your review", skipped: "was skipped" }[e.event] || e.event);
+  }
+  function activityList(list) {
+    if (!list.length) return '<p class="muted">No activity yet. Each step adds a line here when it starts and ends.</p>';
+    return '<ol class="feed">' + list.slice(0, 12).map(function (e, i) {
+      var text = activityText(e);
+      if (e.event !== "start") {
+        for (var j = i + 1; j < list.length; j++) { var o = list[j]; if (o.kind === e.kind && o.step === e.step && o.story === e.story) { if (o.event === "start") text += " after " + fmtDur(Date.parse(e.ts) - Date.parse(o.ts)); break; } }
+      }
+      return '<li><span class="mono muted">' + esc(clock(e.ts)) + "</span><span>" + esc(text) + (e.note ? '<span class="muted">. ' + esc(e.note) + "</span>" : "") + "</span></li>";
+    }).join("") + "</ol>";
   }
 
-  function viewStories() {
-    var html = "<h1>Stories</h1><p class=\"sub\">One user story at a time: pull → design → explore → automate → run.</p>";
-    if (!state.stories.length) {
-      html += emptyBox("<p><b>No stories yet.</b></p><p>Add a story file to <code>.agentic-qa/stories/</code> (for example <code>SD-1-login.md</code>) and run <code>/qa-story SD-1</code>.</p>");
-      main.innerHTML = html;
+  function lastRunPanel() {
+    var r = state.suite.results;
+    if (!r || !r.stats) return '<section class="card pad side-panel"><h2>Last full-suite test run</h2><p class="muted">No results yet. The QA Reporter step runs the tests.</p></section>';
+    var st = r.stats, total = st.passed + st.failed + st.flaky + st.skipped;
+    var items = r.failures.slice(0, 3).map(function (f) { return '<li><span class="chip err">Failed</span><a href="#results">' + esc(testName(f.title)) + "</a></li>"; })
+      .concat((r.flaky || []).slice(0, 2).map(function (f) { return '<li><span class="chip warn">Flaky</span><a href="#results">' + esc(testName(f.title)) + "</a></li>"; }));
+    return '<section class="card pad side-panel" aria-labelledby="res-h"><div><h2 id="res-h">Last full-suite test run</h2><span class="muted small">' + esc(fmtTime(r.startedAt || r.mtime)) + (r.durationMs ? ", took " + esc(fmtDur(r.durationMs)) : "") + '</span></div><p class="big-num">' + st.passed + " of " + total + " passed</p>" + runBar(st) + (items.length ? '<ul class="plain">' + items.join("") + "</ul>" : "") + '<a class="strong-link" href="#results">All results</a></section>';
+  }
+
+  function viewNow() {
+    var s = state.suite, run = s.run, anything = run || s.steps.some(function (x) { return x.state !== "pending"; });
+    var html = '<div class="now"><header class="hero"><p class="muted">' + esc(STATIC ? "Snapshot from " + fmtTime(state.generatedAt) : new Date().toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })) + "</p><h1>" + esc(headline()) + "</h1></header>";
+    if (anything) {
+      var sub = run ? (run.state === "running" ? "Started " + clock(run.startedAt) : "Started " + clock(run.startedAt) + (run.endedAt ? ", ended " + clock(run.endedAt) : "")) + (run.filter && run.filter !== "none" ? ", " + run.filter : ", smoke tests") : "Steps run by hand, read from the files they wrote";
+      html += '<section aria-labelledby="run-h" class="sect"><div class="sec-head"><h2 id="run-h">Full suite run</h2><span class="muted">' + esc(sub) + '</span><a class="strong-link push" href="#suite">Open the run</a></div>' + timeline(s.steps, suiteDocLink) + "</section>";
+    }
+    html += '<div class="now-cols"><div class="now-main"><section aria-labelledby="wait-h" class="sect"><h2 id="wait-h">Waiting for you</h2>' + waitingQueue() + "</section>";
+    html += '<section aria-labelledby="st-h" class="sect"><div class="sec-head"><h2 id="st-h">Stories</h2>' + (state.stories.length ? '<a class="strong-link push" href="#stories">All stories</a>' : "") + "</div>" +
+      (state.stories.length ? storiesTable(state.stories.slice(0, 8)) : emptyBox("<p>No stories yet. Add a story file to <code>.agentic-qa/stories/</code> and run <code>/qa-story &lt;KEY&gt;</code>.</p>")) + "</section></div>";
+    html += '<aside class="now-side">' + lastRunPanel() + '<section aria-labelledby="act-h" class="sect"><h2 id="act-h">Activity</h2>' + activityList(state.activity || []) + "</section></aside></div>";
+    if (!anything && !state.stories.length) html += emptyBox("<p><b>Nothing has run here yet.</b></p><p>Run <code>/qa-pipeline https://your-app.example</code> for a full suite, or <code>/qa-story &lt;KEY&gt;</code> for one story.</p>");
+    main.innerHTML = html + "</div>";
+  }
+
+  // ── Full suite: the track, then a reader for what the agents wrote ────────
+  function readerGroups() {
+    var s = state.suite, groups = [];
+    if (s.documents.length) groups.push({ name: "Documents", items: s.documents.map(function (d) { return { path: d.path, name: d.label, meta: clock(d.mtime) }; }) });
+    if (s.testCases.length) groups.push({ name: "Test cases", items: s.testCases.map(function (t) { return { path: t.path, name: t.title.replace(/\s+[—–-]\s+Test Cases$/i, ""), meta: String(t.cases) }; }) });
+    var scripts = s.specs.map(function (p) { return { path: p, name: p.split("/").pop() }; });
+    if (s.config.exists) scripts.unshift({ path: "playwright.config.ts", name: "playwright.config.ts" });
+    if (scripts.length) groups.push({ name: "Specs", items: scripts });
+    if (s.pageObjects.length) groups.push({ name: "Page objects", items: s.pageObjects.map(function (p) { return { path: p, name: p.split("/").pop() }; }) });
+    if (s.snapshots.length) groups.push({ name: "Snapshots", items: s.snapshots.map(function (p) { return { path: p, name: p.split("/").pop() }; }) });
+    return groups;
+  }
+  function viewSuite(sel) {
+    var s = state.suite, run = s.run;
+    var anything = run || s.steps.some(function (x) { return x.state !== "pending"; });
+    var html = "<h1>Full suite run</h1>";
+    if (!anything) {
+      main.innerHTML = html + '<p class="sub">Five roles, one after another: explore, plan, automate, review, report.</p>' + emptyBox("<p><b>No full-suite run here yet.</b></p><p>In Claude Code, run <code>/qa-pipeline https://your-app.example</code> (or <code>/agentic-qa:qa-pipeline</code> when Agentic QA is installed as a plugin). This page updates while it runs.</p>");
       return;
     }
-    html += '<ul class="list card">' + state.stories.map(function (s) {
-      var stepTxt = s.steps.map(function (st) { return st.notNeeded ? "–" : st.done ? "●" : "○"; }).join(" ");
-      var status = s.running ? chip("running") : s.next ? (s.review ? chip("review") : '<span class="chip info">Next: ' + esc((s.steps.filter(function (x) { return x.id === s.next; })[0] || {}).name) + "</span>") : chip("done");
-      var last = s.lastRun ? '<span class="small muted">Last run ' + esc(s.lastRun.date) + ": " + s.lastRun.passed + " passed, " + s.lastRun.failed + " failed</span>" : "";
-      return '<li class="story-row"><span class="grow"><a href="#story/' + encodeURIComponent(s.key) + '">' + esc(s.key) + "</a> " + esc(s.title) + '<br><span class="small muted" aria-label="Steps done">' + esc(stepTxt) + "</span>" + (s.stale ? ' <span class="chip warn">Story changed</span>' : "") + "</span>" + countsBar(s.counts, s.total) + '<span class="small muted">' + s.total + " case" + (s.total === 1 ? "" : "s") + "</span>" + status + last + "</li>";
-    }).join("") + "</ul>";
+    var running = s.steps.filter(function (x) { return x.state === "running"; })[0];
+    var paused = s.steps.filter(function (x) { return x.state === "paused"; })[0];
+    var lead = run ? (run.state === "running" ? "Running" + (run.target ? " on " + run.target.replace(/^https?:\/\//, "") : "") + " since " + clock(run.startedAt) + "." : "Ran" + (run.target ? " on " + run.target.replace(/^https?:\/\//, "") : "") + ", " + clock(run.startedAt) + (run.endedAt ? " to " + clock(run.endedAt) : "") + ".") : "These steps were run by hand; their state comes from the files they wrote.";
+    if (running) lead += " " + SUITE_DOING[running.id] + ".";
+    if (paused) lead += " It's waiting for you after the " + paused.name + ".";
+    html += '<p class="lead">' + esc(lead) + "</p>";
+    if (run) html += '<dl class="facts"><div><dt>Run</dt><dd class="mono">' + esc(run.run || "—") + "</dd></div><div><dt>Tests to run</dt><dd>" + esc(run.filter && run.filter !== "none" ? run.filter : "Smoke (@smoke)") + "</dd></div>" + (s.config.exists ? '<div><dt>Config</dt><dd class="mono">' + suiteDocLink("playwright.config.ts", "playwright.config.ts") + "</dd></div>" : "") + "</dl>";
+    if (paused) html += '<div class="gate" role="status"><b>Your turn.</b> The pipeline is waiting after the ' + esc(paused.name) + ". Review its output, then answer in the chat.</div>";
+    html += timeline(s.steps, suiteDocLink);
+    var groups = readerGroups(), all = [].concat.apply([], groups.map(function (g) { return g.items; }));
+    if (!all.length) { main.innerHTML = html; return; }
+    var cur = all.filter(function (i) { return i.path === sel; })[0] || all[0];
+    html += '<section aria-labelledby="out-h" class="sect"><h2 id="out-h">What the agents wrote</h2><div class="card reader"><nav class="reader-nav" aria-label="Outputs">' + groups.map(function (g) {
+      return '<div class="rg"><div class="rg-head"><b>' + esc(g.name) + '</b><span class="muted small">' + g.items.length + "</span></div><ul>" + g.items.map(function (i) {
+        return '<li><a href="#suite/' + encodeURIComponent(i.path) + '"' + (i.path === cur.path ? ' aria-current="true"' : "") + "><span>" + esc(i.name) + "</span>" + (i.meta ? '<span class="muted small">' + esc(i.meta) + "</span>" : "") + "</a></li>";
+      }).join("") + "</ul></div>";
+    }).join("") + '</nav><article class="reader-body" id="readerBody" aria-live="polite"><p class="muted">Loading…</p></article></div></section>';
     main.innerHTML = html;
+    api(docKey(cur.path)).then(function (d) {
+      var body = document.getElementById("readerBody");
+      if (!body || parseRoute().v !== "suite") return;
+      var h = '<header class="reader-head"><div class="grow"><h3>' + esc(cur.name) + '</h3><span class="muted small"><span class="mono">' + esc(cur.path) + "</span>, " + esc(fmtSize(d.size)) + ", " + esc(fmtTime(d.mtime)) + "</span></div>" + (STATIC ? "" : '<a class="btn ghost" href="' + rawHref(cur.path) + '" target="_blank" rel="noopener">Open the file</a>') + "</header>";
+      h += d.kind === "md" ? '<div class="doc">' + d.html + "</div>" : d.kind === "large" ? emptyBox("This file is too large to show here.") : '<pre class="text">' + esc(d.text) + "</pre>";
+      body.innerHTML = h;
+      fixLinks(body, cur.path);
+    }).catch(function (err) { var body = document.getElementById("readerBody"); if (body) body.innerHTML = '<div class="err-box" role="alert">' + esc(err.message || err) + "</div>"; });
   }
 
-  function viewStory(key, tab) {
+  // ── Stories ──────────────────────────────────────────────────────────────
+  function viewStories() {
+    var html = '<h1>Stories</h1><p class="sub">One user story at a time: pull, design, explore, automate, run.</p>';
+    if (!state.stories.length) {
+      main.innerHTML = html + emptyBox("<p><b>No stories yet.</b></p><p>Add a story file to <code>.agentic-qa/stories/</code> (for example <code>SD-1-login.md</code>) and run <code>/qa-story SD-1</code>.</p>");
+      return;
+    }
+    var waiting = state.stories.filter(isWaitingStory);
+    if (waiting.length) html += '<p class="lead">' + esc(waiting.length === 1 ? waiting[0].key + " is waiting for your review." : count(waiting.length, "story", "stories") + " are waiting for your review.") + "</p>";
+    main.innerHTML = html + storiesTable(state.stories);
+  }
+
+  var storyCache = null, caseFilter = {};
+  function storyStepItem(st, i, s) {
+    var k = st.state === "running" ? "running" : st.state === "failed" ? "failed" : st.notNeeded ? "skip" : st.done ? "done" : s.next === st.id && s.review ? "turn" : s.next === st.id ? "next" : "todo";
+    var note = { running: "Running", failed: "Failed", skip: "Not needed", done: st.durationMs ? "Done in " + fmtDur(st.durationMs) : "Done", turn: "Waiting for your review", next: "Next", todo: "Not started" }[k];
+    return '<li class="ss-' + k + '"><span class="dot" aria-hidden="true">' + (k === "done" ? "✓" : k === "skip" ? "–" : i + 1) + "</span><span><b>" + esc(st.name) + '</b><span class="muted small">' + esc(note) + "</span></span></li>";
+  }
+  function caseGroups(s, filter) {
+    var order = s.criteria.map(function (c) { return c.id; }), groups = {}, extra = [];
+    s.rows.forEach(function (r, idx) {
+      if (filter !== "All" && r.cells.Status !== filter) return;
+      var ac = String(r.cells.AC || "").split(/[,\s]+/).filter(Boolean)[0] || "—";
+      if (!groups[ac]) { groups[ac] = []; if (order.indexOf(ac) < 0) extra.push(ac); }
+      groups[ac].push(idx);
+    });
+    return order.concat(extra).filter(function (id) { return groups[id]; }).map(function (id) {
+      var c = s.criteria.filter(function (x) { return x.id === id; })[0];
+      return { id: id, html: c ? c.html : id === "—" ? "No criterion" : "", rows: groups[id] };
+    });
+  }
+  function caseDetail(s, r) {
+    if (!r) return '<p class="muted">No test case matches this filter.</p>';
+    var c = r.cells, h = r.html, id = c.ID, status = c.Status;
+    var ac = String(c.AC || "").split(/[,\s]+/).filter(Boolean);
+    var notes = (s.notesByCase || {})[id] || [];
+    var res = (s.resultsByCase || {})[id];
+    var cell = function (k) { return c[k] && c[k] !== "—" ? h[k] : ""; };
+    var html = '<header class="cd-head"><span class="row-meta">' + statusChip(status) + '<span class="mono muted">' + esc(id) + "</span></span><h2>" + h.Title + "</h2></header>";
+    if (status === "Possible defect") {
+      html += '<div class="says-does"><div><b>The story says</b>' + (cell("Expected") ? "<p>" + h.Expected + "</p>" : '<p class="muted">No expected result written.</p>') + '</div><div class="does"><b>The app does</b>' + (notes.length ? notes.map(function (n) { return "<p>" + n + "</p>"; }).join("") : '<p>See the <a href="#story/' + encodeURIComponent(s.key) + '/notes">Exploration notes</a>.</p>') + "</div></div>";
+      html += '<p class="hint-text">Explore never changes the expected result to match the app. If the app is wrong, leave this case as it is: Automate writes it as <code>test.fixme</code>. If the story is wrong, update the story and run Design again.</p>';
+    } else if (notes.length) html += '<div class="note-box">' + notes.map(function (n) { return "<p>" + n + "</p>"; }).join("") + "</div>";
+    html += '<dl class="cd">';
+    if (ac.length) html += "<dt>Criterion</dt><dd>" + ac.map(function (a) { var x = s.criteria.filter(function (y) { return y.id === a; })[0]; return '<p><span class="mono strong">' + esc(a) + "</span> " + (x ? x.html : "") + "</p>"; }).join("") + "</dd>";
+    if (cell("Preconditions")) html += "<dt>Before you start</dt><dd>" + h.Preconditions + "</dd>";
+    if (cell("Steps")) html += '<dt>Steps</dt><dd class="steps-list">' + stepsList(h.Steps) + "</dd>";
+    if (status !== "Possible defect" && cell("Expected")) html += '<dt>Expected</dt><dd class="strong">' + h.Expected + "</dd>";
+    if (cell("Tags")) html += '<dt>Tags</dt><dd class="tags">' + String(c.Tags).split(/\s+/).filter(Boolean).map(function (t) { return '<span class="mono tag">' + esc(t) + "</span>"; }).join("") + "</dd>";
+    html += "<dt>Last result</dt><dd>";
+    if (res) html += '<span class="row-meta"><span class="chip ' + ({ passed: "ok", failed: "err", flaky: "warn", skipped: "neutral" }[res.outcome] || "neutral") + '">' + esc(res.outcome.charAt(0).toUpperCase() + res.outcome.slice(1)) + "</span>" + (res.durationMs ? '<span class="muted small">' + esc(fmtDur(res.durationMs)) + "</span>" : "") + "</span>" + (res.error ? '<pre class="err-pre">' + esc(res.error) + "</pre>" : "") + (res.screenshot ? '<a class="shot" href="' + rawHref(res.screenshot) + '" target="_blank" rel="noopener"><img src="' + rawHref(res.screenshot) + '" alt="Screenshot from the last run" loading="lazy"></a>' : "");
+    else if (cell("Last Result")) html += h["Last Result"];
+    else html += '<span class="muted">Not run yet. Results appear here after the Run step.</span>';
+    html += "</dd>";
+    if (cell("Evidence")) html += "<dt>Evidence</dt><dd>" + h.Evidence + "</dd>";
+    if (cell("Source")) html += "<dt>Source</dt><dd>" + h.Source + "</dd>";
+    if (cell("ALM")) html += "<dt>ALM</dt><dd>" + h.ALM + "</dd>";
+    return html + "</dl>";
+  }
+  function drawCases(s, selId) {
+    var filter = caseFilter[s.key] || "All";
+    if (filter !== "All" && !s.counts[filter]) filter = "All";
+    var groups = caseGroups(s, filter), shown = [].concat.apply([], groups.map(function (g) { return g.rows; }));
+    var selIdx = shown.filter(function (i) { return s.rows[i].cells.ID === selId; })[0];
+    if (selIdx == null) selIdx = shown[0];
+    var chips = ["All"].concat(Object.keys(s.counts)).map(function (k) {
+      return '<button type="button" class="fchip" data-filter="' + esc(k) + '" aria-pressed="' + (k === filter) + '">' + esc(k) + ' <span>' + (k === "All" ? s.total : s.counts[k]) + "</span></button>";
+    }).join("");
+    var list = groups.map(function (g) {
+      return '<div class="acg"><span class="mono strong">' + esc(g.id) + "</span><span>" + g.html + '</span></div><ul class="cl">' + g.rows.map(function (i) {
+        var r = s.rows[i];
+        return '<li><button type="button" class="ci" data-case="' + esc(r.cells.ID) + '"' + (i === selIdx ? ' aria-current="true"' : "") + '><span class="ci-t">' + r.html.Title + '</span><span class="row-meta">' + statusChip(r.cells.Status) + '<span class="mono muted">' + esc(r.cells.ID) + "</span></span></button></li>";
+      }).join("") + "</ul>";
+    }).join("");
+    return '<div class="filters" role="group" aria-label="Show test cases"><span class="muted small">Show</span>' + chips + '</div><div class="card md"><div class="md-list" id="caseList">' + (list || '<p class="muted pad">No cases.</p>') + '<p class="muted small kbd-hint">Use the up and down arrow keys to move between cases.</p></div><article class="md-detail" id="caseDetail" aria-live="polite">' + caseDetail(s, s.rows[selIdx]) + "</article></div>";
+  }
+  function wireCases(s) {
+    var tabBody = document.getElementById("tabBody");
+    if (!tabBody) return;
+    function select(id, focus) {
+      history.replaceState(null, "", "#story/" + encodeURIComponent(s.key) + "/cases/" + encodeURIComponent(id));
+      tabBody.querySelectorAll(".ci").forEach(function (b) { if (b.getAttribute("data-case") === id) { b.setAttribute("aria-current", "true"); if (focus) b.focus(); } else b.removeAttribute("aria-current"); });
+      var row = s.rows.filter(function (r) { return r.cells.ID === id; })[0];
+      var det = document.getElementById("caseDetail");
+      det.innerHTML = caseDetail(s, row);
+      fixLinks(det, s.files.testCases);
+      if (window.matchMedia("(max-width: 900px)").matches && !focus) det.scrollIntoView({ block: "start", behavior: "smooth" });
+    }
+    tabBody.addEventListener("click", function (e) {
+      var b = e.target.closest(".ci"), f = e.target.closest(".fchip");
+      if (b) select(b.getAttribute("data-case"), false);
+      if (f) { caseFilter[s.key] = f.getAttribute("data-filter"); tabBody.innerHTML = drawCases(s, (parseRoute().arg || "").split("/")[2]); fixLinks(tabBody, s.files.testCases); }
+    });
+    tabBody.addEventListener("keydown", function (e) {
+      if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+      var b = e.target.closest(".ci");
+      if (!b) return;
+      var all = Array.prototype.slice.call(tabBody.querySelectorAll(".ci")), i = all.indexOf(b) + (e.key === "ArrowDown" ? 1 : -1);
+      if (i < 0 || i >= all.length) return;
+      e.preventDefault();
+      select(all[i].getAttribute("data-case"), true);
+    });
+  }
+  function storySide(key) {
+    return '<aside class="story-side" aria-label="Stories"><div class="ss-head"><b>Stories</b><a class="small" href="#stories">All</a></div><nav>' + state.stories.map(function (x) {
+      return '<a href="#story/' + encodeURIComponent(x.key) + '"' + (x.key === key ? ' aria-current="page"' : "") + '><span class="kt"><span class="mono muted">' + esc(x.key) + "</span><b>" + esc(x.title) + '</b></span><span class="prog small">' + storyTrack(x) + '<span class="muted">' + esc(storyWhere(x)) + "</span></span></a>";
+    }).join("") + "</nav></aside>";
+  }
+  function viewStory(key, tab, caseId) {
     tab = tab || "cases";
     api("api/story?key=" + encodeURIComponent(key)).then(function (s) {
-      if (parseRoute().v !== "story") return;
-      var html = '<a class="back" href="#stories">← Stories</a><h1>' + esc(s.key) + " — " + esc(s.title) + "</h1>";
-      html += '<p class="sub">' + docLink(s.files.testCases, s.files.testCases) + (s.stale ? ' <span class="chip warn">The story changed since its cases were designed</span>' : "") + "</p>";
-      if (s.review && s.next) html += '<div class="gate" role="status"><b>Your turn.</b> Review the test cases (edit them in <code>' + esc(s.files.testCases) + "</code> if needed), then continue in the chat: <code>/qa-story " + esc(s.key) + "</code>.</div>";
-      html += '<div class="steps" role="list">' + s.steps.map(function (st, i) {
-        return '<div class="card step' + (st.state === "running" ? " running" : "") + '" role="listitem"><span class="num">' + (i + 1) + '</span><span class="name">' + esc(st.name) + '</span><span class="role">' + esc(st.notNeeded || st.role) + '</span><span class="meta">' + storyStepChip(st, s) + (st.durationMs ? "<span>" + esc(fmtDur(st.durationMs)) + "</span>" : "") + "</span></div>";
-      }).join("") + "</div>";
-      var counts = Object.keys(s.counts);
-      if (counts.length) html += '<h2>Status</h2><div class="stats">' + counts.map(function (k) { return '<div class="card stat"><div class="v">' + s.counts[k] + '</div><div class="l">' + esc(k) + "</div></div>"; }).join("") + "</div>";
-      var tabs = [["cases", "Test cases"], ["story", "Story & ACs"], ["questions", "Open questions"], ["notes", "Exploration notes"], ["runs", "Runs"], ["snapshots", "Snapshots (" + s.snapshots.length + ")"]];
-      html += '<nav class="tabs" aria-label="Story sections">' + tabs.map(function (t) { return '<a href="#story/' + encodeURIComponent(s.key) + "/" + t[0] + '"' + (t[0] === tab ? ' aria-current="true"' : "") + ">" + esc(t[1]) + "</a>"; }).join("") + "</nav>";
-      html += '<section id="tabBody">';
-      if (tab === "cases") {
-        if (!s.rows.length) html += emptyBox("No test cases yet. The Design step writes them.");
-        else {
-          var cols = s.headers.filter(function (h) { return h !== "ALM" || s.rows.some(function (r) { return r.cells.ALM && r.cells.ALM !== "—"; }); });
-          html += '<div class="table-wrap"><table><thead><tr>' + cols.map(function (h) { return "<th>" + esc(h) + "</th>"; }).join("") + "</tr></thead><tbody>" + s.rows.map(function (r) {
-            return "<tr>" + cols.map(function (h) { return h === "Status" ? "<td>" + statusChip(r.cells.Status) + "</td>" : h === "ID" ? '<td class="id">' + r.html[h] + "</td>" : "<td>" + r.html[h] + "</td>"; }).join("") + "</tr>";
-          }).join("") + "</tbody></table></div>";
-        }
-      } else if (tab === "story") {
-        html += '<div class="grid2"><div class="card pad doc"><h3>Story</h3>' + (s.storyHtml || '<p class="muted">No story file.</p>') + '</div><div class="card pad doc"><h3>Testable acceptance criteria</h3>' + (s.criteriaHtml || '<p class="muted">Written by the Design step.</p>') + "</div></div>";
-      } else if (tab === "questions") {
-        html += '<div class="card pad doc">' + (s.questionsHtml || '<p class="muted">None recorded.</p>') + "</div>";
-      } else if (tab === "notes") {
-        html += '<div class="card pad doc">' + (s.notesHtml || '<p class="muted">Written by the Explore step.</p>') + "</div>";
-      } else if (tab === "runs") {
-        html += s.results && s.results.stats ? resultsBlock(s.results, s.htmlReport) : "";
-        html += '<div class="card pad doc">' + (s.historyHtml || '<p class="muted">No runs yet. The Run step records each one here.</p>') + "</div>";
-      } else if (tab === "snapshots") {
-        html += s.snapshots.length ? '<ul class="list card">' + s.snapshots.map(function (p) { return '<li class="mono">' + docLink(p, p.split("/").pop()) + "</li>"; }).join("") + "</ul>" : emptyBox("No snapshots yet. The Explore step saves them.");
+      var r = parseRoute();
+      if (r.v !== "story" || (r.arg || "").split("/")[0] !== key) return;
+      storyCache = s;
+      var d = defectCount(s), nextName = STORY_STEP_NAME[s.next] || "";
+      var html = '<div class="story-page">' + storySide(s.key) + '<div class="story-main"><a class="back" href="#stories">← Stories</a><header class="story-head"><span class="mono muted">' + esc(s.key) + "</span><h1>" + esc(s.title) + '</h1><div class="row-meta small">' + (s.exists.testCases ? '<span class="mono">' + docLink(s.files.testCases, s.files.testCases) + "</span>" : "") +
+        (s.stale ? '<span class="chip warn">The story changed since its cases were designed</span>' : s.exists.testCases ? '<span class="muted">Story unchanged since Design</span>' : "") +
+        (s.total ? '<span class="muted">' + esc(plural(s.total, "test case")) + (s.criteria.length ? " from " + esc(plural(s.criteria.length, "acceptance criterion", "acceptance criteria")) : "") + "</span>" : "") + "</div></header>";
+      html += '<ol class="ssteps" aria-label="Story steps">' + s.steps.map(function (st, i) { return storyStepItem(st, i, s); }).join("") + "</ol>";
+      if (s.review && s.next && !s.running) {
+        var before = s.next === "story-explore" ? "before Explore opens the app" : s.next === "story-script" ? "before Automate writes the tests" : "before " + nextName;
+        html += '<section class="gate row" aria-label="Your turn"><div class="grow"><b>Your turn: review the cases ' + esc(before) + '</b><span class="gate-muted">' + (d ? esc((d === 1 ? "One case contradicts" : count(d, "case") + " contradict") + " the story; decide which is right.") + " " : "") + "Edit, add or delete cases in <code>" + esc(s.files.testCases) + "</code>, then continue.</span></div>" + cmdBox("/qa-story " + s.key) + "</section>";
       }
-      html += "</section>";
+      var tabs = [["cases", "Test cases", s.total], ["story", "Story and criteria"], ["questions", "Open questions"], ["notes", "Exploration notes"], ["snapshots", "Snapshots", s.snapshots.length], ["runs", "Runs", s.runs.length]];
+      html += '<nav class="utabs" aria-label="Story sections">' + tabs.map(function (t) { return '<a href="#story/' + encodeURIComponent(s.key) + "/" + t[0] + '"' + (t[0] === tab ? ' aria-current="true"' : "") + ">" + esc(t[1]) + (t[2] != null ? ' <span class="muted">' + t[2] + "</span>" : "") + "</a>"; }).join("") + "</nav>";
+      html += '<section id="tabBody">';
+      if (tab === "cases") html += s.rows.length ? drawCases(s, caseId) : emptyBox("No test cases yet. The Design step writes them.");
+      else if (tab === "story") html += '<div class="grid2"><div class="card pad doc"><h3>Story</h3>' + (s.storyHtml || '<p class="muted">No story file.</p>') + '</div><div class="card pad doc"><h3>Testable acceptance criteria</h3>' + (s.criteriaHtml || '<p class="muted">Written by the Design step.</p>') + "</div></div>";
+      else if (tab === "questions") html += '<div class="card pad doc">' + (s.questionsHtml || '<p class="muted">None recorded.</p>') + "</div>";
+      else if (tab === "notes") html += '<div class="card pad doc">' + (s.notesHtml || '<p class="muted">Written by the Explore step.</p>') + "</div>";
+      else if (tab === "runs") {
+        if (s.results && s.results.stats) {
+          html += runSummary(s.results, s.htmlReport, "Last run of " + s.key);
+          if (s.results.failures.length) html += '<h2>Needs a look</h2><div class="stack">' + s.results.failures.map(failureCard).join("") + "</div>";
+          if (s.results.flaky && s.results.flaky.length) html += '<div class="stack">' + s.results.flaky.map(flakyRow).join("") + "</div>";
+        }
+        html += "<h2>Run history</h2>" + '<div class="card pad doc">' + (s.historyHtml || '<p class="muted">No runs yet. The Run step records each one here.</p>') + "</div>";
+      } else if (tab === "snapshots") html += s.snapshots.length ? '<ul class="list card">' + s.snapshots.map(function (p) { return '<li class="mono">' + docLink(p, p.split("/").pop()) + "</li>"; }).join("") + "</ul>" : emptyBox("No snapshots yet. The Explore step saves them.");
+      html += "</section></div></div>";
       main.innerHTML = html;
-      fixLinks(main, s.files.testCases);
+      fixLinks(main.querySelector("#tabBody"), s.files.testCases);
+      if (tab === "cases" && s.rows.length) wireCases(s);
     }).catch(showError);
   }
 
-  function resultsBlock(r, report) {
-    var st = r.stats, total = st.passed + st.failed + st.skipped + st.flaky;
-    var html = '<div class="stats"><div class="card stat ok"><div class="v">' + st.passed + '</div><div class="l">Passed</div></div><div class="card stat err"><div class="v">' + st.failed + '</div><div class="l">Failed</div></div><div class="card stat warn"><div class="v">' + st.flaky + '</div><div class="l">Flaky</div></div><div class="card stat"><div class="v">' + st.skipped + '</div><div class="l">Skipped</div></div><div class="card stat"><div class="v">' + total + '</div><div class="l">Total' + (r.durationMs ? " · " + esc(fmtDur(r.durationMs)) : "") + "</div></div></div>";
-    html += '<p class="small muted">' + esc(r.path) + " · " + esc(fmtTime(r.mtime)) + (report && report.exists ? ' · <a href="' + rawHref(report.path) + '" target="_blank" rel="noopener">Open the Playwright HTML report</a>' : "") + "</p>";
-    if (r.failures && r.failures.length) html += '<h2>Failures</h2><div class="card">' + r.failures.map(function (f) { return '<div class="failure"><div><b>' + esc(f.title) + '</b> <span class="small muted mono">' + esc(f.file) + '</span></div><div class="e">' + esc(f.error) + "</div></div>"; }).join("") + "</div>";
-    return html;
-  }
-
+  // ── Results: failures first ──────────────────────────────────────────────
   function viewResults() {
-    var s = state.suite, html = "<h1>Results</h1><p class=\"sub\">The latest Playwright runs: the full suite and each story.</p><h2>Full suite</h2>";
-    if (s.results && s.results.stats) {
-      html += resultsBlock(s.results, s.htmlReport);
-      if (s.results.files.length) html += '<h2>By spec file</h2><div class="table-wrap"><table><thead><tr><th>Spec</th><th>Passed</th><th>Failed</th><th>Flaky</th><th>Skipped</th></tr></thead><tbody>' + s.results.files.map(function (f) { return '<tr><td class="mono">' + esc(f.file) + "</td><td>" + f.passed + "</td><td>" + f.failed + "</td><td>" + f.flaky + "</td><td>" + f.skipped + "</td></tr>"; }).join("") + "</tbody></table></div>";
+    var s = state.suite, r = s.results, html = "<h1>Results</h1>";
+    if (r && r.stats) {
+      var st = r.stats, total = st.passed + st.failed + st.flaky + st.skipped;
+      var lead = st.failed || st.flaky
+        ? [st.failed ? (st.failed === 1 ? "One test" : count(st.failed, "test")) + " failed" : "", st.flaky ? (st.failed ? (st.flaky === 1 ? "one" : String(st.flaky)) : st.flaky === 1 ? "One test" : count(st.flaky, "test")) + " " + (st.flaky === 1 ? "was" : "were") + " flaky" : ""].filter(Boolean).join(" and ") + " in the last full-suite run." + (st.failed ? " Start with the " + (st.failed === 1 ? "failure" : "failures") + " below." : "")
+        : "All " + total + " tests passed in the last full-suite run.";
+      html += '<p class="lead">' + esc(lead) + "</p>" + runSummary(r, s.htmlReport, "Full suite");
+      if (r.failures.length || (r.flaky && r.flaky.length)) {
+        html += '<section aria-labelledby="fail-h" class="sect"><h2 id="fail-h">Needs a look</h2><div class="stack">' + r.failures.map(failureCard).join("") + (r.flaky || []).map(flakyRow).join("") + "</div></section>";
+      }
+      if (r.files.length) {
+        var maxMs = Math.max.apply(null, r.files.map(function (f) { return f.durationMs || 0; }).concat([1]));
+        html += '<section aria-labelledby="spec-h" class="sect"><h2 id="spec-h">Every spec</h2><div class="card tbl-card"><table class="tbl spec-tbl"><thead><tr><th>Spec</th><th class="w-bar">Result</th><th>Passed</th><th>Failed</th><th>Flaky</th><th>Skipped</th><th>Time</th></tr></thead><tbody>' + r.files.map(function (f) {
+          var p = specPath(f.file);
+          return '<tr><td class="mono">' + (p ? docLink(p, f.file) : esc(f.file)) + "</td><td>" + runBar(f) + "</td><td>" + f.passed + "</td><td>" + f.failed + "</td><td>" + f.flaky + "</td><td>" + f.skipped + '</td><td class="muted"><span class="timebar"><i style="width:' + Math.round(100 * (f.durationMs || 0) / maxMs) + '%"></i></span>' + esc(fmtDur(f.durationMs)) + "</td></tr>";
+        }).join("") + "</tbody></table></div></section>";
+      }
       if (s.performanceReport.exists) html += '<p><a href="' + rawHref(s.performanceReport.path) + '" target="_blank" rel="noopener">Open the k6 performance report</a></p>';
-    } else html += emptyBox("No full-suite results yet. The QA Reporter step runs the tests.");
-    html += "<h2>Stories</h2>";
-    var withRuns = state.stories.filter(function (x) { return x.lastRun; });
-    html += withRuns.length ? '<div class="table-wrap"><table><thead><tr><th>Story</th><th>Last run</th><th>Passed</th><th>Failed</th><th>Flaky</th><th>Skipped</th></tr></thead><tbody>' + withRuns.map(function (x) { return '<tr><td><a href="#story/' + encodeURIComponent(x.key) + '/runs">' + esc(x.key) + "</a> " + esc(x.title) + "</td><td>" + esc(x.lastRun.date) + "</td><td>" + x.lastRun.passed + "</td><td>" + x.lastRun.failed + "</td><td>" + x.lastRun.flaky + "</td><td>" + x.lastRun.skipped + "</td></tr>"; }).join("") + "</tbody></table></div>" : emptyBox("No story runs yet.");
-    main.innerHTML = html;
+    } else html += '<p class="lead">No full-suite results yet. The QA Reporter step runs the tests.</p>';
+    var withRuns = state.stories.filter(function (x) { return x.runs && x.runs.length; });
+    html += '<section aria-labelledby="sr-h" class="sect"><h2 id="sr-h">Stories</h2>';
+    html += withRuns.length ? '<div class="card tbl-card"><table class="tbl"><thead><tr><th>Story</th><th>Recent runs</th><th>Last run</th><th></th></tr></thead><tbody>' + withRuns.map(function (x) {
+      var strip = '<span class="strip" role="img" aria-label="' + esc(x.runs.map(function (u) { return u.date + ": " + u.passed + " passed, " + u.failed + " failed"; }).join("; ")) + '">' + x.runs.map(function (u) { return '<i class="' + (u.failed ? "r-err" : u.flaky ? "r-warn" : u.passed ? "r-ok" : "r-skip") + '" title="' + esc(u.date + ": " + u.passed + " passed, " + u.failed + " failed, " + u.flaky + " flaky") + '"></i>'; }).join("") + "</span>";
+      return '<tr><td><span class="kt"><span class="mono muted">' + esc(x.key) + "</span>" + esc(x.title) + "</span></td><td>" + strip + '</td><td class="small">' + esc(lastRunText(x.lastRun)) + '</td><td><a href="#story/' + encodeURIComponent(x.key) + '/runs">Runs</a></td></tr>';
+    }).join("") + "</tbody></table></div>" : emptyBox("No story runs yet.");
+    main.innerHTML = html + "</section>";
   }
 
   function viewDoc(p) {
@@ -374,30 +899,185 @@
     }).catch(showError);
   }
 
+  // ── Settings: the look, for this browser or as the project default ─────────
+  var LS_KEYS = { theme: "agentic-qa-ui-theme", mode: "agentic-qa-ui-mode", density: "agentic-qa-ui-density" };
+  var LOOK = {
+    theme: { geist: "Geist", carbon: "Carbon", industrial: "Industrial", corporate: "Corporate" },
+    mode: { light: "light", dark: "dark", system: "matches your computer" },
+    density: { comfortable: "comfortable", compact: "compact" }
+  };
+  var BUILT_IN = { theme: "geist", mode: "system", density: "comfortable" };
+  var THEME_CARDS = [
+    ["geist", "Black and white, with blue when it's your turn. The built-in default.", "#FAFAFA", "#FFFFFF", "#171717", "#0070F3", "#FFFFFF", ["#1A7F37", "#B35400", "#CB2A2F"]],
+    ["carbon", "IBM Plex, square corners and a shape for every status.", "#F4F4F4", "#161616", "#F4F4F4", "#0F62FE", "#FFFFFF", ["#24A148", "#EB6200", "#DA1E28"]],
+    ["industrial", "Black chrome, safety yellow when it's your turn.", "#EFEFEC", "#111111", "#FFCD11", "#FFCD11", "#111111", ["#166534", "#C2410C", "#B91C1C"]],
+    ["corporate", "Navy and serif headings, ready to show stakeholders.", "#F3F5F8", "#0B2545", "#FFFFFF", "#1A56A8", "#FFFFFF", ["#1B7340", "#B54708", "#B42318"]]
+  ];
+  var settingsDraft = null, settingsScope = "browser";
+  function lsGet(k) { try { return window.localStorage.getItem(k); } catch (e) { return null; } }
+  function lsSet(k, v) { try { window.localStorage.setItem(k, v); return true; } catch (e) { return false; } }
+  function lsDel(k) { try { window.localStorage.removeItem(k); } catch (e) {} }
+  function known(kind, v) { if (kind === "theme" && v === "slate") v = "geist"; return LOOK[kind][v] ? v : null; }
+  function browserLook() {
+    var out = {}, any = false;
+    Object.keys(LS_KEYS).forEach(function (k) { var v = known(k, lsGet(LS_KEYS[k])); if (v) { out[k] = v; any = true; } });
+    return any ? out : null;
+  }
+  function projectLook() { return window.__AGENTIC_QA_APPEARANCE__ || {}; }
+  /** What applies now, setting by setting: this browser, then the project default, then the built-in look. */
+  function effectiveLook() {
+    var b = browserLook() || {}, p = projectLook(), out = {};
+    Object.keys(BUILT_IN).forEach(function (k) { out[k] = b[k] || known(k, p[k]) || BUILT_IN[k]; });
+    return out;
+  }
+  function applyLook(a) {
+    var d = document.documentElement;
+    d.setAttribute("data-theme", a.theme);
+    if (a.mode === "system") d.removeAttribute("data-mode"); else d.setAttribute("data-mode", a.mode);
+    if (a.density === "compact") d.setAttribute("data-density", "compact"); else d.removeAttribute("data-density");
+    if (window.agenticQaThemeSync) window.agenticQaThemeSync();
+  }
+  function describeLook(a) {
+    if (!a || !Object.keys(a).length) return "Not set";
+    return ["theme", "mode", "density"].filter(function (k) { return a[k]; }).map(function (k) { return LOOK[k][a[k]]; }).join(", ");
+  }
+  function sameLook(a, b) { return !!a && !!b && a.theme === b.theme && a.mode === b.mode && a.density === b.density; }
+
+  function viewSettings(message) {
+    api("api/settings").then(function (cfg) {
+      if (parseRoute().v !== "settings") return;
+      if (!settingsDraft) settingsDraft = effectiveLook();
+      if (STATIC) settingsScope = "browser";
+      var html = '<h1>Settings</h1><p class="sub">Choose how the dashboard looks. The page previews your choice; nothing is saved until you press Save.</p>';
+      if (message) html += '<p class="ok-box" role="status">' + esc(message) + "</p>";
+      if (cfg.exists && !cfg.valid) html += '<p class="err-box" role="alert"><code>' + esc(cfg.file) + "</code> isn't valid JSON, so the project default is ignored. Fix or delete it to save a new one.</p>";
+      html += '<form id="settingsForm" class="settings"><div>';
+      html += '<fieldset><legend>Theme</legend><div class="theme-cards">' + THEME_CARDS.map(function (c) {
+        var dots = c[7].map(function (col) { return '<i style="background:' + col + '"></i>'; }).join("");
+        return '<label class="theme-card"><span class="swatch" aria-hidden="true" style="background:' + c[2] + '"><span class="sw-top" style="background:' + c[3] + '"><i style="background:' + c[4] + '"></i></span><span class="sw-body"><span class="sw-dots">' + dots + '</span><span class="sw-btn" style="background:' + c[5] + ";color:" + c[6] + '">Your turn</span></span></span>' +
+          '<span class="head"><input type="radio" name="s-theme" value="' + c[0] + '"' + (settingsDraft.theme === c[0] ? " checked" : "") + ">" + esc(LOOK.theme[c[0]]) + '</span><span class="desc">' + esc(c[1]) + "</span></label>";
+      }).join("") + "</div></fieldset>";
+      html += '<fieldset><legend>Mode</legend><div class="choices">' + [["light", "Light"], ["dark", "Dark"], ["system", "Match my computer"]].map(function (o) {
+        return '<label class="choice"><input type="radio" name="s-mode" value="' + o[0] + '"' + (settingsDraft.mode === o[0] ? " checked" : "") + ">" + esc(o[1]) + "</label>";
+      }).join("") + "</div></fieldset>";
+      html += '<fieldset><legend>Density</legend><div class="choices">' + [["comfortable", "Comfortable"], ["compact", "Compact"]].map(function (o) {
+        return '<label class="choice"><input type="radio" name="s-density" value="' + o[0] + '"' + (settingsDraft.density === o[0] ? " checked" : "") + ">" + esc(o[1]) + "</label>";
+      }).join("") + "</div></fieldset>";
+      html += '<fieldset class="card save-box"><legend>Save as</legend><div class="choices">' +
+        '<label class="choice block"><input type="radio" name="s-scope" value="browser"' + (settingsScope === "browser" ? " checked" : "") + '><span><b>This browser only</b><small>Only you see it, on this computer. Teammates keep the project default.</small></span></label>' +
+        '<label class="choice block"><input type="radio" name="s-scope" value="project"' + (settingsScope === "project" ? " checked" : "") + (STATIC ? " disabled" : "") + '><span><b>Project default for everyone</b><small>' + (STATIC ? "Not available in a saved snapshot. Open the live dashboard to save it." : "Saved to " + esc(cfg.file) + ". Commit the file to share it with your team.") + "</small></span></label></div>" +
+        '<pre id="settingsFile" aria-label="What will be saved"></pre>' +
+        '<div class="actions"><span class="grow" id="settingsStatus" role="status"></span><button class="btn ghost" type="button" id="settingsDiscard">Discard changes</button><button class="btn" type="submit" id="settingsSave">Save</button></div></fieldset>';
+      html += "</div>";
+      var b = browserLook();
+      html += '<aside class="card pad wins"><h2 style="margin-top:0">Which setting wins</h2><ol><li>What you saved for this browser</li><li>The project default in <code>' + esc(cfg.file) + "</code></li><li>The built-in look: Geist, matching your computer, comfortable</li></ol>" +
+        "<dl><dt>This browser</dt><dd>" + esc(describeLook(b)) + "</dd><dt>Project default</dt><dd>" + esc(describeLook(cfg.appearance)) + "</dd><dt>Showing now</dt><dd>" + esc(describeLook(effectiveLook())) + "</dd></dl>" +
+        (b ? '<button class="btn ghost" type="button" id="settingsForget">Use the project default in this browser</button>' : "") + "</aside>";
+      html += "</form>";
+      main.innerHTML = html;
+      wireSettings(cfg);
+    }).catch(showError);
+  }
+
+  function wireSettings(cfg) {
+    var form = document.getElementById("settingsForm");
+    if (!form) return;
+    function refresh() {
+      var changed = !sameLook(settingsDraft, effectiveLook());
+      document.getElementById("settingsFile").textContent = settingsScope === "project"
+        ? cfg.file + "\n" + JSON.stringify({ appearance: settingsDraft }, null, 2)
+        : "Saved in this browser only:\n" + describeLook(settingsDraft);
+      document.getElementById("settingsStatus").textContent = changed ? "Not saved yet. You're previewing " + describeLook(settingsDraft) + "." : "No unsaved changes.";
+      document.getElementById("settingsSave").textContent = settingsScope === "project" ? "Save as project default" : "Save for this browser";
+    }
+    form.addEventListener("change", function (e) {
+      var i = e.target;
+      if (!i || !i.name) return;
+      if (i.name === "s-scope") settingsScope = i.value;
+      else { settingsDraft[i.name.slice(2)] = i.value; applyLook(settingsDraft); }
+      refresh();
+    });
+    document.getElementById("settingsDiscard").addEventListener("click", function () {
+      settingsDraft = effectiveLook();
+      applyLook(settingsDraft);
+      viewSettings();
+    });
+    var forget = document.getElementById("settingsForget");
+    if (forget) forget.addEventListener("click", function () {
+      Object.keys(LS_KEYS).forEach(function (k) { lsDel(LS_KEYS[k]); });
+      settingsDraft = effectiveLook();
+      applyLook(settingsDraft);
+      viewSettings("This browser now uses the project default.");
+    });
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var look = { theme: settingsDraft.theme, mode: settingsDraft.mode, density: settingsDraft.density };
+      if (settingsScope === "browser") {
+        var ok = Object.keys(LS_KEYS).every(function (k) { return lsSet(LS_KEYS[k], look[k]); });
+        if (!ok) return showError("This browser doesn't allow saving settings. Save it as the project default instead.");
+        applyLook(effectiveLook());
+        return viewSettings("Saved for this browser.");
+      }
+      var btn = document.getElementById("settingsSave");
+      btn.disabled = true;
+      btn.textContent = "Saving…";
+      fetch("api/settings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ appearance: look }) })
+        .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || r.statusText); return j; }); })
+        .then(function (res) {
+          window.__AGENTIC_QA_APPEARANCE__ = res.appearance || look;
+          // This browser follows the new project default, so what you saved is what you see.
+          Object.keys(LS_KEYS).forEach(function (k) { lsDel(LS_KEYS[k]); });
+          settingsDraft = effectiveLook();
+          applyLook(settingsDraft);
+          viewSettings("Saved as the project default in " + res.file + ". This browser now follows it.");
+        })
+        .catch(function (err) { btn.disabled = false; refresh(); showError(err); });
+    });
+    refresh();
+  }
+
   function showError(err) { main.innerHTML = '<div class="err-box" role="alert">' + esc(err && err.message ? err.message : err) + "</div>"; }
 
   function render(scrollTop) {
     route = parseRoute();
+    if (route.v !== "settings" && settingsDraft) { settingsDraft = null; applyLook(effectiveLook()); }
     document.querySelectorAll(".rail a").forEach(function (a) {
       var v = a.getAttribute("data-view");
-      var on = v === route.v || (v === "stories" && route.v === "story") || (v === "suite" && route.v === "doc") || (v === "suite" && !route.v);
+      var on = v === route.v || (v === "stories" && route.v === "story") || (v === "suite" && route.v === "doc");
       if (on) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
     });
     if (!state) return;
     document.getElementById("proj").textContent = state.project;
     document.title = state.project + " · Agentic QA Dashboard";
-    if (!state.hasData && route.v !== "doc" && route.v !== "models") {
+    if (!state.hasData && route.v !== "doc" && route.v !== "models" && route.v !== "settings") {
       main.innerHTML = "<h1>Nothing here yet</h1>" + emptyBox("<p>This project has no <code>.agentic-qa/</code> folder yet.</p><p>Run <code>/qa-pipeline &lt;url&gt;</code> for a full suite, or <code>/qa-story &lt;KEY&gt;</code> for one story. This page updates as files appear.</p>");
       return;
     }
     if (route.v === "stories") viewStories();
-    else if (route.v === "story" && route.arg) { var parts = route.arg.split("/"); viewStory(parts[0], parts[1]); }
+    else if (route.v === "story" && route.arg) { var parts = route.arg.split("/"); viewStory(parts[0], parts[1], parts[2]); }
+    else if (route.v === "suite") viewSuite(route.arg);
     else if (route.v === "results") viewResults();
     else if (route.v === "models") viewModels();
+    else if (route.v === "settings") viewSettings();
     else if (route.v === "doc" && route.arg) viewDoc(route.arg);
-    else viewSuite();
+    else viewNow();
     if (scrollTop) window.scrollTo(0, 0);
   }
+
+  /** Copy buttons next to commands: the command goes to the clipboard, and the button says so for a moment. */
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest("[data-copy]");
+    if (!b) return;
+    var text = b.getAttribute("data-copy");
+    var done = function (ok) { b.textContent = ok ? "Copied" : "Select and copy"; setTimeout(function () { b.textContent = "Copy"; }, 1600); };
+    if (navigator.clipboard && window.isSecureContext !== false) navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+    else {
+      var ta = document.createElement("textarea"); ta.value = text; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      var ok = false; try { ok = document.execCommand("copy"); } catch (err) { ok = false; }
+      document.body.removeChild(ta); done(ok);
+    }
+  });
 
   function setLive(kind, text) {
     var el = document.getElementById("live");
@@ -415,12 +1095,20 @@
       if (json !== lastJson) {
         var first = !lastJson;
         lastJson = json;
-        if (first || (route.v !== "doc" && route.v !== "models")) render(false);
+        if (first || (route.v !== "doc" && route.v !== "models" && route.v !== "settings")) render(false);
       }
     }).catch(function () { setLive("stale", "Disconnected — is the dashboard still running?"); });
   }
 
-  window.addEventListener("hashchange", function () { render(true); main.focus({ preventScroll: true }); });
+  // Moving within a page (another document in the suite reader, another case of the same story) keeps the scroll position.
+  var lastRoute = parseRoute();
+  window.addEventListener("hashchange", function () {
+    var r = parseRoute(), key = function (x) { return x.v === "story" ? "story/" + (x.arg || "").split("/")[0] : x.v; };
+    var samePage = key(r) === key(lastRoute) && (r.v === "suite" || r.v === "story");
+    lastRoute = r;
+    render(!samePage);
+    if (!samePage) main.focus({ preventScroll: true });
+  });
   poll();
   if (!STATIC) setInterval(poll, 2000);
 })();

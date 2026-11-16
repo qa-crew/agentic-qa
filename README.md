@@ -154,7 +154,8 @@ have a `playwright.config.ts`, it asks before replacing it.
 ├── test-cases/<module>.md
 ├── test-scripts/              <module>.spec.ts, pages/<module>.page.ts, fixtures.ts
 ├── reports/                   review_report.md, summary_report.md, test-results/, playwright-report/
-└── progress.jsonl             step progress, for the dashboard
+├── progress.jsonl             step progress, for the dashboard
+└── settings.json              the dashboard's default look, from its Settings page (optional)
 playwright.config.ts
 ```
 
@@ -197,19 +198,33 @@ Then run `/agentic-qa:qa-story SD-1`. Add `--url https://www.saucedemo.com` the 
 
 ## The dashboard: `qa-dashboard`
 
-![The Agentic QA dashboard during a full-suite run](examples/saucedemo/screenshots/dashboard-suite.png)
+![The dashboard's Now page during a full-suite run: what's running, what's waiting for your review, the last test run and the activity](docs/tutorial/images/now.png)
 
 - `/agentic-qa:qa-dashboard` starts a local page and gives you its link. It follows a running pipeline or story
   every two seconds.
 - **Views:**
-  - Full suite: the five steps with their outputs;
-  - Stories: each story's steps, test cases, notes and runs;
-  - Results: the latest Playwright runs, failures, and links to the HTML report;
-  - Models: the model each agent starts with (see [Models](#models)).
-- **Looks:** Slate and Industrial themes, in light and dark. It works at phone width.
-- **Local and read-only:** it serves on 127.0.0.1 behind a random link and only reads `.agentic-qa/`. The one
-  exception is the Models page, which saves `.agentic-qa/ai.json`.
+  - Now (the start page): one sentence on what's happening, the suite's steps sized by how long they took, what's
+    waiting for your review with the command to continue (and a Copy button), the stories, the last test run and
+    the activity;
+  - Full suite: the run and its steps, then a reader for everything the agents wrote (documents, test cases, specs,
+    page objects, snapshots);
+  - Stories: each story's steps; its test cases grouped by acceptance criterion, one at a time (arrow keys move
+    between them), with a Possible defect showing what the story says next to what the app does; notes and runs;
+  - Results: failures first, each with its error, its screenshot and the manual test case it automates; then flaky
+    tests, every spec, and each story's recent runs;
+  - Models: the model each agent starts with (see [Models](#models));
+  - Settings: the theme, mode and density, saved for your browser or as the project default.
+- **Looks:** four themes, each in light and dark: Geist (the default), Carbon, Industrial and Corporate. Carbon also
+  gives every status a shape, so it reads without colour. There's a compact density, and it works at phone width.
+- **A default for the team:** on the Settings page, save your choice for this browser only, or as the project
+  default in `.agentic-qa/settings.json`. Commit that file and everyone who opens the dashboard gets the same look.
+  Your browser's choice wins over the project default, which wins over the built-in look.
+- **Local and read-only:** it serves on 127.0.0.1 behind a random link and only reads `.agentic-qa/`. The two
+  exceptions are the Models page, which saves `.agentic-qa/ai.json`, and the Settings page, which saves
+  `.agentic-qa/settings.json`.
 - `--static` saves a self-contained `.agentic-qa/reports/dashboard.html` you can attach or share.
+- **Design tokens:** [`design/`](design/README.md) has the four themes as design tokens you can import into Figma,
+  with the colour rules.
 
 ## Models
 Each role's agent can run on its own Claude model.
@@ -230,7 +245,7 @@ The order of precedence:
 The picks are saved in `.agentic-qa/ai.json`. GitHub Copilot uses its own model picker, so the picks don't apply
 there.
 
-![The Models page](examples/saucedemo/screenshots/dashboard-models.png)
+![The Models page](docs/tutorial/images/models.png)
 
 ## Example
 [examples/saucedemo](examples/saucedemo) walks through a real run of the agents on saucedemo.com: what each step did,

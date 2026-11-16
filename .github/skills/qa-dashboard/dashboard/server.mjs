@@ -3,8 +3,9 @@
 //   node server.mjs [--dir <project root>] [--port <n>] [--open]   serve it live on 127.0.0.1
 //   node server.mjs --static [<out.html>]                          write a snapshot (default .agentic-qa/reports/dashboard.html)
 // The server binds to 127.0.0.1 only, uses a random URL token and checks the Host header. It only reads files inside
-// .agentic-qa/ (plus the root playwright.config.ts), and the only thing it ever writes is .agentic-qa/ai.json, from the Models
-// page (POST api/models: same-origin, JSON, known roles and model names only).
+// .agentic-qa/ (plus the root playwright.config.ts). It writes only two files, each from its own page, with same-origin JSON
+// requests and known values only: .agentic-qa/ai.json from the Models page (POST api/models: known roles and model names)
+// and .agentic-qa/settings.json from the Settings page (POST api/settings: the project's default theme, mode and density).
 import * as fs from "node:fs";
 import * as http from "node:http";
 import * as path from "node:path";
@@ -87,6 +88,62 @@ function saveModels(body) {
   return { status: 200 };
 }
 
+const APPEARANCE = {
+  theme: ["geist", "carbon", "industrial", "corporate"],
+  mode: ["light", "dark", "system"],
+  density: ["comfortable", "compact"],
+};
+const BUILT_IN_APPEARANCE = { theme: "geist", mode: "system", density: "comfortable" };
+const settingsFile = path.join(dataDir, "settings.json");
+
+/** .agentic-qa/settings.json as an object: {} when it isn't there, undefined when it isn't a JSON object. */
+function readSettingsFile() {
+  if (!fs.existsSync(settingsFile)) return {};
+  try {
+    const j = JSON.parse(fs.readFileSync(settingsFile, "utf-8"));
+    return j && typeof j === "object" && !Array.isArray(j) ? j : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/** The project's saved default look, known values only, or null. */
+function projectAppearance() {
+  const a = readSettingsFile()?.appearance;
+  if (!a || typeof a !== "object") return null;
+  const out = {};
+  for (const [key, values] of Object.entries(APPEARANCE)) if (values.includes(a[key])) out[key] = a[key];
+  return Object.keys(out).length ? out : null;
+}
+
+function settingsView() {
+  return {
+    file: ".agentic-qa/settings.json",
+    exists: fs.existsSync(settingsFile),
+    valid: readSettingsFile() !== undefined,
+    appearance: projectAppearance(),
+    options: APPEARANCE,
+    builtIn: BUILT_IN_APPEARANCE,
+  };
+}
+
+/** Validates a Settings page save: { appearance: { theme, mode, density } }, each a known value. Other keys in the file are kept. */
+function saveSettings(body) {
+  const a = body && typeof body === "object" ? body.appearance : undefined;
+  if (!a || typeof a !== "object" || Array.isArray(a)) return { status: 400, error: "Send { appearance: { theme, mode, density } }." };
+  for (const key of Object.keys(a)) if (!(key in APPEARANCE)) return { status: 400, error: `Unknown setting "${key}".` };
+  const next = {};
+  for (const [key, values] of Object.entries(APPEARANCE)) {
+    if (!values.includes(a[key])) return { status: 400, error: `The ${key} must be one of: ${values.join(", ")}.` };
+    next[key] = a[key];
+  }
+  const file = readSettingsFile();
+  if (file === undefined) return { status: 409, error: ".agentic-qa/settings.json isn't a JSON object. Fix or delete it, then save again." };
+  fs.mkdirSync(dataDir, { recursive: true });
+  fs.writeFileSync(settingsFile, JSON.stringify({ ...file, appearance: next }, null, 2) + "\n", "utf-8");
+  return { status: 200 };
+}
+
 /** The request body as text, or undefined when it's over the limit (the rest is drained so the reply still arrives). */
 function readBody(req, limit = 4096) {
   return new Promise((resolve, reject) => {
@@ -104,7 +161,7 @@ function readBody(req, limit = 4096) {
 function page(staticData) {
   const read = (f) => fs.readFileSync(path.join(HERE, f), "utf-8");
   let html = read("page.html")
-    .replace("<!--THEME_BOOT-->", () => read("theme-boot.html").trim())
+    .replace("<!--THEME_BOOT-->", () => `<script>window.__AGENTIC_QA_APPEARANCE__=${JSON.stringify(projectAppearance() ?? {}).replace(/</g, "\\u003c")};</script>` + read("theme-boot.html").trim())
     .replace("/*THEME_CSS*/", () => read("theme.css"))
     .replace("<!--THEME_MENU-->", () => read("theme-menu.html").trim());
   const data = staticData ? `<script>window.__AGENTIC_QA_STATIC__=${JSON.stringify(staticData).replace(/</g, "\\u003c")};</script>` : "";
@@ -124,10 +181,15 @@ function send(res, status, body, type = "application/json; charset=utf-8") {
   res.end(typeof body === "string" || Buffer.isBuffer(body) ? body : JSON.stringify(body));
 }
 
+const WRITES = {
+  "api/models": { save: saveModels, view: modelsView },
+  "api/settings": { save: saveSettings, view: settingsView },
+};
+
 function writeStatic() {
   const out = path.resolve(root, typeof flag("static") === "string" ? flag("static") : ".agentic-qa/reports/dashboard.html");
   const state = buildState(root);
-  const data = { "api/state": state, "api/models": modelsView() };
+  const data = { "api/state": state, "api/models": modelsView(), "api/settings": settingsView() };
   const docs = new Set([
     ...state.suite.documents.map((d) => d.path),
     ...state.suite.testCases.map((t) => t.path),
@@ -158,8 +220,9 @@ function serve() {
     const host = req.headers.host ?? "";
     if (host !== `127.0.0.1:${port}` && host !== `localhost:${port}`) return send(res, 403, "Forbidden", "text/plain; charset=utf-8");
     const url = new URL(req.url ?? "/", `http://${host}`);
-    if (req.method === "POST" && url.pathname === `${base}api/models`) {
-      // The one write: same-origin JSON only, so another page in the browser can't post here.
+    const write = req.method === "POST" ? WRITES[url.pathname.slice(base.length)] : undefined;
+    if (write && url.pathname.startsWith(base)) {
+      // The two writes: same-origin JSON only, so another page in the browser can't post here.
       const origin = req.headers.origin ?? "";
       if (origin !== `http://127.0.0.1:${port}` && origin !== `http://localhost:${port}`) return send(res, 403, { error: "Wrong origin." });
       if (!/^application\/json(;|$)/i.test(req.headers["content-type"] ?? "")) return send(res, 415, { error: "Send JSON." });
@@ -172,13 +235,13 @@ function serve() {
         return send(res, 400, { error: "Send a JSON body." });
       }
       try {
-        const r = saveModels(body);
-        return r.error ? send(res, r.status, { error: r.error }) : send(res, 200, modelsView());
+        const r = write.save(body);
+        return r.error ? send(res, r.status, { error: r.error }) : send(res, 200, write.view());
       } catch (err) {
         return send(res, 500, { error: String(err?.message ?? err) });
       }
     }
-    if (req.method !== "GET" && req.method !== "HEAD") return send(res, 405, { error: "Only the Models page can save, and only .agentic-qa/ai.json." });
+    if (req.method !== "GET" && req.method !== "HEAD") return send(res, 405, { error: "Only the Models and Settings pages can save: .agentic-qa/ai.json and .agentic-qa/settings.json." });
     if (url.pathname === `/${token}`) { res.writeHead(302, { Location: base }); return res.end(); }
     if (!url.pathname.startsWith(base)) return send(res, 404, "Not found", "text/plain; charset=utf-8");
     const route = decodeURIComponent(url.pathname.slice(base.length));
@@ -186,6 +249,7 @@ function serve() {
       if (route === "") return send(res, 200, page(), "text/html; charset=utf-8");
       if (route === "api/state") return send(res, 200, buildState(root));
       if (route === "api/models") return send(res, 200, modelsView());
+      if (route === "api/settings") return send(res, 200, settingsView());
       if (route === "api/story") {
         const key = url.searchParams.get("key") ?? "";
         return storyKeys(root).includes(key) ? send(res, 200, buildStory(root, key)) : send(res, 404, { error: `No story ${key}` });
@@ -216,7 +280,7 @@ function serve() {
     const link = `http://127.0.0.1:${port}${base}`;
     console.log(`Agentic QA dashboard for ${root}`);
     console.log(`  ${link}`);
-    console.log("  It only reads .agentic-qa/, except the Models page, which saves .agentic-qa/ai.json. Press Ctrl+C to stop.");
+    console.log("  It only reads .agentic-qa/, except the Models and Settings pages, which save .agentic-qa/ai.json and .agentic-qa/settings.json. Press Ctrl+C to stop.");
     if (flag("open")) {
       const [cmd, cmdArgs] = process.platform === "win32" ? ["cmd", ["/c", "start", "", link]] : process.platform === "darwin" ? ["open", [link]] : ["xdg-open", [link]];
       execFile(cmd, cmdArgs, () => {});

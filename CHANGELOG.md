@@ -2,6 +2,46 @@
 
 Every change to Agentic QA is listed here.
 
+## Unreleased
+
+### Added
+- **Four dashboard themes,** each in light and dark: **Geist** (the new default), **Carbon**, **Industrial** and
+  **Corporate**. Carbon also gives every status a shape: Verified a circle, Possible defect a diamond, Blocked a
+  triangle, New and Draft a square, Updated a hexagon. The Geist, Geist Mono, Source Sans 3, Source Serif 4 and Source
+  Code Pro fonts are bundled, so the dashboard still works offline.
+- **A Settings page** in the dashboard: pick a theme, mode (light, dark or match your computer) and density, see it
+  on the page, then save it for this browser only or as the **project default** in `.agentic-qa/settings.json`
+  (`{ "appearance": { "theme", "mode", "density" } }`). Commit the file to share the look with your team. Your
+  browser's choice wins over the project default, which wins over the built-in look (Geist, matching your computer,
+  comfortable). The appearance menu's choices are for this browser and link to Settings.
+- **A Now page,** the dashboard's new start page: one sentence on what's happening; the suite's five steps as a track
+  whose bars follow how long each step took; **Waiting for you**, with each story or step that needs your review and
+  the command to continue, with a Copy button; the stories with a five-part progress track; the last test run; and
+  the activity from `progress.jsonl`.
+- **Design tokens** in `design/tokens/`: each theme and mode as a DTCG file that Figma can import as variables,
+  generated from the dashboard's `theme.css` by `npm run build` and checked by `npm run check`. `design/README.md` has
+  the colour rules and type.
+
+### Changed
+- **Story review is one case at a time.** The test cases are grouped by acceptance criterion in a list, with filters
+  by status; the selected case shows its criterion, steps, expected result, tags and last result (with its
+  screenshot). The up and down arrow keys move between cases, and the link keeps the case (`#story/SD-3/cases/<id>`).
+  A **Possible defect** shows what the story says next to what the app does, taken from the Exploration Notes line
+  that names the case. The your-turn bar has the command to continue and a Copy button.
+- **Results show failures first:** each with its full error, the screenshot Playwright took (when it's inside
+  `.agentic-qa/`), and the manual test case with the same ID, so you can check it by hand. Then the flaky tests, every
+  spec with bars for its results and time, and each story's recent runs.
+- **Full suite has a reader:** pick a document, test-case file, spec, page object or snapshot to read it beside the
+  list.
+- **The tutorial uses Geist,** the dashboard's default look, with the Geist fonts bundled under `docs/tutorial/fonts/`,
+  and new screenshots of an example project.
+- **The Slate theme is replaced by Geist.** A browser that had Slate saved shows Geist.
+- **One meaning per colour** in every theme: the accent (blue, or yellow in Industrial) only marks "your turn"
+  (Waiting for you, Your turn: review); green, orange and red are only for status; Running, Next, Updated and New
+  are neutral; flaky and warnings are orange. The selected tab and the running step are drawn in ink.
+- The dashboard now writes two files, each from its own page: `.agentic-qa/ai.json` (Models) and
+  `.agentic-qa/settings.json` (Settings). Both only accept same-origin JSON with known values.
+
 ## 1.0.0 — 2026-11-13
 
 The first release of Agentic QA, the open-source QA agents. The earlier proof of concept (Playwright's planner,
