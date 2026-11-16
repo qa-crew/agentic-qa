@@ -47,6 +47,40 @@ test("buildState reads the suite and the stories", () => {
   assert.ok(!story.notesHtml.includes("<script>"));
 });
 
+test("the views get what they need: activity, failures linked to their test cases, criteria, notes and run history", () => {
+  const dir = makeProject();
+  const tc = path.join(dir, ".agentic-qa/test-cases/SD-1-login.md");
+  fs.appendFileSync(tc, "\n- TC-SD1-N-001: expected the locked-out error; actual: the inventory opens.\n\n## Run History\n| Run | Date | Passed | Failed | Flaky | Skipped | Report |\n|---|---|---|---|---|---|---|\n| r1 | 2026-11-10 | 1 | 1 | 0 | 0 | — |\n| r2 | 2026-11-11 | 2 | 0 | 0 | 0 | — |\n");
+  const shot = path.join(dir, ".agentic-qa/reports/test-results/locked/fail.png");
+  fs.mkdirSync(path.dirname(shot), { recursive: true });
+  fs.writeFileSync(shot, "png");
+  const report = JSON.parse(fs.readFileSync(path.join(dir, ".agentic-qa/reports/test-results/results.json"), "utf-8"));
+  const locked = report.suites[0].suites[0].specs[1].tests[0];
+  locked.results[0].attachments = [{ path: shot, contentType: "image/png" }];
+  report.suites[0].suites[0].specs.push({ title: "TC-LOGIN-S-002 — b", tests: [{ status: "flaky", results: [{ status: "failed" }, { status: "passed" }] }] });
+  fs.writeFileSync(path.join(dir, ".agentic-qa/reports/test-results/results.json"), JSON.stringify(report));
+
+  const s = buildState(dir);
+  assert.equal(s.activity[0].step, "qa-engineer", "newest first");
+  assert.equal(s.activity[0].event, "start");
+  assert.equal(s.activity.at(-1).step, "pipeline");
+  const fail = s.suite.results.failures[0];
+  assert.equal(fail.tcId, "TC-SD1-N-001");
+  assert.equal(fail.testCase.file, ".agentic-qa/test-cases/SD-1-login.md");
+  assert.equal(fail.testCase.story, "SD-1");
+  assert.equal(fail.testCase.expected, "Error");
+  assert.equal(fail.screenshot, ".agentic-qa/reports/test-results/locked/fail.png", "only screenshots inside .agentic-qa/ are linked");
+  assert.match(fail.detail, /^Expected: locked\nmore$/);
+  assert.equal(s.suite.results.flaky[0].testCase.file, ".agentic-qa/test-cases/login.md", "the full suite's simpler tables count too");
+  assert.equal(s.suite.results.flaky[0].retries, 1);
+  assert.deepEqual(s.stories[0].runs.map((r) => [r.run, r.failed]), [["r1", 1], ["r2", 0]]);
+  assert.equal(s.stories[0].lastRun.run, "r2");
+
+  const story = buildStory(dir, "SD-1");
+  assert.deepEqual(story.criteria, [{ id: "AC1", html: "Given a valid user, when they log in, then the inventory shows" }]);
+  assert.deepEqual(story.notesByCase, { "TC-SD1-N-001": ["Expected the locked-out error; actual: the inventory opens."] });
+});
+
 test("a story step left running by a cut-off session isn't shown as running once a newer run starts", () => {
   const dir = makeProject();
   const log = path.join(dir, ".agentic-qa", "progress.jsonl");
@@ -93,7 +127,7 @@ function post(port, route, body, headers = {}) {
   });
 }
 
-test("the live server reads only .agentic-qa/ and writes only .agentic-qa/ai.json", async () => {
+test("the live server reads only .agentic-qa/ and writes only .agentic-qa/ai.json and settings.json", async () => {
   const dir = makeProject();
   const child = spawn(process.execPath, [SERVER, "--dir", dir], { stdio: ["ignore", "pipe", "inherit"] });
   try {
@@ -144,6 +178,34 @@ test("the live server reads only .agentic-qa/ and writes only .agentic-qa/ai.jso
     assert.equal(saved.status, 200);
     assert.deepEqual(JSON.parse(fs.readFileSync(aiFile, "utf-8")), { models: { anthropic: { analyst: "opus", "qa-planner": "haiku" } } });
     assert.equal(JSON.parse(saved.body).resolved.analyst.model, "opus");
+
+    // Settings: the project's default look.
+    const settingsFile = path.join(dir, ".agentic-qa/settings.json");
+    const before = JSON.parse((await get(port, base + "api/settings")).body);
+    assert.equal(before.exists, false);
+    assert.equal(before.appearance, null);
+    assert.deepEqual(before.builtIn, { theme: "geist", mode: "system", density: "comfortable" });
+    assert.deepEqual(before.options.theme, ["geist", "carbon", "industrial", "corporate"]);
+    const look = { theme: "corporate", mode: "dark", density: "compact" };
+    assert.equal((await post(port, base + "api/settings", { appearance: look }, { Origin: "http://evil.example" })).status, 403);
+    assert.equal((await post(port, base + "api/settings", "appearance=1", { "Content-Type": "text/plain" })).status, 415);
+    assert.equal((await post(port, base + "api/settings", { appearance: { ...look, theme: "slate" } })).status, 400);
+    assert.equal((await post(port, base + "api/settings", { appearance: { ...look, mode: "sepia" } })).status, 400);
+    assert.equal((await post(port, base + "api/settings", { appearance: { theme: "geist" } })).status, 400, "every setting is required");
+    assert.equal((await post(port, base + "api/settings", { appearance: { ...look, colour: "red" } })).status, 400, "unknown keys are refused");
+    assert.equal((await post(port, base + "api/settings", { look })).status, 400);
+    assert.ok(!fs.existsSync(settingsFile), "nothing written by a refused request");
+    fs.writeFileSync(settingsFile, JSON.stringify({ team: "qa" }));
+    const ok = await post(port, base + "api/settings", { appearance: look });
+    assert.equal(ok.status, 200);
+    assert.deepEqual(JSON.parse(ok.body).appearance, look);
+    assert.deepEqual(JSON.parse(fs.readFileSync(settingsFile, "utf-8")), { team: "qa", appearance: look }, "other keys in the file are kept");
+    assert.ok((await get(port, base)).body.includes('window.__AGENTIC_QA_APPEARANCE__={"theme":"corporate","mode":"dark","density":"compact"}'), "the page boots with the project default");
+    fs.writeFileSync(settingsFile, "{not json");
+    assert.equal((await post(port, base + "api/settings", { appearance: look })).status, 409, "a broken file isn't overwritten");
+    assert.equal(fs.readFileSync(settingsFile, "utf-8"), "{not json");
+    assert.equal(JSON.parse((await get(port, base + "api/settings")).body).valid, false);
+    assert.equal((await get(port, base + "fonts/geist-400.woff2")).type, "font/woff2");
   } finally {
     child.kill();
   }
@@ -157,8 +219,11 @@ test("--static writes one self-contained snapshot", () => {
   const m = html.match(/window\.__AGENTIC_QA_STATIC__=(.*?);<\/script>/s);
   assert.ok(m, "data is embedded");
   const data = JSON.parse(m[1]);
-  assert.ok(data["api/state"]);
-  assert.ok(data["api/story?key=SD-1"]);
+  assert.ok(data["api/state"].activity.length, "the Now page's activity is in the snapshot");
+  assert.ok(data["api/story?key=SD-1"].criteria);
+  assert.ok(html.includes('href="#now" data-view="now"'), "Now is the first view");
   assert.ok(data["api/doc?path=" + encodeURIComponent(".agentic-qa/test-cases/SD-1-login.md")]);
+  assert.equal(data["api/settings"].appearance, null, "the Settings page can show the project default");
+  assert.ok(html.includes("window.__AGENTIC_QA_APPEARANCE__={}"));
   assert.ok(!/<\/script>\s*alert/.test(html), "embedded text can't close the script tag");
 });

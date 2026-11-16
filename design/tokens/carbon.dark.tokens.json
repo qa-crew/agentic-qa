@@ -1,0 +1,722 @@
+{
+  "$description": "Agentic QA dashboard, carbon theme, dark mode. Generated from .claude/skills/qa-dashboard/dashboard/theme.css by scripts/build.mjs; edit that file, then run: npm run build",
+  "color": {
+    "chrome": {
+      "background": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.0863,
+            0.0863,
+            0.0863
+          ],
+          "alpha": 1,
+          "hex": "#161616"
+        }
+      },
+      "rail": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.0863,
+            0.0863,
+            0.0863
+          ],
+          "alpha": 1,
+          "hex": "#161616"
+        }
+      },
+      "text": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.9569,
+            0.9569,
+            0.9569
+          ],
+          "alpha": 1,
+          "hex": "#F4F4F4"
+        }
+      },
+      "text-muted": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.7765,
+            0.7765,
+            0.7765
+          ],
+          "alpha": 1,
+          "hex": "#C6C6C6"
+        }
+      },
+      "rail-selected": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.2235,
+            0.2235,
+            0.2235
+          ],
+          "alpha": 1,
+          "hex": "#393939"
+        }
+      },
+      "focus": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            1,
+            1,
+            1
+          ],
+          "alpha": 1,
+          "hex": "#FFFFFF"
+        }
+      },
+      "logo-background": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.9569,
+            0.9569,
+            0.9569
+          ],
+          "alpha": 1,
+          "hex": "#F4F4F4"
+        }
+      },
+      "logo-text": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.0863,
+            0.0863,
+            0.0863
+          ],
+          "alpha": 1,
+          "hex": "#161616"
+        }
+      }
+    },
+    "surface": {
+      "canvas": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.0863,
+            0.0863,
+            0.0863
+          ],
+          "alpha": 1,
+          "hex": "#161616"
+        }
+      },
+      "default": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.149,
+            0.149,
+            0.149
+          ],
+          "alpha": 1,
+          "hex": "#262626"
+        }
+      },
+      "sunken": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.1098,
+            0.1098,
+            0.1098
+          ],
+          "alpha": 1,
+          "hex": "#1C1C1C"
+        }
+      },
+      "group": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.0863,
+            0.0863,
+            0.0863
+          ],
+          "alpha": 1,
+          "hex": "#161616"
+        }
+      }
+    },
+    "border": {
+      "default": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.3216,
+            0.3216,
+            0.3216
+          ],
+          "alpha": 1,
+          "hex": "#525252"
+        }
+      },
+      "subtle": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.2235,
+            0.2235,
+            0.2235
+          ],
+          "alpha": 1,
+          "hex": "#393939"
+        }
+      }
+    },
+    "text": {
+      "default": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.9569,
+            0.9569,
+            0.9569
+          ],
+          "alpha": 1,
+          "hex": "#F4F4F4"
+        }
+      },
+      "secondary": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.8784,
+            0.8784,
+            0.8784
+          ],
+          "alpha": 1,
+          "hex": "#E0E0E0"
+        }
+      },
+      "muted": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.7765,
+            0.7765,
+            0.7765
+          ],
+          "alpha": 1,
+          "hex": "#C6C6C6"
+        }
+      },
+      "link": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.4706,
+            0.6627,
+            1
+          ],
+          "alpha": 1,
+          "hex": "#78A9FF"
+        }
+      }
+    },
+    "focus": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          1,
+          1,
+          1
+        ],
+        "alpha": 1,
+        "hex": "#FFFFFF"
+      }
+    },
+    "accent": {
+      "$description": "Means \"your turn\" and marks primary buttons. Never used for status.",
+      "default": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.0588,
+            0.3843,
+            0.9961
+          ],
+          "alpha": 1,
+          "hex": "#0F62FE"
+        }
+      },
+      "on-accent": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            1,
+            1,
+            1
+          ],
+          "alpha": 1,
+          "hex": "#FFFFFF"
+        }
+      },
+      "tint": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0,
+            0.1137,
+            0.4235
+          ],
+          "alpha": 1,
+          "hex": "#001D6C"
+        }
+      },
+      "tint-border": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0,
+            0.2627,
+            0.8078
+          ],
+          "alpha": 1,
+          "hex": "#0043CE"
+        }
+      },
+      "tint-text": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.8157,
+            0.8863,
+            1
+          ],
+          "alpha": 1,
+          "hex": "#D0E2FF"
+        }
+      }
+    },
+    "your-turn": {
+      "$description": "The bar that asks the person to review and continue.",
+      "background": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0,
+            0.1137,
+            0.4235
+          ],
+          "alpha": 1,
+          "hex": "#001D6C"
+        }
+      },
+      "text": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.9569,
+            0.9569,
+            0.9569
+          ],
+          "alpha": 1,
+          "hex": "#F4F4F4"
+        }
+      },
+      "border": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0,
+            0.2627,
+            0.8078
+          ],
+          "alpha": 1,
+          "hex": "#0043CE"
+        }
+      },
+      "button": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.0588,
+            0.3843,
+            0.9961
+          ],
+          "alpha": 1,
+          "hex": "#0F62FE"
+        }
+      },
+      "button-text": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            1,
+            1,
+            1
+          ],
+          "alpha": 1,
+          "hex": "#FFFFFF"
+        }
+      }
+    },
+    "status": {
+      "$description": "Green, orange and red are only for test status: passed, warning or flaky, failed.",
+      "passed": {
+        "background": {
+          "$type": "color",
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.0157,
+              0.2627,
+              0.0902
+            ],
+            "alpha": 1,
+            "hex": "#044317"
+          }
+        },
+        "text": {
+          "$type": "color",
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.4353,
+              0.8627,
+              0.549
+            ],
+            "alpha": 1,
+            "hex": "#6FDC8C"
+          }
+        },
+        "solid": {
+          "$type": "color",
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.2588,
+              0.7451,
+              0.3961
+            ],
+            "alpha": 1,
+            "hex": "#42BE65"
+          }
+        }
+      },
+      "warning": {
+        "background": {
+          "$type": "color",
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.3686,
+              0.1608,
+              0
+            ],
+            "alpha": 1,
+            "hex": "#5E2900"
+          }
+        },
+        "text": {
+          "$type": "color",
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              1,
+              0.7176,
+              0.5176
+            ],
+            "alpha": 1,
+            "hex": "#FFB784"
+          }
+        },
+        "solid": {
+          "$type": "color",
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              1,
+              0.5137,
+              0.1686
+            ],
+            "alpha": 1,
+            "hex": "#FF832B"
+          }
+        }
+      },
+      "failed": {
+        "background": {
+          "$type": "color",
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.4588,
+              0.0549,
+              0.0745
+            ],
+            "alpha": 1,
+            "hex": "#750E13"
+          }
+        },
+        "text": {
+          "$type": "color",
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              1,
+              0.702,
+              0.7216
+            ],
+            "alpha": 1,
+            "hex": "#FFB3B8"
+          }
+        },
+        "solid": {
+          "$type": "color",
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.9804,
+              0.302,
+              0.3373
+            ],
+            "alpha": 1,
+            "hex": "#FA4D56"
+          }
+        }
+      },
+      "info": {
+        "background": {
+          "$type": "color",
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0,
+              0.1137,
+              0.4235
+            ],
+            "alpha": 1,
+            "hex": "#001D6C"
+          }
+        },
+        "text": {
+          "$type": "color",
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.651,
+              0.7843,
+              1
+            ],
+            "alpha": 1,
+            "hex": "#A6C8FF"
+          }
+        },
+        "solid": {
+          "$type": "color",
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.4706,
+              0.6627,
+              1
+            ],
+            "alpha": 1,
+            "hex": "#78A9FF"
+          }
+        }
+      },
+      "neutral": {
+        "background": {
+          "$type": "color",
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.2235,
+              0.2235,
+              0.2235
+            ],
+            "alpha": 1,
+            "hex": "#393939"
+          }
+        },
+        "text": {
+          "$type": "color",
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.8784,
+              0.8784,
+              0.8784
+            ],
+            "alpha": 1,
+            "hex": "#E0E0E0"
+          }
+        }
+      }
+    },
+    "chart": {
+      "$description": "Chart series, in this order. Locked: a series keeps its colour everywhere.",
+      "series-1": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.9569,
+            0.9569,
+            0.9569
+          ],
+          "alpha": 1,
+          "hex": "#F4F4F4"
+        }
+      },
+      "series-2": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.7765,
+            0.7765,
+            0.7765
+          ],
+          "alpha": 1,
+          "hex": "#C6C6C6"
+        }
+      },
+      "series-3": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.5529,
+            0.5529,
+            0.5529
+          ],
+          "alpha": 1,
+          "hex": "#8D8D8D"
+        }
+      },
+      "series-4": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.4706,
+            0.6627,
+            1
+          ],
+          "alpha": 1,
+          "hex": "#78A9FF"
+        }
+      },
+      "series-5": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.3216,
+            0.3216,
+            0.3216
+          ],
+          "alpha": 1,
+          "hex": "#525252"
+        }
+      }
+    }
+  },
+  "radius": {
+    "small": {
+      "$type": "dimension",
+      "$value": {
+        "value": 0,
+        "unit": "px"
+      }
+    },
+    "medium": {
+      "$type": "dimension",
+      "$value": {
+        "value": 0,
+        "unit": "px"
+      }
+    },
+    "large": {
+      "$type": "dimension",
+      "$value": {
+        "value": 0,
+        "unit": "px"
+      }
+    }
+  },
+  "font": {
+    "family": {
+      "body": {
+        "$type": "fontFamily",
+        "$value": [
+          "IBM Plex Sans",
+          "Segoe UI",
+          "system-ui",
+          "-apple-system",
+          "sans-serif"
+        ]
+      },
+      "heading": {
+        "$type": "fontFamily",
+        "$value": [
+          "IBM Plex Sans",
+          "Segoe UI",
+          "system-ui",
+          "-apple-system",
+          "sans-serif"
+        ]
+      },
+      "code": {
+        "$type": "fontFamily",
+        "$value": [
+          "IBM Plex Mono",
+          "ui-monospace",
+          "Cascadia Mono",
+          "Consolas",
+          "monospace"
+        ]
+      }
+    },
+    "weight": {
+      "heading": {
+        "$type": "fontWeight",
+        "$value": 600
+      }
+    }
+  }
+}

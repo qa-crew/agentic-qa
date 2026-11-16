@@ -3,6 +3,7 @@
 //   - .claude-plugin/plugin.json `agents`: every .claude/agents/*.md (plugin agent paths must be listed file by file)
 //   - .github/agents/<name>.agent.md: GitHub Copilot custom agents (same body, Copilot tool aliases)
 //   - .github/skills/<name>/: a mirror of .claude/skills for Copilot, with ${CLAUDE_SKILL_DIR} spelled out
+//   - design/tokens/<theme>.<mode>.tokens.json: the dashboard's themes as design tokens (DTCG), for Figma and other tools
 // It also checks the agents' and skills' frontmatter.
 //   node scripts/build.mjs           write the generated files
 //   node scripts/build.mjs --check   fail when anything generated is out of date (CI)
@@ -17,6 +18,8 @@ const SKILLS_DIR = ".claude/skills";
 const GH_AGENTS = ".github/agents";
 const GH_SKILLS = ".github/skills";
 const PLUGIN = ".claude-plugin/plugin.json";
+const TOKENS_DIR = "design/tokens";
+const THEME_CSS = `${SKILLS_DIR}/qa-dashboard/dashboard/theme.css`;
 
 // Claude Code tool → GitHub Copilot tool alias (docs.github.com, "custom agents configuration").
 const COPILOT_TOOL = {
@@ -104,6 +107,84 @@ for (const name of skillDirs) {
   }
 }
 
+// ── Design tokens ───────────────────────────────────────────────────────────
+// The dashboard's theme.css is the source. Each theme and mode becomes one DTCG file (one Figma variable mode).
+const THEMES = {
+  geist: ':root:not([data-theme="carbon"]):not([data-theme="industrial"]):not([data-theme="corporate"])',
+  carbon: ':root[data-theme="carbon"]',
+  industrial: ':root[data-theme="industrial"]',
+  corporate: ':root[data-theme="corporate"]',
+};
+// CSS variable → token path. Only these are exported; the rest are layout values or aliases.
+const TOKEN_PATH = {
+  "bg-chrome": "color.chrome.background", "bg-rail": "color.chrome.rail", "fg-on-chrome": "color.chrome.text",
+  "fg-on-chrome-muted": "color.chrome.text-muted", "bg-rail-active": "color.chrome.rail-selected", "focus-chrome": "color.chrome.focus",
+  "logo-bg": "color.chrome.logo-background", "logo-fg": "color.chrome.logo-text",
+  "bg-canvas": "color.surface.canvas", "bg-surface": "color.surface.default", "bg-sunken": "color.surface.sunken", "bg-group": "color.surface.group",
+  border: "color.border.default", "border-subtle": "color.border.subtle",
+  fg: "color.text.default", "fg-2": "color.text.secondary", "fg-muted": "color.text.muted", link: "color.text.link", focus: "color.focus",
+  accent: "color.accent.default", "accent-fg": "color.accent.on-accent", "accent-tint": "color.accent.tint",
+  "accent-tint-border": "color.accent.tint-border", "accent-tint-fg": "color.accent.tint-text",
+  "gate-bg": "color.your-turn.background", "gate-fg": "color.your-turn.text", "gate-border": "color.your-turn.border",
+  "gate-btn-bg": "color.your-turn.button", "gate-btn-fg": "color.your-turn.button-text",
+  "ok-bg": "color.status.passed.background", "ok-fg": "color.status.passed.text", "ok-solid": "color.status.passed.solid",
+  "warn-bg": "color.status.warning.background", "warn-fg": "color.status.warning.text", "warn-solid": "color.status.warning.solid",
+  "err-bg": "color.status.failed.background", "err-fg": "color.status.failed.text", "err-solid": "color.status.failed.solid",
+  "info-bg": "color.status.info.background", "info-fg": "color.status.info.text", "info-solid": "color.status.info.solid",
+  "neutral-bg": "color.status.neutral.background", "neutral-fg": "color.status.neutral.text",
+  "series-1": "color.chart.series-1", "series-2": "color.chart.series-2", "series-3": "color.chart.series-3", "series-4": "color.chart.series-4", "series-5": "color.chart.series-5",
+  "radius-sm": "radius.small", "radius-md": "radius.medium", "radius-lg": "radius.large",
+  "font-sans": "font.family.body", "font-display": "font.family.heading", "font-mono": "font.family.code", "display-weight": "font.weight.heading",
+};
+const GROUP_NOTE = {
+  "color.accent": "Means \"your turn\" and marks primary buttons. Never used for status.",
+  "color.your-turn": "The bar that asks the person to review and continue.",
+  "color.status": "Green, orange and red are only for test status: passed, warning or flaky, failed.",
+  "color.chart": "Chart series, in this order. Locked: a series keeps its colour everywhere.",
+};
+function cssBlock(css, selector) {
+  const i = css.indexOf(`${selector} {`);
+  if (i < 0) { errors.push(`${THEME_CSS}: no block for ${selector}`); return {}; }
+  const body = css.slice(i + selector.length + 2, css.indexOf("}", i));
+  return Object.fromEntries([...body.matchAll(/--([\w-]+):\s*([^;]+);/g)].map((m) => [m[1], m[2].trim()]));
+}
+function colorValue(v) {
+  const hex = v.match(/^#([0-9a-f]{6})$/i);
+  if (!hex) return undefined;
+  const n = (k) => Math.round((parseInt(hex[1].slice(k, k + 2), 16) / 255) * 10000) / 10000;
+  return { colorSpace: "srgb", components: [n(0), n(2), n(4)], alpha: 1, hex: `#${hex[1].toUpperCase()}` };
+}
+function tokenValue(name, v) {
+  if (name.startsWith("radius-")) { const m = v.match(/^(\d+(?:\.\d+)?)px$/); return m && { $type: "dimension", $value: { value: Number(m[1]), unit: "px" } }; }
+  if (name.startsWith("font-")) return { $type: "fontFamily", $value: v.split(",").map((f) => f.trim().replace(/^"|"$/g, "")) };
+  if (name === "display-weight") return { $type: "fontWeight", $value: Number(v) };
+  const c = colorValue(v);
+  return c && { $type: "color", $value: c };
+}
+if (fs.existsSync(path.join(ROOT, THEME_CSS))) {
+  const css = read(THEME_CSS);
+  for (const [theme, selector] of Object.entries(THEMES)) {
+    for (const mode of ["light", "dark"]) {
+      const vars = cssBlock(css, mode === "dark" ? `${selector}[data-mode="dark"]` : selector);
+      const doc = { $description: `Agentic QA dashboard, ${theme} theme, ${mode} mode. Generated from ${THEME_CSS} by scripts/build.mjs; edit that file, then run: npm run build` };
+      for (const [name, tokenPath] of Object.entries(TOKEN_PATH)) {
+        if (!(name in vars)) { errors.push(`${THEME_CSS}: ${theme} ${mode} has no --${name}`); continue; }
+        const token = tokenValue(name, vars[name]);
+        if (!token) { errors.push(`${THEME_CSS}: ${theme} ${mode} --${name} "${vars[name]}" isn't a value tokens can hold`); continue; }
+        const keys = tokenPath.split(".");
+        let node = doc;
+        keys.slice(0, -1).forEach((k, i) => {
+          node = node[k] ??= {};
+          const group = keys.slice(0, i + 1).join(".");
+          if (GROUP_NOTE[group] && !node.$description) node.$description = GROUP_NOTE[group];
+        });
+        node[keys.at(-1)] = token;
+      }
+      generated.set(`${TOKENS_DIR}/${theme}.${mode}.tokens.json`, JSON.stringify(doc, null, 2) + "\n");
+    }
+  }
+}
+
 // ── Plugin manifest ─────────────────────────────────────────────────────────
 const plugin = JSON.parse(read(PLUGIN));
 plugin.agents = agentFiles.map((f) => `./${AGENTS_DIR}/${f}`);
@@ -125,7 +206,7 @@ const same = (p, content) => {
     return false;
   }
 };
-const existing = [GH_AGENTS, GH_SKILLS].flatMap((d) => (fs.existsSync(path.join(ROOT, d)) ? walk(path.join(ROOT, d)).map(rel) : []));
+const existing = [GH_AGENTS, GH_SKILLS, TOKENS_DIR].flatMap((d) => (fs.existsSync(path.join(ROOT, d)) ? walk(path.join(ROOT, d)).map(rel) : []));
 const stale = [...generated].filter(([p, c]) => !same(p, c)).map(([p]) => p);
 const extra = existing.filter((p) => !generated.has(p));
 
