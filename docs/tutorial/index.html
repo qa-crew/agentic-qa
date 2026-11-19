@@ -219,8 +219,6 @@
   .gallery { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 18px; margin: 20px 0 26px; }
   .gallery figure { margin: 0; }
   .gallery .wide { grid-column: 1 / -1; }
-  .phone-row { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 18px; align-items: start; }
-  .phone-row .shot.crop { aspect-ratio: auto; }
 
   dialog.viewer { border: 0; padding: 0; background: transparent; max-width: min(96vw, 1400px); max-height: 94vh; }
   dialog.viewer::backdrop { background: rgba(9, 11, 16, .78); }
@@ -261,8 +259,6 @@
     .roles { grid-template-columns: minmax(0, 1fr); }
     .roles .arrow span { transform: rotate(90deg); }
     .grid2, .gallery { grid-template-columns: minmax(0, 1fr); }
-    .phone-row { grid-template-columns: minmax(0, 1fr); }
-    .phone-row figure:last-child { max-width: 260px; }
     .msg { max-width: 100%; }
   }
   @media (max-width: 520px) {
@@ -652,7 +648,7 @@ As a shopper I want to sign in so I can buy things.
       <p class="intro">A small local page that follows a run as it happens and shows everything the agents wrote.</p>
       <div class="code"><button class="copy" type="button">Copy</button>
 <pre><code>/agentic-qa:qa-dashboard</code></pre></div>
-      <p>It gives you a link like <code>http://127.0.0.1:52341/3f9c…/</code>. The page refreshes every two seconds. The left rail has five views: <strong>Now</strong>, <strong>Full suite</strong>, <strong>Stories</strong>, <strong>Results</strong> and <strong>Models</strong>, with <strong>Settings</strong> at the bottom. Start on <strong>Now</strong>: one sentence says what's happening, and anything waiting for your review comes with the command to continue and a Copy button. Select any image to see it full size.</p>
+      <p>It gives you a link like <code>http://127.0.0.1:52341/3f9c…/</code>. The page refreshes every two seconds. The left rail has five views: <strong>Now</strong>, <strong>Full suite</strong>, <strong>Stories</strong>, <strong>Results</strong> and <strong>Runs</strong>, with <strong>Settings</strong> at the bottom (AI models, Project, Connection, Appearance). Start on <strong>Now</strong>: one sentence says what's happening, and anything waiting for your review comes with the command to continue and a Copy button. Select any image to see it full size.</p>
 
       <div class="gallery">
         <figure class="wide">
@@ -682,37 +678,30 @@ As a shopper I want to sign in so I can buy things.
         </figure>
       </div>
 
-      <h3>Themes, dark mode and phones</h3>
-      <p>Use the menu at the top right to pick a theme, <strong>Geist</strong> (the default), <strong>Carbon</strong>, <strong>Industrial</strong> or <strong>Corporate</strong>, and light, dark or your system's setting. The page also works at phone width.</p>
+      <h3>Themes and dark mode</h3>
+      <p>Use the menu at the top right to pick a theme, <strong>Geist</strong> (the default), <strong>Carbon</strong>, <strong>Industrial</strong> or <strong>Corporate</strong>, and light, dark or your system's setting.</p>
       <p>To keep a look, open <strong>Settings</strong> (at the bottom of the left rail). Save it for this browser only, or as the <strong>project default</strong> in <code>.agentic-qa/settings.json</code>; commit that file and your whole team gets the same look.</p>
       <figure>
-        <a class="shot crop" href="images/settings.png" data-caption="Settings: pick a theme, mode and density, then save it for this browser or as the project default.">
-          <img src="images/settings.png" alt="The Settings page: four theme cards (Geist, Carbon, Industrial, Corporate), mode and density choices, and Save as this browser or the project default." loading="lazy" width="1366" height="1000"><span class="zoom">Open</span></a>
+        <a class="shot crop" href="images/settings.png" data-caption="Settings: pick a theme and mode, then save it for this browser or as the project default.">
+          <img src="images/settings.png" alt="The Settings page: four theme cards (Geist, Carbon, Industrial, Corporate), mode choices, and Save as this browser or the project default." loading="lazy" width="1366" height="1000"><span class="zoom">Open</span></a>
         <figcaption><strong>Settings:</strong> save a look for this browser, or for the whole project.</figcaption>
       </figure>
-      <div class="phone-row">
-        <div class="gallery" style="margin:0">
-          <figure>
-            <a class="shot crop" href="images/now-dark.png" data-caption="The Geist theme in dark mode.">
-              <img src="images/now-dark.png" alt="The Now page in the Geist theme, dark mode." loading="lazy" width="1366" height="900"><span class="zoom">Open</span></a>
-            <figcaption>Geist, dark</figcaption>
-          </figure>
-          <figure>
-            <a class="shot crop" href="images/story-industrial.png" data-caption="The Industrial theme in light mode.">
-              <img src="images/story-industrial.png" alt="A story page in the Industrial theme: black top bar, yellow logo and your-turn marks, condensed headings." loading="lazy" width="1366" height="900"><span class="zoom">Open</span></a>
-            <figcaption>Industrial, light</figcaption>
-          </figure>
-        </div>
-        <figure style="margin:0">
-          <a class="shot crop" href="images/phone-story.png" data-caption="A story on a phone, in dark mode.">
-            <img src="images/phone-story.png" alt="The SD-3 story page at phone width in dark mode: the views along the top, the steps in two columns, and the your-turn bar with its Copy button." loading="lazy" width="390" height="1300"><span class="zoom">Open</span></a>
-          <figcaption>On a phone</figcaption>
+      <div class="gallery">
+        <figure>
+          <a class="shot crop" href="images/now-dark.png" data-caption="The Geist theme in dark mode.">
+            <img src="images/now-dark.png" alt="The Now page in the Geist theme, dark mode." loading="lazy" width="1366" height="900"><span class="zoom">Open</span></a>
+          <figcaption>Geist, dark</figcaption>
+        </figure>
+        <figure>
+          <a class="shot crop" href="images/story-industrial.png" data-caption="The Industrial theme in light mode.">
+            <img src="images/story-industrial.png" alt="A story page in the Industrial theme: black top bar, yellow logo and your-turn marks, condensed headings." loading="lazy" width="1366" height="900"><span class="zoom">Open</span></a>
+          <figcaption>Industrial, light</figcaption>
         </figure>
       </div>
 
       <ul class="plain" style="margin-top:22px">
         <li><strong>Private:</strong> it serves on your computer only (127.0.0.1), behind a random link.</li>
-        <li><strong>Read-only:</strong> it only reads <code>.agentic-qa/</code>. The two exceptions are the Models page and the Settings page, which save your choices to <code>.agentic-qa/ai.json</code> and <code>.agentic-qa/settings.json</code>.</li>
+        <li><strong>Read-only:</strong> it only reads <code>.agentic-qa/</code>. Settings saves your choices to <code>.agentic-qa/ai.json</code>, <code>.agentic-qa/workspace.json</code> and <code>.agentic-qa/settings.json</code>.</li>
         <li><strong>Shareable:</strong> <code>/agentic-qa:qa-dashboard --static</code> saves one self-contained file, <code>.agentic-qa/reports/dashboard.html</code>, that you can attach or send.</li>
       </ul>
     </section>
@@ -721,7 +710,7 @@ As a shopper I want to sign in so I can buy things.
     <section id="models">
       <h2><span class="n">9</span>Choose the models</h2>
       <p class="intro">Each agent can run on its own Claude model, so you can spend where it matters.</p>
-      <p><strong>On the dashboard:</strong> open <strong>Models</strong>, pick Session model, Sonnet, Opus, Haiku or Fable for Default and for each role, then press <strong>Save</strong>.</p>
+      <p><strong>On the dashboard:</strong> open <strong>Settings → AI</strong>, pick Session model, Sonnet, Opus, Haiku or Fable for Default and for each role, then press <strong>Save</strong>.</p>
       <figure>
         <a class="shot" href="images/models.png" data-caption="The Models page: a model for Default and for each role, saved to .agentic-qa/ai.json.">
           <img src="images/models.png" alt="The Models page: a row for Default and each of the five roles, with a model menu and a Save button." loading="lazy" width="1366" height="800"><span class="zoom">Open</span></a>
@@ -733,7 +722,7 @@ As a shopper I want to sign in so I can buy things.
       <p>When several choices apply, the first one in this list wins:</p>
       <ol class="plain">
         <li>an option on the command;</li>
-        <li>the role's own pick on the Models page;</li>
+        <li>the role's own pick in Settings → AI;</li>
         <li>the Default pick;</li>
         <li>the model of your Claude Code session.</li>
       </ol>

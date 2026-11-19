@@ -10,8 +10,11 @@ allowed-tools: Bash(node ".github/skills/qa-dashboard/dashboard/server.mjs") Bas
 
 Arguments: $ARGUMENTS
 
-The dashboard reads `.agentic-qa/` (and the root `playwright.config.ts`). It writes only two files:
-`.agentic-qa/ai.json` from its Models page, and `.agentic-qa/settings.json` from its Settings page. Continuing, re-running or stopping a step happens in the chat.
+The dashboard reads `.agentic-qa/` (and the root `playwright.config.ts`). It's also a place to **start and continue
+runs**: give it the app's address and it runs the full suite's steps itself, one at a time, each as a headless Claude
+Code session (`claude -p --agent <step>`) in the project root, and records them in `.agentic-qa/progress.jsonl` and
+`.agentic-qa/logs/`. Besides that it writes `.agentic-qa/ai.json`, `.agentic-qa/workspace.json` and `.agentic-qa/settings.json` from its Settings tabs,
+from its Settings page.
 
 Run each `node ".github/skills/qa-dashboard/…"` command on its own, exactly as written here, not joined to other commands with `&&` or `;`. Only then does it run without a permission prompt.
 
@@ -26,18 +29,34 @@ every 2 seconds, so it follows a pipeline or story run as it happens.
 
 Tell the user:
 - the link only works on this machine (the server listens on 127.0.0.1 and the link carries a random token);
-- the six views:
-  - **Now** (the start page): what's running, what's waiting for their review (with the command to continue), the
-    stories, the last test run and the activity;
-  - **Full suite**: the five steps, and a reader for the documents, test cases, specs, page objects and snapshots;
-  - **Stories**: each story's steps and its test cases, one at a time, grouped by acceptance criterion; a Possible
+- **starting a run from the page:** the Now page has a form for the app's address, the tests to run, step by step or
+  all five steps, and showing the browser. Step by step, the run pauses after each step with a **Continue** button
+  (the QA Reviewer is deferred, with a **Run it now** button); every finished step has **Run again**, and a running
+  step shows its live log and a **Stop** button. A story's page has a button for its next step (it runs
+  `/qa-story <KEY>` up to the next review). This needs the `claude` CLI on PATH; the agents run with
+  `acceptEdits` and may only run playwright-cli, Playwright, k6 and mkdir. Stopping the server stops a step it started;
+- **AIQA's shell:** a Run activity panel on the right of every page (live activity, counts, tokens, Continue / Stop),
+  header pills for what's running and waiting, and a jump box (Ctrl/⌘K) to any story, test case or file;
+- the seven views:
+  - **Now** (the start page): the form to start a run, what's running, what's waiting for their review (with the
+    button to continue), the stories, the last test run and the activity;
+  - **Full suite**: a progress bar ("3 of 5 steps done") over the five steps and their buttons, and a reader for the documents, test cases, specs, page objects
+    and snapshots. The reader has its own scroll view: the file list (with a filter) and the open file scroll
+    separately. Each file has **Edit** (a text editor; the save is refused if an agent wrote the file meanwhile) and
+    **Open in editor** (VS Code, or `$AGENTIC_QA_EDITOR`);
+  - **Stories**: each story's steps and its test cases, one at a time, grouped by acceptance criterion, with **Edit**,
+    **+ Add** and **Delete** for each case, and **Test by hand**: a guide that records each case's result (Passed,
+    Failed or Blocked), a note and a screenshot; a Possible
     defect shows what the story says next to what the app does;
+  - **Runs**: every run of the suite and of each story, with its steps, time, tokens and result;
   - **Results**: failures first, with the error, the screenshot and the matching manual test case; then flaky tests,
     every spec and each story's recent runs;
-  - **Models**: the model each role's agent starts with, saved in `.agentic-qa/ai.json` and used by the qa-pipeline and
-    qa-story skills from their next step;
-  - **Settings**: the theme (Geist, Carbon, Industrial or Corporate), light / dark and density, saved for this browser
-    or as the project default in `.agentic-qa/settings.json`;
+  - **Settings**, in four tabs: **AI**, the model each role's agent starts with, saved in `.agentic-qa/ai.json` and
+    used by the qa-pipeline and qa-story skills from their next step; **Project**, the app's address, saved in
+    `.agentic-qa/workspace.json`; **Connection**, where stories come from; **Appearance**, the theme (Geist, Carbon,
+    Industrial or Corporate) and light / dark, saved for this browser or as the project default in
+    `.agentic-qa/settings.json`;
+  - **on a story:** its open questions tick off as they're answered, and its ⋯ menu redoes it from the start;
 - the Appearance menu switches the theme and light / dark for this browser;
 - to stop it, stop the background command (or press Ctrl+C where it runs).
 
@@ -46,5 +65,5 @@ Tell the user:
 node ".github/skills/qa-dashboard/dashboard/server.mjs" --static
 ```
 This writes `.agentic-qa/reports/dashboard.html`, or the path given after `--static`. It's one self-contained file to
-attach or share. In it the Models page is read-only, and Settings can only save for the browser. Its links to screenshots and the Playwright report work while
+attach or share. In it Settings → AI and Project are read-only, and Settings can only save for the browser. Its links to screenshots and the Playwright report work while
 the file stays in `.agentic-qa/reports/`. It uses system fonts instead of the bundled ones.

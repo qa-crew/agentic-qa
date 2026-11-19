@@ -46,7 +46,7 @@ Run these before starting any agent:
 - `mkdir -p .agentic-qa/snapshots .agentic-qa/requirements .agentic-qa/test-plan .agentic-qa/test-cases .agentic-qa/test-scripts/pages .agentic-qa/reports/test-results`
 - **Models:** `node ".github/skills/qa-pipeline/scripts/models.mjs"`, plus any `--model` / `--model-<role>` options from the
   arguments. It prints each role's model: `model` is an alias (`opus`, `sonnet`, …) or `null`, and `source` says
-  where it came from: the command line, `.agentic-qa/ai.json` (picked on the dashboard's Models page) or the
+  where it came from: the command line, `.agentic-qa/ai.json` (picked on the dashboard, Settings → AI) or the
   session. If it reports an unknown option, tell the user and stop. Show one line, e.g.
   "Models: qa-planner opus (.agentic-qa/ai.json); the rest use this session's model", and pass on any `note` it gives.
 

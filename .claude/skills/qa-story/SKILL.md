@@ -32,7 +32,7 @@ Run `story.mjs info <KEY>`, adding any `--model` / `--model-<role>` options from
 - the story's files, `storyHash` and `stale`;
 - `stage`: which steps are done, the next one, and what's not needed;
 - status counts and the full `storyText`;
-- `models`: the model for each agent step, from the command line, `.agentic-qa/ai.json` (the dashboard's Models page) or
+- `models`: the model for each agent step, from the command line, `.agentic-qa/ai.json` (the dashboard's Settings → AI) or
   the session. `model: null` means the session's model.
 
 If it reports `"error": "no-story-file"`, the story needs a file in `.agentic-qa/stories/`. Offer to write it:

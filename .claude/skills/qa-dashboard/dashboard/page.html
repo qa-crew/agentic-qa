@@ -14,11 +14,112 @@
   .brand { display: flex; align-items: center; gap: 10px; color: inherit; text-decoration: none; min-width: 0; }
   .logo { background: var(--logo-bg); color: var(--logo-fg); font: var(--display-weight) 15px/1 var(--font-display); letter-spacing: .06em; padding: 7px 9px; border-radius: var(--radius-sm); }
   .proj { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .proj-wrap { display: flex; flex-direction: column; min-width: 0; line-height: 1.2; }
+  .proj-sub { font-size: 12px; color: var(--fg-on-chrome-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .proj-sub:empty { display: none; }
   .live { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--fg-on-chrome-muted); white-space: nowrap; }
   .live .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--chrome-ok); }
   .live.stale .dot { background: var(--chrome-warn); }
   .live.snapshot .dot { background: var(--fg-on-chrome-muted); }
-  .shell { display: grid; grid-template-columns: var(--rail-w) minmax(0, 1fr); min-height: calc(100vh - var(--topbar-h)); }
+  .shell { display: grid; grid-template-columns: var(--rail-w) minmax(0, 1fr) auto; min-height: calc(100vh - var(--topbar-h)); }
+
+  /* AIQA's shell: header pills, the jump box, and the run panel on the right of every page. */
+  .pills { display: flex; gap: 8px; align-items: center; min-width: 0; }
+  .tchip { display: inline-flex; align-items: center; gap: 7px; min-height: 30px; padding: 0 12px; border-radius: var(--radius-pill); border: 1px solid color-mix(in srgb, var(--fg-on-chrome) 22%, transparent); background: transparent; color: var(--fg-on-chrome); font: 600 12.5px/1 var(--font-sans); text-decoration: none; white-space: nowrap; cursor: pointer; }
+  .pills .tchip { display: inline-flex; align-items: center; }
+  .tchip:hover { background: var(--bg-rail-active); }
+  .tchip:focus-visible { outline: 2px solid var(--focus-chrome); outline-offset: 1px; }
+  .tchip.turn { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+  .tchip .cdot { width: 8px; height: 8px; border-radius: 50%; background: var(--fg-on-chrome-muted); flex: 0 0 auto; }
+  .tchip .cdot.ok { background: var(--chrome-ok); } .tchip .cdot.bad { background: var(--chrome-err); } .tchip .cdot.on { background: var(--chrome-ok); animation: pulse 1.2s ease-in-out infinite; }
+  @media (prefers-reduced-motion: reduce) { .tchip .cdot.on { animation: none; } }
+  .jump { position: relative; flex: 0 1 360px; min-width: 160px; margin-left: 12px; }
+  .jump input { width: 100%; height: 36px; padding: 0 64px 0 34px; border-radius: var(--radius-md); border: 1px solid color-mix(in srgb, var(--fg-on-chrome) 22%, transparent); background: color-mix(in srgb, var(--fg-on-chrome) 6%, transparent); color: var(--fg-on-chrome); font: 14px var(--font-sans); }
+  .jump input::placeholder { color: var(--fg-on-chrome-muted); }
+  .jump input:focus-visible { outline: 2px solid var(--focus-chrome); outline-offset: 0; }
+  .jump > svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--fg-on-chrome-muted); pointer-events: none; }
+  .jump kbd.jk { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: transparent; color: var(--fg-on-chrome-muted); border-color: color-mix(in srgb, var(--fg-on-chrome) 25%, transparent); }
+  .jump-list { position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 40; list-style: none; margin: 0; padding: 4px; max-height: 60vh; overflow-y: auto; background: var(--bg-surface); color: var(--fg); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-lg); }
+  .jump-list li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: baseline; padding: 8px 10px; border-radius: var(--radius-sm); cursor: pointer; font-size: 14px; }
+  .jump-list li[aria-selected="true"] { background: var(--accent-tint); }
+  .jump-list .k { font: 12.5px var(--font-mono); }
+  .jump-list .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .jump-list .w { font-size: 12px; color: var(--fg-muted); }
+  .jump-list li.none { display: block; color: var(--fg-muted); cursor: default; }
+
+  .runpanel { position: sticky; top: var(--topbar-h); height: calc(100vh - var(--topbar-h)); width: 44px; border-left: 1px solid var(--border); background: var(--bg-surface); display: flex; flex-direction: column; z-index: 20; }
+  .runpanel.open { width: 380px; }
+  .runpanel .strip { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 10px 0; height: 100%; }
+  .runpanel .vlabel { writing-mode: vertical-rl; font-size: 12.5px; font-weight: 600; color: var(--fg-muted); letter-spacing: .02em; }
+  .icon-btn { display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: var(--radius-md); border: 1px solid var(--border); background: var(--bg-surface); color: var(--fg); cursor: pointer; }
+  .icon-btn:hover { background: var(--bg-sunken); }
+  .rp-head { display: flex; gap: 10px; align-items: flex-start; padding: 16px 16px 12px; border-bottom: 1px solid var(--border-subtle); }
+  .rp-head h2 { margin: 2px 0 2px; font-size: 18px; line-height: 1.25; }
+  .rk { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-bottom: 1px solid var(--border-subtle); }
+  .rk > div { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-right: 1px solid var(--border-subtle); min-width: 0; }
+  .rk > div:last-child { border-right: 0; }
+  .rk span { font-size: 11.5px; color: var(--fg-muted); }
+  .rk b { font: var(--display-weight) 17px/1.2 var(--font-display); overflow-wrap: anywhere; }
+  .rp-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 14px 16px 20px; display: flex; flex-direction: column; gap: 14px; }
+  .indet { height: 3px; background: var(--bg-sunken); overflow: hidden; position: relative; }
+  .indet::after { content: ""; position: absolute; inset: 0 auto 0 0; width: 35%; background: var(--accent); animation: indet 1.4s ease-in-out infinite; }
+  @keyframes indet { from { transform: translateX(-100%); } to { transform: translateX(300%); } }
+  @media (prefers-reduced-motion: reduce) { .indet::after { animation: none; width: 100%; opacity: .4; } }
+  .feed2 { display: flex; flex-direction: column; }
+  .feed2 .ev { display: grid; grid-template-columns: 58px 52px minmax(0, 1fr); gap: 8px; align-items: start; padding: 7px 0; border-bottom: 1px solid var(--border-subtle); font-size: 13px; }
+  .feed2 .t { font: 11.5px/1.7 var(--font-mono); color: var(--fg-muted); }
+  .feed2 .path { display: block; font: 12px var(--font-mono); color: var(--fg-muted); overflow-wrap: anywhere; }
+  .tag { display: inline-block; text-align: center; font: 700 10.5px/1.6 var(--font-mono); letter-spacing: .04em; padding: 0 5px; border-radius: var(--radius-sm); background: var(--neutral-bg); color: var(--neutral-fg); }
+  .tag.write, .tag.edit { background: var(--info-bg); color: var(--info-fg); }
+  .tag.agent { background: var(--accent-tint); color: var(--accent-tint-fg); }
+  .tag.snap { background: var(--agent-bg); color: var(--agent-fg); border: 1px solid var(--border); }
+  .tag.done { background: var(--ok-bg); color: var(--ok-fg); } .tag.fail { background: var(--err-bg); color: var(--err-fg); } .tag.warn { background: var(--warn-bg); color: var(--warn-fg); }
+  details.fold2 > summary { cursor: pointer; font-weight: 600; font-size: 14px; padding: 4px 0; }
+  .dsteps { display: flex; flex-direction: column; gap: 6px; padding: 6px 0 0; font-size: 13.5px; }
+  .dstep { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; gap: 8px; align-items: baseline; }
+  .dstep .m { font: 12px var(--font-mono); color: var(--fg-muted); white-space: nowrap; }
+
+  /* AIQA's type and controls. */
+  .eyebrow { display: block; font: 700 11.5px/1.4 var(--font-sans); letter-spacing: .08em; text-transform: uppercase; color: var(--fg-muted); }
+  main > h1:not(.mono)::after, .page-head > h1::after { content: ""; display: block; width: 40px; height: 4px; margin-top: 10px; border-radius: 2px; background: var(--accent); }
+  .run-live .grow { flex: 1 1 220px; }
+  .seg { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 3px; border-radius: var(--radius-md); background: var(--bg-sunken); border: 1px solid var(--border-subtle); }
+  .seg button { font: 600 13.5px var(--font-sans); min-height: 32px; padding: 0 12px; border: 1px solid transparent; border-radius: var(--radius-sm); background: transparent; color: var(--fg-2); cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: var(--bg-surface); color: var(--fg); border-color: var(--border); box-shadow: var(--shadow-sm); }
+  .seg button:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+  .msg { border-radius: var(--radius-md); padding: 10px 14px; font-size: 14px; border: 1px solid transparent; }
+  .msg.info { background: var(--info-bg); color: var(--info-fg); border-color: color-mix(in srgb, var(--info-fg) 25%, transparent); }
+  .msg.warn { background: var(--warn-bg); color: var(--warn-fg); border-color: color-mix(in srgb, var(--warn-fg) 25%, transparent); }
+  .msg.bad { background: var(--err-bg); color: var(--err-fg); border-color: color-mix(in srgb, var(--err-fg) 25%, transparent); }
+  .msg p { margin: 0; } .msg p + p, .msg p + .actions { margin-top: 8px; }
+
+  /* The story list pane (left of a story, as in AIQA): filters, a status and an M · A bar per story. */
+  .sp-chips { display: flex; gap: 6px; flex-wrap: wrap; padding: 10px 14px; border-bottom: 1px solid var(--border-subtle); }
+  .sp-chips button { font: 600 12.5px var(--font-sans); min-height: 28px; padding: 0 10px; border-radius: var(--radius-pill); border: 1px solid var(--border); background: var(--bg-surface); color: var(--fg); cursor: pointer; }
+  .sp-chips button[aria-pressed="true"] { background: var(--fg); color: var(--bg-surface); border-color: var(--fg); }
+  .sp-item .r1 { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+  .sp-item .cov { display: flex; gap: 8px; align-items: center; font: 11.5px var(--font-mono); color: var(--fg-muted); }
+  .mabar { flex: 1; height: 4px; border-radius: 2px; background: var(--bg-sunken); border: 1px solid var(--border-subtle); overflow: hidden; }
+  .mabar i { display: block; height: 100%; background: var(--accent); }
+  .story-page.pane-closed { grid-template-columns: 44px minmax(0, 1fr); }
+  .story-page.pane-closed .story-side { display: flex; flex-direction: column; align-items: center; padding: 8px 0; gap: 10px; }
+  .status-line { font-size: 14px; color: var(--fg-2); margin: 2px 0 0; }
+  .status-line .err-text { font-weight: 600; }
+
+  /* Screenshot lightbox. */
+  .lightbox { position: fixed; inset: 0; z-index: 60; background: var(--scrim-strong); display: grid; place-items: center; padding: 24px; }
+  .lightbox[hidden], .jump-list[hidden], .runpanel[hidden] { display: none; }
+  .lightbox img { max-width: min(1200px, 100%); max-height: calc(100vh - 120px); border-radius: var(--radius-md); background: var(--bg-surface); }
+  .lbbar { display: flex; gap: 12px; align-items: center; justify-content: center; margin-top: 12px; color: var(--on-scrim); font-size: 14px; flex-wrap: wrap; }
+  .lbbar button { font: 600 13.5px var(--font-sans); min-height: 34px; padding: 0 14px; border-radius: var(--radius-md); border: 1px solid color-mix(in srgb, var(--on-scrim) 40%, transparent); background: transparent; color: var(--on-scrim); cursor: pointer; }
+  .lbbar button:disabled { opacity: .4; cursor: default; }
+
+  @media (max-width: 1100px) {
+    .runpanel.open { position: fixed; right: 0; top: var(--topbar-h); bottom: 0; height: auto; width: min(400px, 100vw); box-shadow: var(--shadow-lg); }
+    .shell { grid-template-columns: var(--rail-w) minmax(0, 1fr) 44px; }
+    .pills .tchip.opt { display: none; }
+  }
+  @media (max-width: 860px) { .jump { display: none; } }
   .rail { background: var(--bg-rail); display: flex; flex-direction: column; gap: 4px; padding: 10px 8px; position: sticky; top: var(--topbar-h); height: calc(100vh - var(--topbar-h)); }
   .rail a { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 4px; border-radius: var(--radius-md); color: var(--fg-on-chrome-muted); text-decoration: none; font-size: 11.5px; font-weight: 600; text-align: center; }
   .rail a:hover { color: var(--fg-on-chrome); background: var(--bg-rail-active); }
@@ -44,7 +145,7 @@
   .chip.info { background: var(--info-bg); color: var(--info-fg); }
   .chip.agent { background: var(--agent-bg); color: var(--agent-fg); }
   .chip.accent { background: var(--accent); color: var(--accent-fg); }
-  .chip.line { background: transparent; color: var(--fg-2); box-shadow: inset 0 0 0 1px var(--fg-muted); }
+  .chip.line { background: transparent; color: var(--fg-2); border: 1px solid var(--fg-muted); padding: 1px 8px; }
   .chip.running::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; animation: pulse 1.2s ease-in-out infinite; }
   @keyframes pulse { 50% { opacity: .25; } }
   @media (prefers-reduced-motion: reduce) { .chip.running::before { animation: none; } }
@@ -103,7 +204,6 @@
   .ok-box { background: var(--ok-bg); color: var(--ok-fg); border-radius: var(--radius-md); padding: 8px 12px; }
   .models td { vertical-align: middle; }
   .models label { font-weight: 600; }
-  .m-only { display: none; }
   .rail .rail-end { margin-top: auto; }
   .settings { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 340px); gap: 28px; align-items: start; }
   .settings fieldset { border: 0; margin: 0 0 24px; padding: 0; min-width: 0; }
@@ -136,23 +236,6 @@
   .wins dt { color: var(--fg-muted); }
   .wins dd { margin: 0; }
   @media (max-width: 1000px) { .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } .grid2, .settings { grid-template-columns: 1fr; } }
-  @media (max-width: 720px) {
-    .shell { grid-template-columns: minmax(0, 1fr); }
-    .rail { z-index: 20; height: auto; flex-direction: row; justify-content: space-around; padding: 6px; }
-    .rail a { flex: 1 1 0; min-width: 0; flex-direction: column; gap: 2px; font-size: 11px; padding: 6px 2px; }
-    .rail .rail-end { margin-top: 0; }
-    .steps { grid-template-columns: 1fr; }
-    .live #liveText, #themeLabel { display: none; }
-    h1 { font-size: 22px; }
-    .story-row .bar { width: 100%; }
-    .m-only { display: block; margin-top: 2px; }
-    .models .d-only, .models thead { display: none; }
-    .models table, .models tbody, .models tr, .models td { display: block; width: 100%; }
-    .models tr { padding: 10px 14px; border-top: 1px solid var(--border-subtle); }
-    .models tr:first-child { border-top: 0; }
-    .models td { border: 0; padding: 2px 0; }
-    .models select { width: 100%; margin-top: 6px; }
-  }
   /* Phase 2 screens: Now, the suite track and reader, story review, failure-first results. */
   .lead { font-size: 17px; max-width: 70ch; margin: 4px 0 18px; color: var(--fg-2); }
   .sect { margin: 0 0 32px; }
@@ -173,9 +256,10 @@
   .facts div { display: flex; gap: 8px; }
   .facts dt { color: var(--fg-muted); }
   .facts dd { margin: 0; }
-  .hero { margin: 4px 0 34px; }
-  .hero p { margin: 0 0 8px; }
-  .hero h1 { font-size: clamp(28px, 3.4vw, 42px); line-height: 1.08; max-width: 26ch; text-wrap: balance; margin: 0; }
+  /* A page title like the other views', then what's happening in one sentence. */
+  .page-head { display: flex; gap: 6px 14px; align-items: baseline; flex-wrap: wrap; }
+  .page-head h1 { margin: 0; }
+  .page-head + .lead { margin-top: 12px; margin-bottom: 26px; }
   .now-cols { display: flex; flex-wrap: wrap; gap: 36px; align-items: flex-start; }
   .now-main { flex: 3 1 560px; min-width: 0; }
   .now-side { flex: 2 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 32px; }
@@ -183,26 +267,38 @@
   .side-panel h2 { margin: 0; }
   .big-num { margin: 0; font: var(--display-weight) 36px/1.05 var(--font-display); }
 
-  .tl { list-style: none; margin: 0 0 30px; padding: 0; display: flex; gap: 4px; align-items: stretch; }
-  .tl .seg { min-width: 120px; display: flex; flex-direction: column; gap: 12px; }
-  .tl-bar { display: block; height: 20px; border-radius: 2px; background: var(--bg-sunken); }
-  .tl-text { display: flex; flex-direction: column; gap: 2px; font-size: 14px; min-width: 0; overflow-wrap: anywhere; }
-  .tl-name { display: flex; gap: 8px; align-items: baseline; font-size: 15px; }
-  .s-done .tl-bar { background: var(--fg-2); }
-  .s-running .tl-bar { background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--fg) 22%, transparent) 0 6px, transparent 6px 12px); box-shadow: inset 0 0 0 1.5px var(--fg); }
-  .s-paused .tl-bar { background: var(--accent); }
-  .s-failed .tl-bar { background: var(--err-solid); }
-  .s-skipped .tl-bar { background: transparent; border: 1.5px dashed var(--fg-muted); }
-  .s-pending .tl-bar { background: transparent; border: 1.5px solid var(--fg-muted); }
-  .s-failed .tl-text > span:nth-child(2) { color: var(--err-fg); font-weight: 600; }
+  /* Progress: "N of 5 steps done", a bar in equal parts (one per step), then the step cards. */
+  .progress { display: flex; flex-direction: column; gap: 8px; margin: 0 0 12px; }
+  .prog-head { display: flex; gap: 6px 12px; align-items: baseline; flex-wrap: wrap; font-size: 14.5px; }
+  .prog-now { margin-left: auto; color: var(--fg-2); }
+  .err-text { color: var(--err-fg); font-weight: 600; }
+  .segbar { display: flex; gap: 4px; height: 10px; }
+  .segbar i { flex: 1 1 0; border-radius: var(--radius-pill); background: var(--bg-sunken); border: 1px solid var(--border); }
+  .segbar .sb-d { background: var(--fg-2); border-color: transparent; }
+  .segbar .sb-r { border: 1.5px solid var(--fg); background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--fg) 30%, transparent) 0 5px, transparent 5px 10px) 0 0 / 14.14px 14.14px; animation: seg-move 1s linear infinite; }
+  .segbar .sb-f { background: var(--err-solid); border-color: transparent; }
+  .segbar .sb-s { background: transparent; border: 1.5px dashed var(--fg-muted); }
+  .segbar .sb-n { background: var(--accent); border-color: transparent; }
+  @keyframes seg-move { to { background-position: 14.14px 0; } }
+  @media (prefers-reduced-motion: reduce) { .segbar .sb-r { animation: none; } }
+  .ssteps.tall { margin: 0 0 30px; }
+  .ssteps.tall li { align-items: flex-start; padding: 12px 14px 14px; position: relative; }
+  .ssteps .ss-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; overflow-wrap: anywhere; line-height: 1.35; }
+  .ssteps .ss-text .linkbtn { margin-top: 4px; }
+  .ssteps li.ss-current { background: var(--accent-tint); }
+  .ssteps li.ss-current::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--accent); }
+  .ssteps li.ss-running.ss-current::after { background: var(--fg); }
+  .ssteps li.ss-failed.ss-current { background: var(--err-bg); }
+  .ssteps li.ss-failed.ss-current::after { background: var(--err-solid); }
+  .ss-skip .dot { border: 1.5px dashed var(--fg-muted); }
 
   .mini { display: inline-flex; gap: 3px; flex: 0 0 auto; }
-  .mini i { display: block; width: 16px; height: 6px; border-radius: 1px; background: transparent; box-shadow: inset 0 0 0 1px var(--fg-muted); }
-  .mini .m-done { background: var(--fg-2); box-shadow: none; }
-  .mini .m-turn { background: var(--accent); box-shadow: none; }
+  .mini i { display: block; width: 16px; height: 6px; border-radius: 1px; background: transparent; border: 1px solid var(--fg-muted); }
+  .mini .m-done { background: var(--fg-2); border-color: transparent; }
+  .mini .m-turn { background: var(--accent); border-color: transparent; }
   .mini .m-running { background: repeating-linear-gradient(135deg, var(--fg) 0 2px, transparent 2px 4px); }
-  .mini .m-failed { background: var(--err-solid); box-shadow: none; }
-  .mini .m-skip { box-shadow: none; background: repeating-linear-gradient(90deg, var(--fg-muted) 0 3px, transparent 3px 5px); height: 2px; margin-top: 2px; }
+  .mini .m-failed { background: var(--err-solid); border-color: transparent; }
+  .mini .m-skip { border: 0; background: repeating-linear-gradient(90deg, var(--fg-muted) 0 3px, transparent 3px 5px); height: 2px; margin-top: 2px; }
   .prog { display: inline-flex; align-items: center; gap: 10px; }
   .tbl-card { overflow-x: auto; }
   .tbl { width: 100%; font-size: 14px; }
@@ -239,7 +335,9 @@
   .reader-nav ul { list-style: none; margin: 0; padding: 0; }
   .reader-nav a { display: flex; justify-content: space-between; gap: 10px; padding: 7px 18px; text-decoration: none; color: var(--fg); font-size: 14px; overflow-wrap: anywhere; }
   .reader-nav a:hover { background: var(--bg-sunken); }
-  .reader-nav a[aria-current="true"], .story-side a[aria-current="page"] { background: var(--accent-tint); box-shadow: inset 3px 0 0 var(--accent); color: var(--fg); }
+  .reader-nav a[aria-current="true"], .story-side a[aria-current="page"] { background: var(--accent-tint); border-left: 3px solid var(--accent); color: var(--fg); }
+  .reader-nav a[aria-current="true"] { padding-left: 15px; }
+  .story-side a[aria-current="page"] { padding-left: 13px; }
   .reader-body { flex: 999 1 480px; min-width: 0; padding: 24px 30px 32px; }
   .reader-head { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; border-bottom: 1px solid var(--border-subtle); padding-bottom: 14px; margin-bottom: 16px; }
   .reader-head h3 { font-size: 24px; margin: 0 0 4px; }
@@ -258,13 +356,13 @@
   .ssteps li { flex: 1 1 140px; display: flex; gap: 10px; align-items: center; padding: 10px 14px; border-right: 1px solid var(--border-subtle); }
   .ssteps li:last-child { border-right: 0; }
   .ssteps li > span:last-child { display: flex; flex-direction: column; line-height: 1.25; }
-  .ssteps .dot { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; font: 700 13px var(--font-sans); flex: 0 0 auto; box-shadow: inset 0 0 0 1.5px var(--fg-muted); color: var(--fg-muted); }
-  .ss-done .dot { background: var(--fg-2); color: var(--bg-surface); box-shadow: none; }
+  .ssteps .dot { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; font: 700 13px var(--font-sans); flex: 0 0 auto; border: 1.5px solid var(--fg-muted); color: var(--fg-muted); }
+  .ss-done .dot { background: var(--fg-2); color: var(--bg-surface); border-color: transparent; }
   .ss-turn { background: var(--accent-tint); }
-  .ss-turn .dot { background: var(--accent); color: var(--accent-fg); box-shadow: none; }
-  .ss-running .dot { box-shadow: inset 0 0 0 2px var(--fg); color: var(--fg); background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--fg) 20%, transparent) 0 3px, transparent 3px 6px); }
-  .ss-failed .dot { background: var(--err-solid); color: #fff; box-shadow: none; }
-  .ss-next .dot { box-shadow: inset 0 0 0 1.5px var(--fg); color: var(--fg); }
+  .ss-turn .dot { background: var(--accent); color: var(--accent-fg); border-color: transparent; }
+  .ss-running .dot { border: 2px solid var(--fg); color: var(--fg); background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--fg) 20%, transparent) 0 3px, transparent 3px 6px); }
+  .ss-failed .dot { background: var(--err-solid); color: #fff; border-color: transparent; }
+  .ss-next .dot { border-color: var(--fg); color: var(--fg); }
   .utabs { display: flex; gap: 2px; flex-wrap: wrap; border-bottom: 1px solid var(--border); margin: 18px 0 16px; }
   .utabs a { padding: 10px 14px; margin-bottom: -1px; border-bottom: 3px solid transparent; text-decoration: none; color: var(--fg-muted); font-weight: 600; font-size: 14.5px; }
   .utabs a:hover { color: var(--fg); }
@@ -280,7 +378,7 @@
   .cl { list-style: none; margin: 0; padding: 0; }
   .ci { display: flex; flex-direction: column; gap: 6px; width: 100%; text-align: left; padding: 11px 16px; border: 0; border-bottom: 1px solid var(--border-subtle); background: transparent; color: var(--fg); font: 400 14.5px var(--font-sans); cursor: pointer; }
   .ci:hover { background: var(--bg-sunken); }
-  .ci[aria-current="true"] { background: var(--accent-tint); box-shadow: inset 3px 0 0 var(--accent); }
+  .ci[aria-current="true"] { background: var(--accent-tint); border-left: 3px solid var(--accent); padding-left: 13px; }
   .ci-t { font-weight: 600; line-height: 1.3; }
   .kbd-hint { margin: auto 0 0; padding: 12px 16px; }
   .md-detail { flex: 999 1 400px; min-width: 0; padding: 24px 28px 30px; display: flex; flex-direction: column; gap: 18px; }
@@ -331,38 +429,124 @@
   .kt > .mono, .acg > .mono { white-space: nowrap; flex: 0 0 auto; }
   main:focus-visible { outline: none; }
   /* Safety yellow is too light to stand alone as a mark on a light page: give it an ink edge. */
-  :root[data-theme="industrial"] .mini .m-turn, :root[data-theme="industrial"] .s-paused .tl-bar { box-shadow: inset 0 0 0 1px var(--fg); }
-  :root[data-theme="industrial"] .ci[aria-current="true"], :root[data-theme="industrial"] .reader-nav a[aria-current="true"], :root[data-theme="industrial"] .story-side a[aria-current="page"] { box-shadow: inset 4px 0 0 var(--fg); }
+  :root[data-theme="industrial"] .mini .m-turn, :root[data-theme="industrial"] .segbar .sb-n { border-color: var(--fg); }
+  :root[data-theme="industrial"] .ci[aria-current="true"], :root[data-theme="industrial"] .reader-nav a[aria-current="true"], :root[data-theme="industrial"] .story-side a[aria-current="page"] { border-left: 4px solid var(--fg); }
+  :root[data-theme="industrial"] .ci[aria-current="true"] { padding-left: 12px; }
+  :root[data-theme="industrial"] .reader-nav a[aria-current="true"] { padding-left: 14px; }
+  :root[data-theme="industrial"] .story-side a[aria-current="page"] { padding-left: 12px; }
   a.btn { display: inline-flex; align-items: center; text-decoration: none; }
   .shot img { width: auto; max-width: 100%; max-height: 360px; }
+
+  /* The reader and the story's cases are their own scroll views: the list and the open item scroll separately. */
+  .reader-find { position: sticky; top: 0; z-index: 1; padding: 10px 14px; background: var(--bg-surface); border-bottom: 1px solid var(--border-subtle); }
+  .reader-find input { width: 100%; }
+  details.rg > summary { list-style: none; cursor: pointer; }
+  details.rg > summary::-webkit-details-marker { display: none; }
+  details.rg > summary b::before { content: ""; display: inline-block; width: 6px; height: 6px; margin: 0 9px 2px 1px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(-45deg); transition: transform .15s; }
+  details.rg[open] > summary b::before { transform: rotate(45deg); }
+  details.rg > summary:hover { background: var(--bg-sunken); }
+  details.rg > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+  .reader-nav .no-match { padding: 12px 18px; }
+  @media (min-width: 901px) {
+    .reader { flex-wrap: nowrap; height: calc(100vh - var(--topbar-h) - 32px); min-height: 480px; }
+    .reader-nav { flex: 0 0 300px; max-width: 300px; overflow-y: auto; overscroll-behavior: contain; padding-top: 0; }
+    .reader-body { overflow-y: auto; overscroll-behavior: contain; }
+    .md { flex-wrap: nowrap; height: calc(100vh - var(--topbar-h) - 32px); min-height: 480px; }
+    .md-list { flex: 0 0 380px; overflow-y: auto; overscroll-behavior: contain; }
+    .md-detail { overflow-y: auto; overscroll-behavior: contain; }
+  }
+
+  /* Starting and continuing runs from the page. */
+  .field { font: inherit; font-size: 15px; color: var(--fg); background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 8px 12px; min-height: 42px; max-width: 100%; }
+  .field:focus-visible, select:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+  .field-label { display: block; font-weight: 600; font-size: 14px; margin: 0 0 6px; }
+  .start-form { display: flex; flex-direction: column; gap: 18px; padding: 20px 22px; }
+  .sf-url { display: flex; gap: 10px; flex-wrap: wrap; align-items: stretch; }
+  .sf-url .field { flex: 1 1 320px; }
+  .sf-opts { display: flex; flex-wrap: wrap; gap: 16px 32px; align-items: flex-start; }
+  .sf-opts fieldset { border: 0; margin: 0; padding: 0; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+  .sf-opts legend { padding: 0; margin: 0 0 6px; font-weight: 600; font-size: 14px; }
+  .opt { display: inline-flex; gap: 8px; align-items: flex-start; font-size: 14px; cursor: pointer; }
+  .opt input { margin: 3px 0 0; accent-color: var(--focus); }
+  .opt small { display: block; color: var(--fg-muted); font-size: 13px; }
+  .sf-note { margin: 0; font-size: 14px; color: var(--fg-2); }
+  details.new-run { margin: 0 0 24px; }
+  details.new-run > summary { list-style: none; display: inline-flex; gap: 8px; align-items: center; }
+  details.new-run > summary::-webkit-details-marker { display: none; }
+  details.new-run > summary::before { content: "+"; font-size: 18px; line-height: 1; }
+  details.new-run[open] > summary::before { content: "−"; }
+  details.new-run[open] > summary { margin-bottom: 12px; }
+  .run-live { overflow: hidden; margin: 0 0 24px; }
+  .run-live > header { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; padding: 14px 18px; border-bottom: 1px solid var(--border-subtle); }
+  pre.log { margin: 0; padding: 12px 18px; height: 260px; overflow: auto; font: 12.5px/1.55 var(--font-mono); background: var(--bg-sunken); white-space: pre-wrap; overflow-wrap: anywhere; }
+  .btn.danger { background: var(--bg-surface); color: var(--err-fg); border-color: var(--err-solid); }
+  .linkbtn { background: none; border: 0; padding: 0; font: inherit; font-size: 13.5px; font-weight: 600; color: var(--link); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; align-self: flex-start; }
+  .linkbtn:disabled { color: var(--fg-muted); cursor: default; text-decoration: none; }
+  .gate .linkbtn { color: inherit; }
+  .story-run { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .story-run .field { flex: 1 1 260px; min-height: 38px; font-size: 14px; }
+  .tcform { display: flex; flex-direction: column; gap: 14px; max-width: 760px; }
+  .tcform h2 { font-size: 22px; margin: 0; }
+  .tcform .fld { display: flex; flex-direction: column; min-width: 0; }
+  .tcform .field, .tcform select { width: 100%; }
+  .tcform textarea.field { resize: vertical; line-height: 1.45; }
+  .tcform .grid2 { gap: 14px; }
+  .md-list.locked { opacity: .55; pointer-events: none; }
+  .cd-head .actions .btn { min-height: 32px; }
+  kbd { font: 11.5px var(--font-mono); padding: 1px 5px; border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 4px; background: var(--bg-surface); }
+  .ed-bar { position: sticky; top: 0; z-index: 2; display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; padding: 10px 12px; margin: 0 0 10px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); }
+  .ed-bar .mono { overflow-wrap: anywhere; }
+  .doc-view .ed-bar { top: var(--topbar-h); }
+  textarea.code-edit { display: block; width: 100%; min-height: 240px; resize: vertical; padding: 14px 16px; font: 13px/1.6 var(--font-mono); color: var(--fg); background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md); tab-size: 2; white-space: pre; overflow-x: auto; }
+  textarea.code-edit:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+  .tbl tr.click { cursor: pointer; }
+  .tbl tr.click:hover td { background: var(--bg-sunken); }
+  .res { display: inline-flex; gap: 6px; align-items: baseline; }
+  .res-failed { color: var(--err-fg); } .res-passed { color: var(--ok-fg); } .res-paused { color: var(--accent-tint-fg); } .res-running { color: var(--fg); }
+  .runs-tbl td { vertical-align: top; }
+  .runs-tbl .steps-cell { max-width: 340px; }
+  /* The manual testing guide (as in AIQA): one case at a time over the page. */
+  .guide { position: fixed; inset: 0; z-index: 55; background: var(--scrim); display: grid; place-items: center; padding: 24px; }
+  .guide[hidden] { display: none; }
+  .gcard { width: min(720px, 100%); max-height: calc(100vh - 48px); overflow-y: auto; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); padding: 20px 22px; display: flex; flex-direction: column; gap: 14px; }
+  .gcard h2 { margin: 2px 0 0; font-size: 20px; }
+  .pbar { height: 6px; border-radius: 3px; background: var(--bg-sunken); border: 1px solid var(--border-subtle); overflow: hidden; }
+  .pbar i { display: block; height: 100%; background: var(--ok-solid); }
+  .gout { display: flex; gap: 8px; flex-wrap: wrap; }
+  .gout button { flex: 1 1 120px; min-height: 42px; font: 600 14.5px var(--font-sans); border-radius: var(--radius-md); border: 1px solid var(--border); background: var(--bg-surface); color: var(--fg); cursor: pointer; }
+  .gout button[aria-pressed="true"].pass { background: var(--ok-bg); color: var(--ok-fg); border-color: var(--ok-solid); }
+  .gout button[aria-pressed="true"].fail { background: var(--err-bg); color: var(--err-fg); border-color: var(--err-solid); }
+  .gout button[aria-pressed="true"].blocked { background: var(--warn-bg); color: var(--warn-fg); border-color: var(--warn-solid); }
+  .gout button:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+  .dz { display: flex; gap: 10px; align-items: center; justify-content: center; min-height: 64px; padding: 10px 14px; border: 1.5px dashed var(--border); border-radius: var(--radius-md); color: var(--fg-muted); font-size: 14px; cursor: pointer; text-align: center; }
+  .dz.over, .dz:hover { border-color: var(--focus); color: var(--fg); }
+  .dz img { max-height: 120px; max-width: 220px; border-radius: var(--radius-sm); border: 1px solid var(--border); }
+  .dz input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+  .gnav { display: flex; gap: 8px; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+  .qlist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .qrow { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); cursor: pointer; }
+  .qrow input { margin-top: 4px; accent-color: var(--focus); }
+  .qrow.done span { color: var(--fg-muted); text-decoration: line-through; }
+  details.menu { position: relative; }
+  details.menu > summary { list-style: none; cursor: pointer; display: inline-grid; place-items: center; width: 30px; height: 26px; border-radius: var(--radius-md); border: 1px solid var(--border); background: var(--bg-surface); font-weight: 700; line-height: 1; }
+  details.menu > summary::-webkit-details-marker { display: none; }
+  details.menu > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+  .menu-pop { position: absolute; top: calc(100% + 6px); left: 0; z-index: 25; min-width: 260px; padding: 4px; display: flex; flex-direction: column; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-lg); }
+  .menu-pop button { text-align: left; font: 14px var(--font-sans); padding: 8px 10px; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--fg); cursor: pointer; }
+  .menu-pop button:hover:not(:disabled) { background: var(--bg-sunken); }
+  .menu-pop button:disabled { color: var(--fg-muted); cursor: default; }
+  .toast { position: fixed; right: 16px; bottom: 16px; z-index: 50; max-width: min(460px, calc(100vw - 32px)); box-shadow: var(--shadow-sm); }
   @media (max-width: 1100px) { .story-page { grid-template-columns: minmax(0, 1fr); } .story-side { display: none; } .story-main .back { display: inline-block; } }
   @media (max-width: 900px) { .md-list { max-width: none; border-right: 0; border-bottom: 1px solid var(--border); } .reader-nav { max-width: none; border-right: 0; border-bottom: 1px solid var(--border); max-height: 280px; overflow-y: auto; } .fail-main { border-right: 0; border-bottom: 1px solid var(--border-subtle); } }
-  @media (max-width: 720px) {
-    .tl { flex-direction: column; gap: 10px; }
-    .tl .seg { flex: none !important; min-width: 0; flex-direction: row; gap: 12px; align-items: flex-start; }
-    .tl-bar { width: 8px; height: auto; align-self: stretch; min-height: 44px; flex: 0 0 8px; }
-    .cd { grid-template-columns: 1fr; gap: 4px; }
-    .cd dd { margin-bottom: 10px; }
-    .md-detail, .reader-body { padding: 18px 16px 22px; }
-    .ssteps li { flex: 1 1 45%; border-bottom: 1px solid var(--border-subtle); }
-    .cmd code { max-width: 52vw; overflow: hidden; text-overflow: ellipsis; }
-    .hero h1 { font-size: 26px; }
-    .st-tbl thead { display: none; }
-    .st-tbl, .st-tbl tbody, .st-tbl tr, .st-tbl td { display: block; width: 100%; }
-    .st-tbl tr { padding: 12px 14px; border-top: 1px solid var(--border-subtle); }
-    .st-tbl tr:first-child { border-top: 0; }
-    .st-tbl td { border: 0; padding: 3px 0; }
-    .st-tbl td:nth-child(3) { display: none; }
-    .spec-tbl th:nth-child(n+3):nth-child(-n+6), .spec-tbl td:nth-child(n+3):nth-child(-n+6) { display: none; }
-    .spec-tbl td.mono { overflow-wrap: normal; word-break: normal; }
-    .feed li { grid-template-columns: 74px minmax(0, 1fr); }
-    .feed li .mono { white-space: nowrap; }
-  }
+  /* Below 1100px a story's list pane is hidden (its page has a Stories link); so is the collapsed strip. */
+  @media (max-width: 1100px) { .story-page.pane-closed { grid-template-columns: minmax(0, 1fr); } .story-page.pane-closed .story-side { display: none; } }
 </style>
 </head>
 <body>
 <header class="top">
-  <a class="brand" href="#now"><span class="logo">Agentic QA</span><span class="proj" id="proj">Dashboard</span></a>
+  <a class="brand" href="#now"><span class="logo">Agentic QA</span><span class="proj-wrap"><span class="proj" id="proj">Dashboard</span><span class="proj-sub" id="projSub"></span></span></a>
+  <div class="jump" id="jump" role="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="jumpQ" type="search" autocomplete="off" spellcheck="false" placeholder="Jump to a story, test case or file" aria-label="Jump to a story, test case or file" role="combobox" aria-expanded="false" aria-controls="jumpList" aria-autocomplete="list"><kbd class="jk" id="jumpKbd">Ctrl K</kbd><ul class="jump-list" id="jumpList" role="listbox" hidden></ul></div>
+  <span class="pills" id="pills"></span>
   <span class="live" id="live" role="status"><span class="dot"></span><span id="liveText">Connecting…</span></span>
   <!--THEME_MENU-->
 </header>
@@ -372,11 +556,14 @@
     <a href="#suite" data-view="suite"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 3 8l9 5 9-5-9-5z"/><path d="m3 13 9 5 9-5"/></svg>Full suite</a>
     <a href="#stories" data-view="stories"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>Stories</a>
     <a href="#results" data-view="results"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Results</a>
-    <a href="#models" data-view="models"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>Models</a>
+    <a href="#runs" data-view="runs"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 5v14l11-7z"/></svg>Runs</a>
     <a href="#settings" data-view="settings" class="rail-end"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2.8v2.4M12 18.8v2.4M4.2 7.5l2.1 1.2M17.7 15.3l2.1 1.2M4.2 16.5l2.1-1.2M17.7 8.7l2.1-1.2"/></svg>Settings</a>
   </nav>
   <main id="main" tabindex="-1"><p class="muted">Loading…</p></main>
+  <aside class="runpanel" id="runPanel" aria-label="Run activity"></aside>
 </div>
+<div class="guide" id="guide" role="dialog" aria-modal="true" aria-label="Manual testing" hidden></div>
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Screenshot" hidden></div>
 <!--STATIC_DATA-->
 <script>
 (function () {
@@ -455,27 +642,525 @@
   function isWaitingStory(s) { return !!(s.review && s.next && !s.running); }
   function defectCount(s) { return (s.counts && s.counts["Possible defect"]) || 0; }
 
-  /** The five steps as a track: bar widths follow how long each step took (or has been running). */
-  function timeline(steps, linkFn) {
-    var now = STATIC ? Date.parse(state.generatedAt) : Date.now(), pausedIdx = -1;
+  // ── Running agents from the page ─────────────────────────────────────────
+  // state.control comes from the live server only: { available: the claude CLI is there, job: what the page started }.
+  function control() { return (!STATIC && state && state.control) || null; }
+  function canStart() { var c = control(); return !!(c && c.available && !c.job); }
+  function busyText() {
+    var c = control();
+    if (!c) return "";
+    if (!c.available) return "Starting agents from here needs the Claude Code CLI (claude) on this computer.";
+    return c.job ? c.job.label + " is running." : "";
+  }
+  function stepName(id) { var x = stepById(id); return x ? x.name : id; }
+  function since(iso) { return '<span data-since="' + esc(iso) + '">' + esc(fmtDur(Date.now() - Date.parse(iso))) + "</span>"; }
+  function runBtn(attrs, label, cls) { return '<button type="button" class="' + (cls || "btn") + '" ' + attrs + (canStart() ? "" : ' disabled title="' + esc(busyText() || "Not available") + '"') + ">" + esc(label) + "</button>"; }
+
+  var startDraft = null;
+  /** The form that starts a full-suite run: the app's address, what to test and how. */
+  function startForm(intro) {
+    var run = state.suite.run, c = control();
+    var d = startDraft || { url: (state.workspace && state.workspace.appUrl) || (run && run.target) || "", grep: run && run.filter && run.filter !== "none" ? run.filter : "@smoke", mode: "step", headed: false, config: "keep" };
+    var greps = [["@smoke", "Smoke"], ["@regression", "Regression"], ["@smoke|@accessibility", "Smoke + accessibility"], ["all", "Everything"]];
+    if (greps.every(function (g) { return g[0] !== d.grep; })) greps.push([d.grep, d.grep]);
+    var off = !canStart();
+    var html = '<form class="card start-form" id="startForm" novalidate><span class="eyebrow">Start a run</span>' + (intro ? '<p class="sf-note">' + intro + "</p>" : "");
+    html += '<div><label class="field-label" for="sf-url">The app\'s address</label><div class="sf-url"><input class="field" id="sf-url" name="url" type="url" inputmode="url" autocomplete="url" spellcheck="false" required placeholder="https://your-app.example" value="' + esc(d.url) + '"><button class="btn" type="submit" id="sf-go"' + (off ? " disabled" : "") + ">Start the full suite</button></div></div>";
+    // Which tests: a segmented control (as in AIQA), with the tag filter it stands for under it.
+    html += '<div class="sf-opts"><div><span class="field-label" id="sf-grep-l">Tests to run</span><input type="hidden" name="grep" id="sf-grep" value="' + esc(d.grep) + '"><div class="seg" role="group" aria-labelledby="sf-grep-l">' + greps.map(function (g) { return '<button type="button" data-grep="' + esc(g[0]) + '" aria-pressed="' + (g[0] === d.grep) + '">' + esc(g[1]) + "</button>"; }).join("") + '</div><p class="muted small" id="sf-grep-h" style="margin:6px 0 0">' + grepHint(d.grep) + "</p></div>";
+    html += '<fieldset><legend>How to run</legend><label class="opt"><input type="radio" name="mode" value="step"' + (d.mode !== "auto" ? " checked" : "") + '><span>Step by step<small>Pauses after each step for your review. The slow QA Reviewer waits until you run it.</small></span></label><label class="opt"><input type="radio" name="mode" value="auto"' + (d.mode === "auto" ? " checked" : "") + "><span>All five steps<small>Runs straight through, the QA Reviewer included.</small></span></label></fieldset>";
+    html += '<fieldset><legend>Options</legend><label class="opt"><input type="checkbox" name="headed"' + (d.headed ? " checked" : "") + "><span>Show the browser while the Analyst explores</span></label>";
+    if (state.suite.config.exists) html += '<label class="opt"><input type="radio" name="config" value="keep"' + (d.config !== "overwrite" ? " checked" : "") + '><span>Keep my <span class="mono">playwright.config.ts</span><small>Its testDir must include .agentic-qa/test-scripts.</small></span></label><label class="opt"><input type="radio" name="config" value="overwrite"' + (d.config === "overwrite" ? " checked" : "") + '><span>Replace it with Agentic QA\'s</span></label>';
+    html += "</fieldset></div>";
+    if (c && !c.available) html += '<p class="sf-note">' + esc(busyText()) + " Or run <code>/qa-pipeline &lt;url&gt;</code> in Claude Code.</p>";
+    else if (c && c.job) html += '<p class="sf-note">' + esc(busyText()) + " You can start a new run when it ends.</p>";
+    else html += '<p class="sf-note muted small">Each step runs as a Claude Code session in this project, with the models from the <a href="#settings/ai">Settings → AI</a> page. It can edit files here and run playwright-cli, Playwright and k6; nothing else.</p>';
+    return html + "</form>";
+  }
+  function grepHint(g) { return g === "all" ? "Every test the QA Engineer writes." : "The tests tagged " + g.split("|").map(function (t) { return "<code>" + esc(t) + "</code>"; }).join(" or ") + "."; }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest("#startForm [data-grep]");
+    if (!b) return;
+    var form = b.closest("form"), g = b.getAttribute("data-grep");
+    form.elements.grep.value = g;
+    form.querySelectorAll("[data-grep]").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+    document.getElementById("sf-grep-h").innerHTML = grepHint(g);
+    startDraft = readStartForm(form);
+  });
+  function readStartForm(form) {
+    var f = form.elements;
+    return { url: f.url.value.trim(), grep: f.grep.value, mode: (form.querySelector('input[name="mode"]:checked') || {}).value || "step", headed: f.headed.checked, config: (form.querySelector('input[name="config"]:checked') || {}).value || "keep" };
+  }
+
+  /** What the page started, in a line: the activity itself is in the run panel (as in AIQA). */
+  function jobPanel(job) {
+    return '<section class="card run-live" aria-label="Running now"><header><span class="chip neutral running">Running</span><span class="grow"><span class="eyebrow">Running now</span><b>' + esc(job.label) + '</b> <span class="muted small">for ' + since(job.startedAt) + '</span></span><button type="button" class="btn ghost sm" data-open-panel>Follow it in the run panel</button><button type="button" class="btn danger sm" data-run="stop">Stop</button></header></section>';
+  }
+  function refreshLog() {
+    var el = document.getElementById("liveLog");
+    if (!el) return;
+    api(docKey(el.getAttribute("data-path"))).then(function (d) {
+      if (!el.isConnected || d.kind !== "text") return;
+      var lines = d.text.split(/\r?\n/), text = lines.slice(-200).join("\n");
+      if (text === el.textContent) return;
+      var atEnd = el.scrollHeight - el.scrollTop - el.clientHeight < 24;
+      el.textContent = text;
+      if (atEnd) el.scrollTop = el.scrollHeight;
+    }).catch(function () {});
+  }
+
+  // ── Editing files and test cases ─────────────────────────────────────────
+  // While an editor is open, polls don't redraw the page under it (see poll and hashchange).
+  var fileEdit = null, caseEdit = null;
+  function editing() { return !!(fileEdit || caseEdit); }
+  function unsaved() { return !!((fileEdit && fileEdit.dirty) || (caseEdit && caseEdit.dirty) || guideDirty()); }
+  function openable(p) { return !STATIC && !!p && (p === "playwright.config.ts" || (/^\.agentic-qa\//.test(p) && !/^\.agentic-qa\/logs\//.test(p))); }
+  function editableFile(p) { return openable(p) && /\.(md|ts|ya?ml|txt)$/i.test(p); }
+  function openBtn(p, cls) { return openable(p) ? '<button type="button" class="' + (cls || "btn ghost") + '" data-open="' + esc(p) + '">Open in editor</button>' : ""; }
+  function fileBtns(p) { return (editableFile(p) ? '<button type="button" class="btn ghost" data-file-edit="' + esc(p) + '">Edit</button>' : "") + openBtn(p); }
+  function postJson(route, body) {
+    return fetch(route, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(j.error || r.statusText); return j; }); });
+  }
+  function autosize(ta) { ta.style.height = "auto"; ta.style.height = Math.max(240, ta.scrollHeight + 4) + "px"; }
+
+  /** Swap a document for a text editor: the host holds a .doc-content element. */
+  function startFileEdit(host, p) {
+    api("api/file?path=" + encodeURIComponent(p)).then(function (f) {
+      var content = host.querySelector(".doc-content");
+      if (!content) return;
+      fileEdit = { path: p, version: f.version, dirty: false, host: host };
+      content.innerHTML = '<div class="ed-bar" role="toolbar" aria-label="Editing ' + esc(p) + '"><b>Editing</b><span class="mono small">' + esc(p) + '</span><span class="muted small" id="edStatus" role="status">No changes</span><span class="push"></span><button type="button" class="btn ghost sm" data-file-cancel>Cancel</button><button type="button" class="btn sm" data-file-save>Save</button></div><textarea class="code-edit" id="codeEdit" spellcheck="false" aria-label="The text of ' + esc(p) + '"></textarea><p class="muted small">Ctrl+S saves. If an agent writes this file while you edit, the save is refused, so neither of you loses work.</p>';
+      var ta = content.querySelector("#codeEdit");
+      ta.value = f.text;
+      autosize(ta);
+      ta.addEventListener("input", function () {
+        if (!fileEdit) return;
+        fileEdit.dirty = ta.value !== f.text;
+        document.getElementById("edStatus").textContent = fileEdit.dirty ? "Unsaved changes" : "No changes";
+        autosize(ta);
+      });
+      ta.addEventListener("keydown", function (e) { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") { e.preventDefault(); saveFileEdit(); } });
+      host.querySelectorAll("[data-file-edit]").forEach(function (b) { b.hidden = true; });
+      // Start at the top of the file, where the bar is.
+      ta.setSelectionRange(0, 0);
+      ta.focus({ preventScroll: true });
+      content.querySelector(".ed-bar").scrollIntoView({ block: "nearest" });
+    }).catch(function (err) { toast(err.message || String(err)); });
+  }
+  function endFileEdit() {
+    var host = fileEdit && fileEdit.host;
+    fileEdit = null;
+    // The reader keeps its open document across redraws: forget it, so the saved file is read again.
+    if (host) { host.removeAttribute("data-path"); host.removeAttribute("data-sig"); }
+    render(false);
+  }
+  function saveFileEdit() {
+    if (!fileEdit) return;
+    var ta = document.getElementById("codeEdit"), btn = document.querySelector("[data-file-save]");
+    if (btn) { btn.disabled = true; btn.textContent = "Saving…"; }
+    postJson("api/file", { path: fileEdit.path, text: ta.value, version: fileEdit.version })
+      .then(function (r) { toast("Saved " + r.path + ".", true); endFileEdit(); })
+      .catch(function (err) { if (btn) { btn.disabled = false; btn.textContent = "Save"; } toast(err.message || String(err)); });
+  }
+
+  document.addEventListener("click", function (e) {
+    var t = e.target.closest && e.target.closest("[data-open], [data-file-edit], [data-file-save], [data-file-cancel]");
+    if (!t || STATIC) return;
+    if (t.hasAttribute("data-open")) {
+      postJson("api/open", { path: t.getAttribute("data-open") })
+        .then(function (r) { toast("Opened " + r.path.split("/").pop() + (r.via === "editor" ? " in your editor." : " with your computer's default app."), true); })
+        .catch(function (err) { toast(err.message || String(err)); });
+    } else if (t.hasAttribute("data-file-edit")) {
+      if (editing()) return toast("Finish the edit that's open first.");
+      startFileEdit(t.closest("[data-doc-host]") || document, t.getAttribute("data-file-edit"));
+    } else if (t.hasAttribute("data-file-save")) saveFileEdit();
+    else if (t.hasAttribute("data-file-cancel")) {
+      if (fileEdit && fileEdit.dirty && !window.confirm("Discard your changes to " + fileEdit.path + "?")) return;
+      endFileEdit();
+    }
+  });
+  window.addEventListener("beforeunload", function (e) { if (unsaved()) { e.preventDefault(); e.returnValue = ""; } });
+
+  // ── AIQA's shell: header pills, the jump box, the run panel and the screenshot lightbox ──
+  function fmtTokens(n) { n = Number(n) || 0; return n >= 1e6 ? (n / 1e6).toFixed(1).replace(/\.0$/, "") + "M" : n >= 1000 ? Math.round(n / 1000) + "k" : String(n); }
+  function ago(iso) {
+    var t = Date.parse(iso || "");
+    if (!t) return "";
+    var m = Math.round((Date.now() - t) / 60000);
+    return m < 1 ? "just now" : m < 60 ? m + "m ago" : m < 1440 ? Math.round(m / 60) + "h ago" : Math.round(m / 1440) + "d ago";
+  }
+  function shortPath(p) {
+    var s = String(p || "").replace(/\\/g, "/"), i = s.indexOf(".agentic-qa/");
+    return i >= 0 ? s.slice(i) : /playwright\.config\.ts$/.test(s) ? "playwright.config.ts" : s.split("/").slice(-2).join("/");
+  }
+  function lastSuiteStep() {
+    var run = state.suite.run, steps = state.suite.steps.filter(function (x) { return x.feed; });
+    if (!run || !steps.length) return null;
+    return steps.filter(function (x) { return x.id === run.next; })[0] || steps.slice().sort(function (a, b) { return Date.parse(b.startedAt || 0) - Date.parse(a.startedAt || 0); })[0];
+  }
+
+  /** The header: the app under test under the project name, then pills for what's running, waiting and last run. */
+  function renderHeader() {
+    if (!state) return;
+    var run = state.suite.run, c = control(), job = c && c.job, host = "";
+    try { host = run && run.target ? new URL(run.target).host : ""; } catch (e) {}
+    document.getElementById("projSub").textContent = [host, state.stories.length ? plural(state.stories.length, "story", "stories") : ""].filter(Boolean).join(" · ");
+    var pills = [];
+    if (job) pills.push('<button type="button" class="tchip run" data-open-panel title="Open the run panel"><span class="cdot on" aria-hidden="true"></span>' + esc(job.kind === "story" ? job.key : "Full suite") + (job.step ? " · " + esc(stepName(job.step)) : "") + " · " + since(job.startedAt) + "</button>");
+    else if (run && run.state === "paused" && run.next) {
+      var nx = stepById(run.next);
+      pills.push('<a class="tchip run turn" href="#suite"><span class="cdot" aria-hidden="true"></span>Full suite · ' + (nx && nx.state === "failed" ? "stopped" : "your turn") + "</a>");
+    } else if (run && run.state === "done") {
+      var bad = state.suite.steps.some(function (x) { return x.state === "failed"; });
+      pills.push((STATIC ? '<a class="tchip run opt" href="#suite">' : '<button type="button" class="tchip run opt" data-open-panel title="Open the run panel">') + '<span class="cdot ' + (bad ? "bad" : "ok") + '" aria-hidden="true"></span>Full suite ' + (bad ? "stopped" : "done") + (STATIC ? "</a>" : "</button>"));
+    }
+    var waiting = state.stories.filter(isWaitingStory);
+    if (waiting.length) pills.push('<a class="tchip turn opt" href="#story/' + encodeURIComponent(waiting[0].key) + '"><span class="cdot" aria-hidden="true"></span>' + esc(waiting.length === 1 ? waiting[0].key + " · waiting for you" : waiting.length + " stories waiting for you") + "</a>");
+    var r = state.suite.results;
+    if (r && r.stats) pills.push('<a class="tchip opt" href="#results" title="The last full-suite test run"><span class="cdot ' + (r.stats.failed ? "bad" : "ok") + '" aria-hidden="true"></span>Last run · ' + esc(r.stats.failed ? r.stats.failed + " failed" : "passing") + (ago(r.startedAt || r.mtime) ? " · " + esc(ago(r.startedAt || r.mtime)) : "") + "</a>");
+    var el = document.getElementById("pills"), html = pills.join("");
+    if (el.getAttribute("data-html") !== html) { el.innerHTML = html; el.setAttribute("data-html", html); }
+  }
+
+  // The run panel: what's running (or ran last), its counts, and its activity as it happens.
+  var feedState = { path: null, total: 0, events: [] };
+  var TAG = { write: "WRITE", edit: "EDIT", agent: "AGENT", snap: "SNAP", task: "RUN", note: "NOTE", warn: "WARN", done: "DONE", fail: "FAIL" };
+  function panelOpen() { return lsGet("agentic-qa-ui-panel") === "open"; }
+  function setPanel(open) { lsSet("agentic-qa-ui-panel", open ? "open" : "closed"); renderPanel(); if (open) fetchFeed(); }
+  function panelSource() {
+    var c = control(), job = c && c.job;
+    if (job) return { job: job, feed: job.events, step: job.kind === "suite" ? stepById(job.step) : null, story: job.kind === "story" ? state.stories.filter(function (x) { return x.key === job.key; })[0] : null };
+    var st = lastSuiteStep();
+    if (st) return { feed: st.feed, step: st };
+    var s = state.stories.filter(function (x) { return x.feed; }).sort(function (a, b) { return b.feed.localeCompare(a.feed); })[0];
+    return s ? { feed: s.feed, story: s } : null;
+  }
+  function fetchFeed() {
+    if (STATIC || !state || !panelOpen()) return;
+    var src = panelSource();
+    if (!src || !src.feed) { feedState = { path: null, total: 0, events: [] }; renderPanel(); return; }
+    if (src.feed !== feedState.path) feedState = { path: src.feed, total: 0, events: [] };
+    var want = feedState.path;
+    fetch("api/run/feed?path=" + encodeURIComponent(want) + "&after=" + feedState.total, { cache: "no-store" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) {
+        if (!j || feedState.path !== want) return;
+        feedState.events = (j.from > feedState.total ? [] : feedState.events).concat(j.events).slice(-400);
+        feedState.total = j.total;
+        renderPanel();
+      }).catch(function () {});
+  }
+  function renderPanel() {
+    var el = document.getElementById("runPanel");
+    if (!el) return;
+    if (STATIC || !state) { el.hidden = true; return; }
+    var c = control(), job = c && c.job, src = panelSource();
+    if (!panelOpen()) {
+      el.className = "runpanel";
+      el.innerHTML = '<div class="strip"><button type="button" class="icon-btn" data-panel-toggle aria-expanded="false" aria-controls="runPanel" title="Show the run panel" aria-label="Show the run panel"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M15 4v16"/></svg></button>' + (job ? '<span class="tchip" style="padding:0;border:0;min-height:0"><span class="cdot on" aria-hidden="true"></span></span>' : "") + '<span class="vlabel" aria-hidden="true">' + esc(job ? "Running · " + (job.key || stepName(job.step)) : "Run activity") + "</span></div>";
+      return;
+    }
+    el.className = "runpanel open";
+    var oldBody = el.querySelector(".rp-body"), keepTop = oldBody ? oldBody.scrollTop : 0;
+    var run = state.suite.run, ev = feedState.path === (src && src.feed) ? feedState.events : [];
+    var eyebrow = "Run activity", title = "Nothing has run yet", sub = "", actions = "";
+    if (job) {
+      eyebrow = "Run · " + (job.kind === "story" ? '<a href="#story/' + encodeURIComponent(job.key) + '">' + esc(job.key) + "</a>" : '<a href="#suite">Full suite</a>');
+      title = job.kind === "story" ? "Running " + esc(job.key) : "Running the " + esc(stepName(job.step));
+      var idx = job.step ? state.suite.steps.map(function (x) { return x.id; }).indexOf(job.step) : -1;
+      sub = (idx >= 0 ? "Step " + (idx + 1) + " of " + state.suite.steps.length + " · " : "") + "for " + since(job.startedAt);
+      actions = '<button type="button" class="btn danger sm" data-run="stop">Stop</button>';
+    } else if (src && src.step) {
+      eyebrow = 'Run · <a href="#suite">Full suite</a>' + (run && run.run ? ' · <span class="mono">' + esc(run.run) + "</span>" : "");
+      var st = src.step;
+      if (run && run.state === "paused" && run.next) {
+        var nx = stepById(run.next), failed = nx && nx.state === "failed";
+        title = failed ? "Stopped at the " + esc(nx.name) : "Your turn: review the " + esc(st.name) + "'s output";
+        actions = runBtn('data-run="step" data-step="' + esc(run.next) + '"', failed ? "Run the " + stepName(run.next) + " again" : "Continue to the " + stepName(run.next), "btn sm");
+      } else title = run && run.state === "done" ? "Full suite finished" : esc(st.name) + (st.state === "running" ? " is running in another session" : " · " + esc(st.state));
+      sub = esc(st.name) + (st.durationMs ? " · " + esc(fmtDur(st.durationMs)) : "") + (st.tokens ? " · " + esc(fmtTokens(st.tokens)) + " tokens" : "");
+    } else if (src && src.story) {
+      eyebrow = 'Run · <a href="#story/' + encodeURIComponent(src.story.key) + '">' + esc(src.story.key) + "</a>";
+      title = esc(storyWhere(src.story));
+      sub = src.story.tokens ? esc(fmtTokens(src.story.tokens)) + " tokens to date" : "";
+    }
+    var files = {}, snaps = 0;
+    ev.forEach(function (e) { if ((e.kind === "write" || e.kind === "edit") && e.path) files[e.path] = 1; if (e.kind === "snap") snaps++; });
+    var live = job && job.live, tokens = live ? live.tokens : src && src.step ? src.step.tokens : src && src.story ? src.story.tokens : null;
+    var counts = [["Files written", live ? live.files : Object.keys(files).length], ["Pages captured", live ? live.snaps : snaps], ["Tokens", tokens ? fmtTokens(tokens) : "—"], ["Time", job ? since(job.startedAt) : src && src.step && src.step.durationMs ? esc(fmtDur(src.step.durationMs)) : "—"]];
+    var html = '<div class="rp-head"><div class="grow" style="min-width:0"><span class="eyebrow">' + eyebrow + "</span><h2>" + title + '</h2><div class="muted small">' + sub + '</div></div><button type="button" class="icon-btn" data-panel-toggle aria-expanded="true" aria-controls="runPanel" title="Hide the run panel" aria-label="Hide the run panel"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button></div>';
+    if (src) html += '<div class="rk" role="group" aria-label="Counts">' + counts.map(function (x) { return "<div><span>" + esc(x[0]) + "</span><b>" + x[1] + "</b></div>"; }).join("") + "</div>";
+    if (job) html += '<div class="indet" aria-hidden="true"></div>';
+    html += '<div class="rp-body">';
+    if (!src) html += '<p class="muted" style="margin:0">Start a run on the <a href="#now">Now</a> page. Its progress shows here while you keep working, on any page.</p>';
+    if (actions) html += '<div class="actions tight">' + actions + "</div>";
+    if (src) {
+      html += '<div><div class="sec-head" style="margin:0 0 4px"><h3 style="margin:0;font-size:15px">Activity</h3><span class="muted small">' + (job ? "Updating live" : ev.length ? "Ended " + esc(clock(ev[ev.length - 1].at)) : "") + "</span></div>";
+      html += ev.length ? '<div class="feed2">' + ev.slice().reverse().map(function (e) {
+        var t = new Date(e.at), hms = isNaN(t) ? "" : t.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+        return '<div class="ev"><span class="t">' + esc(hms) + '</span><span><span class="tag ' + esc(e.kind) + '">' + esc(TAG[e.kind] || "NOTE") + "</span></span><span>" + esc(e.text) + (e.path ? '<span class="path">' + esc(shortPath(e.path)) + "</span>" : "") + "</span></div>";
+      }).join("") + "</div>" : '<p class="muted small">' + (job ? "Waiting for the agent's first move…" : "No activity was recorded for this run. Steps started from the chat show only in the chat.") + "</p>";
+      html += "</div>";
+      if (src.step || (job && job.kind === "suite")) {
+        var ICON = { done: "✓", running: "●", failed: "✕", skipped: "–", paused: "⏸", pending: "○" };
+        html += '<details class="fold2"><summary>Steps in this run (' + state.suite.steps.length + ')</summary><div class="dsteps">' + state.suite.steps.map(function (x) {
+          return '<div class="dstep"><span aria-hidden="true">' + (ICON[x.state] || "○") + "</span><span>" + esc(x.name) + ' <span class="muted">· ' + esc(x.state === "pending" ? "not started" : x.state) + '</span></span><span class="m">' + esc(x.durationMs ? fmtDur(x.durationMs) : "") + (x.tokens ? " · " + esc(fmtTokens(x.tokens)) : "") + "</span></div>";
+        }).join("") + "</div></details>";
+      }
+      if (job) html += '<p class="muted small" style="margin:0"><a href="#doc/' + encodeURIComponent(job.log) + '">The full log</a></p>';
+    }
+    html += "</div>";
+    el.innerHTML = html;
+    var nb = el.querySelector(".rp-body");
+    if (nb) nb.scrollTop = keepTop;
+  }
+
+  // Jump to a story, test case or file (Ctrl/⌘K), from what the page already has: no server search.
+  var jumpQ = document.getElementById("jumpQ"), jumpList = document.getElementById("jumpList"), jumpHits = [], jumpSel = 0;
+  document.getElementById("jumpKbd").textContent = /Mac|iPhone|iPad/.test(navigator.platform || "") ? "⌘K" : "Ctrl K";
+  function jumpIndex() {
+    if (!state) return [];
+    var out = state.stories.map(function (x) { return { kind: "Story", id: x.key, title: x.title, href: "#story/" + encodeURIComponent(x.key) }; });
+    (state.cases || []).forEach(function (c) { out.push({ kind: "Test case", id: c.id, title: c.title, sub: c.story || "", href: c.story ? "#story/" + encodeURIComponent(c.story) + "/cases/" + encodeURIComponent(c.id) : "#suite/" + encodeURIComponent(c.file) }); });
+    readerGroups().forEach(function (g) { g.items.forEach(function (i) { if (g.name !== "Test cases") out.push({ kind: g.name.replace(/s$/, ""), id: i.name, title: i.path, href: "#suite/" + encodeURIComponent(i.path) }); }); });
+    return out;
+  }
+  function closeJump() { jumpList.hidden = true; jumpQ.setAttribute("aria-expanded", "false"); jumpQ.removeAttribute("aria-activedescendant"); }
+  function renderJump() {
+    var q = jumpQ.value.trim().toLowerCase();
+    if (!q) return closeJump();
+    var score = function (h) { var id = String(h.id).toLowerCase(), t = String(h.title || "").toLowerCase(); return id === q ? 0 : id.indexOf(q) === 0 ? 1 : id.indexOf(q) >= 0 ? 2 : t.indexOf(q) >= 0 ? 3 : -1; };
+    jumpHits = jumpIndex().map(function (h) { return { h: h, s: score(h) }; }).filter(function (x) { return x.s >= 0; })
+      .sort(function (a, b) { return a.s - b.s || String(a.h.id).localeCompare(String(b.h.id), undefined, { numeric: true }); }).slice(0, 10).map(function (x) { return x.h; });
+    jumpSel = Math.min(jumpSel, Math.max(0, jumpHits.length - 1));
+    jumpList.innerHTML = jumpHits.length ? jumpHits.map(function (h, i) {
+      return '<li role="option" id="jump-' + i + '" data-jump="' + i + '" aria-selected="' + (i === jumpSel) + '"><span class="k">' + esc(h.id) + '</span><span class="t">' + esc(h.title || "") + '</span><span class="w">' + esc(h.kind + (h.sub ? " · " + h.sub : "")) + "</span></li>";
+    }).join("") : '<li class="none" role="option" aria-disabled="true" aria-selected="false">Nothing matches “' + esc(jumpQ.value.trim()) + "”.</li>";
+    jumpList.hidden = false;
+    jumpQ.setAttribute("aria-expanded", "true");
+    if (jumpHits.length) jumpQ.setAttribute("aria-activedescendant", "jump-" + jumpSel); else jumpQ.removeAttribute("aria-activedescendant");
+    var sel = jumpList.querySelector('[aria-selected="true"]');
+    if (sel && sel.scrollIntoView) sel.scrollIntoView({ block: "nearest" });
+  }
+  function goJump(i) { var h = jumpHits[i]; if (!h) return; jumpQ.value = ""; closeJump(); jumpQ.blur(); location.hash = h.href; }
+  jumpQ.addEventListener("input", function () { jumpSel = 0; renderJump(); });
+  jumpQ.addEventListener("focus", function () { if (jumpQ.value.trim()) renderJump(); });
+  jumpQ.addEventListener("blur", function () { setTimeout(closeJump, 120); });
+  jumpQ.addEventListener("keydown", function (e) {
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); if (!jumpHits.length) return; jumpSel = (jumpSel + (e.key === "ArrowDown" ? 1 : -1) + jumpHits.length) % jumpHits.length; renderJump(); }
+    else if (e.key === "Enter") { e.preventDefault(); goJump(jumpSel); }
+    else if (e.key === "Escape") { e.stopPropagation(); if (!jumpList.hidden) closeJump(); else { jumpQ.value = ""; jumpQ.blur(); } }
+  });
+  jumpList.addEventListener("mousedown", function (e) { var li = e.target.closest("[data-jump]"); if (li) { e.preventDefault(); goJump(Number(li.getAttribute("data-jump"))); } });
+  document.addEventListener("keydown", function (e) {
+    if ((e.ctrlKey || e.metaKey) && !e.altKey && (e.key === "k" || e.key === "K")) { e.preventDefault(); jumpQ.focus(); jumpQ.select(); }
+  });
+
+  // Screenshots open in a lightbox, with the page's other screenshots one step away.
+  var lb = null;
+  function renderLightbox() {
+    var el = document.getElementById("lightbox");
+    if (!lb) { el.hidden = true; el.innerHTML = ""; return; }
+    var it = lb.items[lb.i];
+    el.hidden = false;
+    el.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;max-width:100%"><img src="' + esc(it.src) + '" alt="' + esc(it.label) + '"><div class="lbbar"><button type="button" id="lbPrev"' + (lb.i ? "" : " disabled") + '>‹ Previous</button><span>' + esc(it.label) + " · " + (lb.i + 1) + " of " + lb.items.length + '</span><button type="button" id="lbNext"' + (lb.i < lb.items.length - 1 ? "" : " disabled") + '>Next ›</button><a href="' + esc(it.src) + '" target="_blank" rel="noopener" style="color:inherit">Open</a><button type="button" id="lbClose">Close</button></div></div>';
+    document.getElementById("lbClose").focus();
+  }
+  document.getElementById("lightbox").addEventListener("click", function (e) {
+    if (e.target.id === "lightbox" || e.target.id === "lbClose") { lb = null; return renderLightbox(); }
+    if (e.target.id === "lbPrev" && lb.i > 0) { lb.i--; renderLightbox(); }
+    if (e.target.id === "lbNext" && lb.i < lb.items.length - 1) { lb.i++; renderLightbox(); }
+  });
+  document.addEventListener("keydown", function (e) {
+    if (!lb) return;
+    if (e.key === "Escape") { lb = null; renderLightbox(); }
+    else if (e.key === "ArrowLeft" && lb.i > 0) { lb.i--; renderLightbox(); }
+    else if (e.key === "ArrowRight" && lb.i < lb.items.length - 1) { lb.i++; renderLightbox(); }
+  });
+
+  // ── Manual testing guide (as in AIQA): step through a story's cases, record each result, with a note and a screenshot ──
+  var guide = null;
+  function guideRows() { return guide && guide.story ? guide.story.rows.filter(function (r) { return guide.ids.indexOf(r.cells.ID) >= 0; }) : []; }
+  function isManual(r) { return /\(manual\)/.test(String(r.cells["Last Result"] || "")); }
+  function guideDirty() { return !!(guide && (guide.outcome || guide.note.trim() || guide.shot)); }
+  function openGuide(key, caseId) {
+    if (guide) return;
+    api("api/story?key=" + encodeURIComponent(key)).then(function (st) {
+      var ids = st.rows.map(function (r) { return r.cells.ID; });
+      if (!ids.length) return toast(key + " has no test cases to test yet.");
+      // Start at the case asked for, else the first one without a manual result.
+      var first = caseId ? ids.indexOf(caseId) : st.rows.findIndex(function (r) { return !isManual(r); });
+      guide = { key: key, story: st, ids: ids, i: Math.max(0, first), outcome: "", note: "", shot: null, saving: false, done: false };
+      renderGuide();
+    }).catch(function (err) { toast(err.message || String(err)); });
+  }
+  function closeGuide(force) {
+    if (!guide) return;
+    if (!force && guideDirty() && !window.confirm("Close without saving this result?")) return;
+    guide = null;
+    renderGuide();
+    render(false);
+  }
+  function guideMove(d) {
+    var n = guideRows().length;
+    guide.i = Math.max(0, Math.min(n - 1, guide.i + d));
+    guide.outcome = ""; guide.note = ""; guide.shot = null;
+    renderGuide();
+  }
+  function renderGuide() {
+    var el = document.getElementById("guide");
+    if (!guide) { el.hidden = true; el.innerHTML = ""; return; }
+    var rows = guideRows(), r = rows[guide.i], c = r.cells, h = r.html;
+    var doneN = rows.filter(isManual).length, cell = function (k) { return c[k] && c[k] !== "—" ? h[k] : ""; };
+    el.hidden = false;
+    var html = '<div class="gcard" role="document"><div class="gnav"><span class="eyebrow">Manual testing · ' + doneN + " of " + rows.length + ' recorded</span><button type="button" class="icon-btn" data-guide-close aria-label="Close manual testing" title="Close (Esc)">✕</button></div>';
+    html += '<div class="pbar" aria-hidden="true"><i style="width:' + (rows.length ? Math.round(100 * doneN / rows.length) : 0) + '%"></i></div>';
+    html += '<div><div class="mono muted small">' + esc(c.ID) + " · " + esc(guide.key) + " · " + (guide.i + 1) + " of " + rows.length + "</div><h2>" + h.Title + "</h2>" + (isManual(r) ? '<p class="muted small" style="margin:4px 0 0">Last result: ' + esc(c["Last Result"]) + "</p>" : "") + "</div>";
+    html += '<dl class="cd" style="margin:0"><dt>Before you start</dt><dd>' + (cell("Preconditions") || '<span class="muted">—</span>') + '</dd><dt>Steps</dt><dd class="steps-list">' + (cell("Steps") ? stepsList(h.Steps) : '<span class="muted">—</span>') + '</dd><dt>Expected</dt><dd class="strong">' + (cell("Expected") || '<span class="muted">—</span>') + "</dd></dl>";
+    html += '<div class="gout" role="group" aria-label="Result">' + [["passed", "pass", "Passed"], ["failed", "fail", "Failed"], ["blocked", "blocked", "Blocked"]].map(function (o) {
+      return '<button type="button" class="' + o[1] + '" data-go="' + o[0] + '" aria-pressed="' + (guide.outcome === o[0]) + '">' + o[2] + "</button>";
+    }).join("") + "</div>";
+    html += '<label class="field-label" for="gNote" style="margin:0">Note <span class="muted small">what you saw, the browser, the data you used</span></label><textarea class="field" id="gNote" rows="2" style="width:100%;resize:vertical">' + esc(guide.note) + "</textarea>";
+    html += '<label class="dz" id="gDrop">' + (guide.shot ? '<img src="' + esc(guide.shot.url) + '" alt="The screenshot to save">' + esc(guide.shot.name) + " · choose another" : "Paste a screenshot (Ctrl+V), drop one here, or choose a file") + '<input type="file" id="gFile" accept="image/png,image/jpeg"></label>';
+    html += '<div class="gnav"><button type="button" class="btn ghost sm" data-guide-move="-1"' + (guide.i ? "" : " disabled") + '>Previous</button><span class="actions tight"><button type="button" class="btn ghost sm" data-guide-move="1"' + (guide.i < rows.length - 1 ? "" : " disabled") + '>Skip</button><button type="button" class="btn sm" data-guide-save' + (guide.outcome && !guide.saving ? "" : " disabled") + ">" + (guide.saving ? "Saving…" : "Save result") + "</button></span></div>";
+    el.innerHTML = html + "</div>";
+    var note = document.getElementById("gNote");
+    note.addEventListener("input", function () { guide.note = note.value; });
+    document.getElementById("gFile").addEventListener("change", function (e) { if (e.target.files[0]) takeShot(e.target.files[0]); });
+    var dz = document.getElementById("gDrop");
+    dz.addEventListener("dragover", function (e) { e.preventDefault(); dz.classList.add("over"); });
+    dz.addEventListener("dragleave", function () { dz.classList.remove("over"); });
+    dz.addEventListener("drop", function (e) { e.preventDefault(); dz.classList.remove("over"); var f = e.dataTransfer.files[0]; if (f) takeShot(f); });
+  }
+  function takeShot(file) {
+    if (!/^image\/(png|jpeg)$/.test(file.type)) return toast("The screenshot must be a PNG or JPEG image.");
+    if (file.size > 5 * 1024 * 1024) return toast("That screenshot is over 5 MB.");
+    var rd = new FileReader();
+    rd.onload = function () { var u = String(rd.result); guide.shot = { url: u, name: file.name || "Pasted screenshot", data: u.slice(u.indexOf(",") + 1) }; renderGuide(); };
+    rd.readAsDataURL(file);
+  }
+  function saveGuide() {
+    var rows = guideRows(), r = rows[guide.i];
+    guide.saving = true;
+    renderGuide();
+    postJson("api/story/manual", { key: guide.key, id: r.cells.ID, outcome: guide.outcome, note: guide.note, base: { Title: r.cells.Title, Steps: r.cells.Steps, Expected: r.cells.Expected }, shot: guide.shot ? { data: guide.shot.data } : null })
+      .then(function (res) {
+        toast("Recorded " + res.id + ": " + guide.outcome + ".", true);
+        guide.story = res.story;
+        guide.saving = false;
+        var n = guideRows().length;
+        if (guide.i < n - 1) guideMove(1);
+        else { guide.outcome = ""; guide.note = ""; guide.shot = null; renderGuide(); }
+      })
+      .catch(function (err) { guide.saving = false; renderGuide(); toast(err.message || String(err)); });
+  }
+  document.getElementById("guide").addEventListener("click", function (e) {
+    if (e.target.id === "guide" || e.target.closest("[data-guide-close]")) return closeGuide(false);
+    var o = e.target.closest("[data-go]");
+    if (o) { guide.outcome = o.getAttribute("data-go"); return renderGuide(); }
+    var m = e.target.closest("[data-guide-move]");
+    if (m && !m.disabled) {
+      if (guideDirty() && !window.confirm("Leave this case without saving its result?")) return;
+      return guideMove(Number(m.getAttribute("data-guide-move")));
+    }
+    if (e.target.closest("[data-guide-save]")) saveGuide();
+  });
+  document.addEventListener("paste", function (e) {
+    if (!guide || !e.clipboardData) return;
+    var item = Array.prototype.slice.call(e.clipboardData.items || []).filter(function (i) { return /^image\/(png|jpeg)$/.test(i.type); })[0];
+    if (item) { e.preventDefault(); takeShot(item.getAsFile()); }
+  });
+  document.addEventListener("keydown", function (e) {
+    if (!guide) return;
+    if (e.key === "Escape") closeGuide(false);
+    else if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && guide.outcome && !guide.saving) { e.preventDefault(); saveGuide(); }
+  });
+  document.addEventListener("click", function (e) {
+    var g = e.target.closest && e.target.closest("[data-guide]");
+    if (g && !g.disabled && !STATIC) openGuide(g.getAttribute("data-guide"), g.getAttribute("data-guide-case"));
+  });
+
+  // The shell's buttons.
+  document.addEventListener("click", function (e) {
+    var t = e.target.closest && e.target.closest("[data-open-panel], [data-panel-toggle], [data-pane-toggle], [data-pf], a.shot");
+    if (!t) return;
+    if (t.hasAttribute("data-open-panel")) setPanel(true);
+    else if (t.hasAttribute("data-panel-toggle")) setPanel(!panelOpen());
+    else if (t.hasAttribute("data-pane-toggle")) { lsSet("agentic-qa-ui-story-pane", paneOpen() ? "closed" : "open"); render(false); }
+    else if (t.hasAttribute("data-pf")) { paneFilter = t.getAttribute("data-pf"); render(false); }
+    else if (t.matches("a.shot")) {
+      e.preventDefault();
+      var all = Array.prototype.slice.call(main.querySelectorAll("a.shot"));
+      lb = { items: all.map(function (a) { var img = a.querySelector("img"); return { src: a.getAttribute("href"), label: (img && img.alt) || "Screenshot" }; }), i: Math.max(0, all.indexOf(t)) };
+      renderLightbox();
+    }
+  });
+
+  /** The suite's run controls: what the page is running, or the Continue button when the run is waiting. */
+  function suiteControls() {
+    var c = control(), run = state.suite.run;
+    if (!c) return "";
+    if (c.job) return jobPanel(c.job);
+    var running = state.suite.steps.filter(function (x) { return x.state === "running"; })[0];
+    if (running) return '<div class="gate row" role="status"><div class="grow"><b>The ' + esc(running.name) + " is running in another session</b><span class=\"gate-muted\">A chat started it, or a dashboard that has since closed. If that session has stopped, mark the step as stopped to run it again from here.</span></div>" + '<button type="button" class="btn ghost" data-run="stop">Mark as stopped</button></div>';
+    if (run && run.state === "paused" && run.next) {
+      var nx = stepById(run.next), failed = nx && nx.state === "failed";
+      var head = failed ? "The " + nx.name + " didn't finish" : "Your turn: review, then continue to the " + stepName(run.next);
+      var body = failed ? (nx.note ? nx.note + ". " : "") + "Run it again, or end the run here." : "Read what the last step wrote below. Continue when you're happy with it.";
+      return '<div class="gate row" role="status"><div class="grow"><b>' + esc(head) + '</b><span class="gate-muted">' + esc(body) + '</span></div><div class="actions tight">' + runBtn('data-run="step" data-step="' + esc(run.next) + '"', failed ? "Run the " + stepName(run.next) + " again" : "Continue: run the " + stepName(run.next), "btn gate-btn") + '<button type="button" class="btn ghost" data-run="finish">End the run</button></div></div>';
+    }
+    return "";
+  }
+
+  /** A progress bar in equal parts, one per step: kinds d(one) r(unning) f(ailed) s(kipped) n(ext, your turn) or "". */
+  function segbar(kinds, done, label) {
+    return '<div class="segbar" role="progressbar" aria-valuemin="0" aria-valuemax="' + kinds.length + '" aria-valuenow="' + done + '" aria-valuetext="' + esc(label) + '">' +
+      kinds.map(function (k) { return '<i class="' + (k ? "sb-" + k : "") + '"></i>'; }).join("") + "</div>";
+  }
+  /** "2 of 5 steps done · 40%" and what's happening now, above a segbar. */
+  function progHead(done, total, extra) {
+    return '<div class="prog-head"><b>' + done + " of " + total + " steps done</b>" + '<span class="muted">' + Math.round(100 * done / total) + "%</span>" + (extra ? '<span class="prog-now">' + extra + "</span>" : "") + "</div>";
+  }
+
+  /** The five steps as a progress bar (equal parts, one per step) over a row of step cards. */
+  function timeline(steps, linkFn, withRun) {
+    var now = STATIC ? Date.parse(state.generatedAt) : Date.now(), pausedIdx = -1, run = state.suite.run;
     steps.forEach(function (x, i) { if (x.state === "paused") pausedIdx = i; });
-    return '<ol class="tl" aria-label="Pipeline steps">' + steps.map(function (x, i) {
+    var anyRunning = steps.some(function (x) { return x.state === "running"; });
+    var isNext = function (x, i) { return x.state === "pending" && ((pausedIdx >= 0 && i === pausedIdx + 1) || (run && run.state === "paused" && run.next === x.id)); };
+    var kind = function (x, i) { return x.state === "done" ? "d" : x.state === "running" ? "r" : x.state === "failed" ? "f" : x.state === "skipped" ? "s" : x.state === "paused" || isNext(x, i) ? "n" : ""; };
+    var done = steps.filter(function (x) { return x.state === "done"; }).length;
+    var skipped = steps.filter(function (x) { return x.state === "skipped"; }).length;
+    var cur = steps.filter(function (x) { return x.state === "running"; })[0];
+    var failed = steps.filter(function (x) { return x.state === "failed"; })[0];
+    var nextStep = steps.filter(isNext)[0];
+    var extra = cur ? esc(cur.name) + " running" + (cur.startedAt && !STATIC ? " for " + since(cur.startedAt) : "")
+      : failed && run && run.next === failed.id ? '<span class="err-text">' + esc(failed.name) + " didn't finish</span>"
+      : nextStep ? "Next: " + esc(nextStep.name) + ", after you continue"
+      : skipped ? esc(plural(skipped, "step")) + " skipped" : run && run.state === "done" ? "Finished" : "";
+    var label = done + " of " + steps.length + " steps done" + (cur ? ", " + cur.name + " running" : "");
+    var html = '<div class="progress">' + progHead(done, steps.length, extra) + segbar(steps.map(kind), done, label) + "</div>";
+    return html + '<ol class="ssteps tall" aria-label="Pipeline steps">' + steps.map(function (x, i) {
       var ms = x.state === "running" && x.startedAt ? now - Date.parse(x.startedAt) : x.durationMs;
-      var sized = ms > 0 && (x.state === "done" || x.state === "running" || x.state === "failed" || x.state === "paused");
-      var style = sized ? "flex:" + Math.max(1, Math.round(ms / 1000)) + " 1 0" : "flex:0 0 150px";
-      var line2 = x.state === "done" ? (x.durationMs ? "Done in " + fmtDur(x.durationMs) : "Done")
-        : x.state === "running" ? "Running" + (ms > 0 ? " for " + fmtDur(ms) : "")
+      var k = { d: "done", r: "running", f: "failed", s: "skip", n: "turn" }[kind(x, i)] || "todo";
+      var line2 = x.state === "done" ? esc((x.durationMs ? "Done in " + fmtDur(x.durationMs) : "Done") + (x.tokens ? " · " + fmtTokens(x.tokens) + " tokens" : ""))
+        : x.state === "running" ? "Running" + (x.startedAt && !STATIC ? " for " + since(x.startedAt) : ms > 0 ? " for " + esc(fmtDur(ms)) : "")
         : x.state === "paused" ? "Waiting for you"
         : x.state === "failed" ? "Failed"
         : x.state === "skipped" ? "Skipped"
-        : pausedIdx >= 0 && i === pausedIdx + 1 ? "Next, after you continue" : "Not started";
+        : (pausedIdx >= 0 && i === pausedIdx + 1) || (run && run.state === "paused" && run.next === x.id) ? "Next, after you continue" : "Not started";
+      var again = withRun && control() && run && !anyRunning && run.next !== x.id && (x.state === "done" || x.state === "failed" || x.state === "skipped")
+        ? runBtn('data-run="step" data-step="' + esc(x.id) + '"', x.state === "skipped" ? "Run it now" : "Run again", "linkbtn") : "";
       var out = x.outputInfo || {};
       var line3 = x.note ? '<span class="muted">' + esc(x.note) + "</span>"
+        : (x.state === "pending" && run) || x.state === "running" ? '<span class="muted">' + esc(x.role) + "</span>"
         : out.exists && /\.\w+$/.test(out.path) ? '<span class="mono">' + linkFn(out.path) + "</span>"
         : out.exists && (out.dir || !/\.\w+$/.test(out.path)) ? '<a href="#results">' + esc(plural(state.suite.specs.length, "spec")) + "</a>"
         : x.state === "running" || x.state === "pending" ? '<span class="muted">' + esc(x.role) + "</span>" : "";
-      return '<li class="seg s-' + esc(x.state) + '" style="' + style + '"><span class="tl-bar" aria-hidden="true"></span><span class="tl-text"><span class="tl-name"><span class="mono muted">' + (i + 1) + "</span><b>" + esc(x.name) + "</b></span>" +
-        '<span class="' + (x.state === "running" || x.state === "paused" || x.state === "failed" ? "" : "muted") + '">' + esc(line2) + "</span>" + line3 + "</span></li>";
+      var current = x.state === "running" || x.state === "paused" || isNext(x, i) || (x.state === "failed" && run && run.next === x.id);
+      return '<li class="ss-' + k + (current ? " ss-current" : "") + '"' + (current ? ' aria-current="step"' : "") + '><span class="dot" aria-hidden="true">' + (k === "done" ? "✓" : k === "skip" ? "–" : k === "failed" ? "!" : i + 1) + '</span><span class="ss-text"><b>' + esc(x.name) + "</b>" +
+        '<span class="small ' + (x.state === "running" || x.state === "paused" || x.state === "failed" ? "" : "muted") + '">' + line2 + "</span>" + (line3 ? '<span class="small">' + line3 + "</span>" : "") + again + "</span></li>";
     }).join("") + "</ol>";
   }
 
@@ -529,7 +1214,7 @@
     html += '<div class="actions tight">' + (spec ? '<a class="btn ghost" href="#doc/' + encodeURIComponent(spec) + '">Open the spec</a>' : "") + "</div></div>";
     html += '<div class="fail-side"><b>Check it by hand</b>';
     if (tc) {
-      html += '<p class="muted small">The same case, from <span class="mono">' + esc(tc.file.replace(/^\.agentic-qa\//, "")) + "</span>:</p>" + (tc.steps ? '<div class="steps-list">' + stepsList(tc.steps) + "</div>" : "") + (tc.expected ? '<p><span class="muted">Expected:</span> ' + tc.expected + "</p>" : "") + '<a class="btn ghost" href="' + caseHref(tc) + '">Open the test case</a>';
+      html += '<p class="muted small">The same case, from <span class="mono">' + esc(tc.file.replace(/^\.agentic-qa\//, "")) + "</span>:</p>" + (tc.steps ? '<div class="steps-list">' + stepsList(tc.steps) + "</div>" : "") + (tc.expected ? '<p><span class="muted">Expected:</span> ' + tc.expected + "</p>" : "") + '<div class="actions tight"><a class="btn ghost" href="' + caseHref(tc) + '">Open the test case</a>' + (tc.story && !STATIC ? '<button type="button" class="btn ghost" data-guide="' + esc(tc.story) + '" data-guide-case="' + esc(tc.id) + '">Record a manual result</button>' : "") + "</div>";
     } else html += '<p class="muted small">' + (f.tcId ? "No test case with the ID " + esc(f.tcId) + " was found in <code>.agentic-qa/test-cases/</code>." : "This test has no test-case ID in its title, so there's no manual case to link to.") + "</p>";
     return html + "</div></div></article>";
   }
@@ -549,8 +1234,11 @@
     var paused = s.steps.filter(function (x) { return x.state === "paused"; })[0];
     var waiting = state.stories.filter(isWaitingStory);
     var storyRunning = state.stories.filter(function (x) { return x.running; });
+    var run = s.run, job = control() && control().job;
     if (running) parts.push(SUITE_DOING[running.id] + ".");
     if (paused) parts.push("The full suite is waiting for you after the " + paused.name + ".");
+    else if (!running && run && run.state === "paused" && run.next) parts.push((stepById(run.next) || {}).state === "failed" ? "The " + stepName(run.next) + " didn't finish." : "The full suite is waiting for you before the " + stepName(run.next) + ".");
+    if (job && job.kind === "story" && !storyRunning.some(function (x) { return x.key === job.key; })) parts.push(job.key + " is running.");
     storyRunning.slice(0, 2).forEach(function (x) { parts.push(x.key + " is in " + (STORY_STEP_NAME[x.running] || x.running) + "."); });
     if (waiting.length) parts.push(waiting.length === 1 ? waiting[0].key + " is waiting for your review." : count(waiting.length, "story", "stories") + " are waiting for your review.");
     if (!parts.length) {
@@ -567,26 +1255,35 @@
     if (paused) {
       var out = paused.outputInfo || {};
       items.push({ key: "Full suite", title: "Check the " + paused.name + "'s work", body: "The pipeline stopped after the " + paused.name + ". Review " + (out.exists && !out.dir ? out.path.split("/").pop() : "what it wrote") + ", then answer in the chat to go on to the next step.", href: out.exists && !out.dir ? "#suite/" + encodeURIComponent(out.path) : "#suite", cta: out.exists && !out.dir ? "Open " + out.path.split("/").pop() : "Open the run" });
+    } else if (s.run && s.run.state === "paused" && s.run.next && !s.steps.some(function (x) { return x.state === "running"; })) {
+      // Paused by the dashboard: the last step that finished is the one to review.
+      var nx = stepById(s.run.next), prev = s.steps.filter(function (x) { return x.state === "done" && x.endedAt; }).sort(function (a, b) { return Date.parse(b.endedAt) - Date.parse(a.endedAt); })[0];
+      var po = prev && prev.outputInfo && prev.outputInfo.exists && !prev.outputInfo.dir && /\.\w+$/.test(prev.outputInfo.path) ? prev.outputInfo.path : null;
+      items.push(nx && nx.state === "failed"
+        ? { key: "Full suite", title: "The " + nx.name + " didn't finish", body: (nx.note ? nx.note + ". " : "") + "Run it again, or open the run to see its log and what it wrote.", href: "#suite", cta: "Open the run", run: { step: nx.id, label: "Run the " + nx.name + " again" } }
+        : { key: "Full suite", title: prev ? "Check the " + prev.name + "'s work" : "Continue the full suite", body: (prev ? "The " + prev.name + " is done. Review " + (po ? po.split("/").pop() : "what it wrote") + ", then continue" : "Continue") + " to the " + stepName(s.run.next) + ".", href: po ? "#suite/" + encodeURIComponent(po) : "#suite", cta: po ? "Open " + po.split("/").pop() : "Open the run", run: { step: s.run.next, label: "Continue: run the " + stepName(s.run.next) } });
     }
     state.stories.filter(isWaitingStory).forEach(function (x) {
       var d = defectCount(x), body;
       if (x.next === "story-explore") body = "Design wrote " + plural(x.total, "test case") + ". Review them before Explore opens the app.";
       else if (x.next === "story-script") body = "Explore checked " + plural(x.total, "test case") + " in the app." + (d ? " " + (d === 1 ? "One case doesn't" : count(d, "case") + " don't") + " match the story." : "") + " Review them, then continue to Automate.";
       else body = "Review the test cases, then continue to " + (STORY_STEP_NAME[x.next] || "the next step") + ".";
-      items.push({ key: x.key, title: x.title, body: body, href: "#story/" + encodeURIComponent(x.key), cta: "Review the " + plural(x.total, "test case"), cmd: "/qa-story " + x.key });
+      // With the run buttons, the story page has the Continue button; without them, the chat command.
+      items.push({ key: x.key, title: x.title, body: body, href: "#story/" + encodeURIComponent(x.key), cta: "Review the " + plural(x.total, "test case"), cmd: control() && control().available ? "" : "/qa-story " + x.key });
     });
     if (!items.length) return '<p class="muted">Nothing is waiting for you. When a step needs your review, it shows up here.</p>';
     return items.map(function (it, i) {
       var head = '<span class="kt"><span class="mono ' + (i === 0 ? "gate-muted" : "muted") + '">' + esc(it.key) + "</span><h3>" + esc(it.title) + "</h3></span>";
-      if (i === 0) return '<article class="gate big">' + head + "<p>" + esc(it.body) + '</p><div class="actions tight"><a class="btn gate-btn" href="' + it.href + '">' + esc(it.cta) + "</a>" + (it.cmd ? cmdBox(it.cmd) : "") + "</div></article>";
-      return '<article class="card wait"><div class="grow">' + head + '<p class="muted">' + esc(it.body) + '</p></div><div class="actions tight"><a class="btn" href="' + it.href + '">' + esc(it.cta) + "</a>" + (it.cmd ? cmdBox(it.cmd) : "") + "</div></article>";
+      var go = it.run ? runBtn('data-run="step" data-step="' + esc(it.run.step) + '"', it.run.label, i === 0 ? "btn ghost" : "btn ghost") : "";
+      if (i === 0) return '<article class="gate big">' + head + "<p>" + esc(it.body) + '</p><div class="actions tight"><a class="btn gate-btn" href="' + it.href + '">' + esc(it.cta) + "</a>" + go + (it.cmd ? cmdBox(it.cmd) : "") + "</div></article>";
+      return '<article class="card wait"><div class="grow">' + head + '<p class="muted">' + esc(it.body) + '</p></div><div class="actions tight"><a class="btn" href="' + it.href + '">' + esc(it.cta) + "</a>" + go + (it.cmd ? cmdBox(it.cmd) : "") + "</div></article>";
     }).join("");
   }
 
   function activityText(e) {
     var isSuite = e.kind === "suite", name;
     if (isSuite && e.step === "pipeline") {
-      return { start: "Full suite started" + (e.target ? " on " + e.target.replace(/^https?:\/\//, "") : ""), done: "Full suite finished", failed: "Full suite stopped with an error", paused: "Full suite paused for your review", skipped: "Full suite skipped" }[e.event] || "Full suite: " + e.event;
+      return { start: "Full suite started" + (e.target ? " on " + e.target.replace(/^https?:\/\//, "") : ""), done: "Full suite finished", failed: "Full suite stopped with an error", paused: "Full suite paused for your review" + (e.next ? " before the " + stepName(e.next) : ""), resume: "Full suite continued", skipped: "Full suite skipped" }[e.event] || "Full suite: " + e.event;
     }
     name = isSuite ? ((stepById(e.step) || {}).name || e.step) : (e.story ? e.story + " " : "") + (STORY_STEP_NAME[e.step] || e.step);
     return name + " " + ({ start: "started", done: "finished", failed: "failed", paused: "paused for your review", skipped: "was skipped" }[e.event] || e.event);
@@ -595,7 +1292,7 @@
     if (!list.length) return '<p class="muted">No activity yet. Each step adds a line here when it starts and ends.</p>';
     return '<ol class="feed">' + list.slice(0, 12).map(function (e, i) {
       var text = activityText(e);
-      if (e.event !== "start") {
+      if (e.event !== "start" && e.event !== "resume" && !(e.step === "pipeline" && e.event === "paused")) {
         for (var j = i + 1; j < list.length; j++) { var o = list[j]; if (o.kind === e.kind && o.step === e.step && o.story === e.story) { if (o.event === "start") text += " after " + fmtDur(Date.parse(e.ts) - Date.parse(o.ts)); break; } }
       }
       return '<li><span class="mono muted">' + esc(clock(e.ts)) + "</span><span>" + esc(text) + (e.note ? '<span class="muted">. ' + esc(e.note) + "</span>" : "") + "</span></li>";
@@ -613,16 +1310,21 @@
 
   function viewNow() {
     var s = state.suite, run = s.run, anything = run || s.steps.some(function (x) { return x.state !== "pending"; });
-    var html = '<div class="now"><header class="hero"><p class="muted">' + esc(STATIC ? "Snapshot from " + fmtTime(state.generatedAt) : new Date().toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })) + "</p><h1>" + esc(headline()) + "</h1></header>";
+    var c = control(), job = c && c.job;
+    var html = '<div class="now"><header class="page-head"><h1>Now</h1><span class="muted small">' + esc(STATIC ? "Snapshot from " + fmtTime(state.generatedAt) : new Date().toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })) + '</span></header><p class="lead">' + esc(headline()) + "</p>";
+    if (job) html += jobPanel(job);
+    // The starting point: when the suite isn't busy, the page opens on the form that starts a run.
+    var suiteBusy = s.steps.some(function (x) { return x.state === "running"; }) || (run && run.state === "paused" && run.next);
+    if (c && !job && !suiteBusy) html += '<section aria-labelledby="new-h" class="sect"><h2 id="new-h">Test a web app</h2>' + startForm("Give the address of the app to test. Five agents explore it, plan, write Playwright tests, review them and run them. You review between steps.") + "</section>";
     if (anything) {
-      var sub = run ? (run.state === "running" ? "Started " + clock(run.startedAt) : "Started " + clock(run.startedAt) + (run.endedAt ? ", ended " + clock(run.endedAt) : "")) + (run.filter && run.filter !== "none" ? ", " + run.filter : ", smoke tests") : "Steps run by hand, read from the files they wrote";
+      var sub = run ? (run.state === "running" ? "Started " + clock(run.startedAt) : "Started " + clock(run.startedAt) + (run.endedAt ? (run.state === "paused" ? ", waiting since " : ", ended ") + clock(run.endedAt) : "")) +(run.filter && run.filter !== "none" ? ", " + run.filter : ", smoke tests") : "Steps run by hand, read from the files they wrote";
       html += '<section aria-labelledby="run-h" class="sect"><div class="sec-head"><h2 id="run-h">Full suite run</h2><span class="muted">' + esc(sub) + '</span><a class="strong-link push" href="#suite">Open the run</a></div>' + timeline(s.steps, suiteDocLink) + "</section>";
     }
     html += '<div class="now-cols"><div class="now-main"><section aria-labelledby="wait-h" class="sect"><h2 id="wait-h">Waiting for you</h2>' + waitingQueue() + "</section>";
     html += '<section aria-labelledby="st-h" class="sect"><div class="sec-head"><h2 id="st-h">Stories</h2>' + (state.stories.length ? '<a class="strong-link push" href="#stories">All stories</a>' : "") + "</div>" +
       (state.stories.length ? storiesTable(state.stories.slice(0, 8)) : emptyBox("<p>No stories yet. Add a story file to <code>.agentic-qa/stories/</code> and run <code>/qa-story &lt;KEY&gt;</code>.</p>")) + "</section></div>";
     html += '<aside class="now-side">' + lastRunPanel() + '<section aria-labelledby="act-h" class="sect"><h2 id="act-h">Activity</h2>' + activityList(state.activity || []) + "</section></aside></div>";
-    if (!anything && !state.stories.length) html += emptyBox("<p><b>Nothing has run here yet.</b></p><p>Run <code>/qa-pipeline https://your-app.example</code> for a full suite, or <code>/qa-story &lt;KEY&gt;</code> for one story.</p>");
+    if (!anything && !state.stories.length && !c) html += emptyBox("<p><b>Nothing has run here yet.</b></p><p>Run <code>/qa-pipeline https://your-app.example</code> for a full suite, or <code>/qa-story &lt;KEY&gt;</code> for one story.</p>");
     main.innerHTML = html + "</div>";
   }
 
@@ -643,42 +1345,93 @@
     var anything = run || s.steps.some(function (x) { return x.state !== "pending"; });
     var html = "<h1>Full suite run</h1>";
     if (!anything) {
-      main.innerHTML = html + '<p class="sub">Five roles, one after another: explore, plan, automate, review, report.</p>' + emptyBox("<p><b>No full-suite run here yet.</b></p><p>In Claude Code, run <code>/qa-pipeline https://your-app.example</code> (or <code>/agentic-qa:qa-pipeline</code> when Agentic QA is installed as a plugin). This page updates while it runs.</p>");
+      main.innerHTML = html + '<p class="sub">Five roles, one after another: explore, plan, automate, review, report.</p>' + (control() ? startForm("") : emptyBox("<p><b>No full-suite run here yet.</b></p><p>In Claude Code, run <code>/qa-pipeline https://your-app.example</code> (or <code>/agentic-qa:qa-pipeline</code> when Agentic QA is installed as a plugin). This page updates while it runs.</p>"));
       return;
     }
     var running = s.steps.filter(function (x) { return x.state === "running"; })[0];
     var paused = s.steps.filter(function (x) { return x.state === "paused"; })[0];
-    var lead = run ? (run.state === "running" ? "Running" + (run.target ? " on " + run.target.replace(/^https?:\/\//, "") : "") + " since " + clock(run.startedAt) + "." : "Ran" + (run.target ? " on " + run.target.replace(/^https?:\/\//, "") : "") + ", " + clock(run.startedAt) + (run.endedAt ? " to " + clock(run.endedAt) : "") + ".") : "These steps were run by hand; their state comes from the files they wrote.";
+    var lead = run ? (run.state === "paused" ? "Started" + (run.target ? " on " + run.target.replace(/^https?:\/\//, "") : "") + " at " + clock(run.startedAt) + (!run.next ? ", paused" : (stepById(run.next) || {}).state === "failed" ? "; the " + stepName(run.next) + " didn't finish" : ", waiting for you before the " + stepName(run.next)) + "." : run.state === "running" ? "Running" + (run.target ? " on " + run.target.replace(/^https?:\/\//, "") : "") + " since " + clock(run.startedAt) + "." : "Ran" + (run.target ? " on " + run.target.replace(/^https?:\/\//, "") : "") + ", " + clock(run.startedAt) + (run.endedAt ? " to " + clock(run.endedAt) : "") + ".") : "These steps were run by hand; their state comes from the files they wrote.";
     if (running) lead += " " + SUITE_DOING[running.id] + ".";
     if (paused) lead += " It's waiting for you after the " + paused.name + ".";
     html += '<p class="lead">' + esc(lead) + "</p>";
     if (run) html += '<dl class="facts"><div><dt>Run</dt><dd class="mono">' + esc(run.run || "—") + "</dd></div><div><dt>Tests to run</dt><dd>" + esc(run.filter && run.filter !== "none" ? run.filter : "Smoke (@smoke)") + "</dd></div>" + (s.config.exists ? '<div><dt>Config</dt><dd class="mono">' + suiteDocLink("playwright.config.ts", "playwright.config.ts") + "</dd></div>" : "") + "</dl>";
     if (paused) html += '<div class="gate" role="status"><b>Your turn.</b> The pipeline is waiting after the ' + esc(paused.name) + ". Review its output, then answer in the chat.</div>";
-    html += timeline(s.steps, suiteDocLink);
+    html += suiteControls();
+    html += timeline(s.steps, suiteDocLink, true);
+    if (control() && !control().job && !s.steps.some(function (x) { return x.state === "running"; }) && !(run && run.state === "paused" && run.next)) {
+      html += '<details class="new-run"' + (startDraft ? " open" : "") + '><summary class="btn ghost">Start a new run</summary>' + startForm("A new run starts again from the Analyst. Files from this run are replaced as each step writes its own.") + "</details>";
+    }
     var groups = readerGroups(), all = [].concat.apply([], groups.map(function (g) { return g.items; }));
     if (!all.length) { main.innerHTML = html; return; }
     var cur = all.filter(function (i) { return i.path === sel; })[0] || all[0];
-    html += '<section aria-labelledby="out-h" class="sect"><h2 id="out-h">What the agents wrote</h2><div class="card reader"><nav class="reader-nav" aria-label="Outputs">' + groups.map(function (g) {
-      return '<div class="rg"><div class="rg-head"><b>' + esc(g.name) + '</b><span class="muted small">' + g.items.length + "</span></div><ul>" + g.items.map(function (i) {
-        return '<li><a href="#suite/' + encodeURIComponent(i.path) + '"' + (i.path === cur.path ? ' aria-current="true"' : "") + "><span>" + esc(i.name) + "</span>" + (i.meta ? '<span class="muted small">' + esc(i.meta) + "</span>" : "") + "</a></li>";
-      }).join("") + "</ul></div>";
-    }).join("") + '</nav><article class="reader-body" id="readerBody" aria-live="polite"><p class="muted">Loading…</p></article></div></section>';
+    // Re-rendering (a poll, another file) keeps the list's scroll and, for the same file, the open document as it was.
+    var oldNav = main.querySelector(".reader-nav"), oldBody = document.getElementById("readerBody");
+    var keep = { nav: oldNav ? oldNav.scrollTop : 0, path: oldBody && oldBody.getAttribute("data-path"), sig: oldBody && oldBody.getAttribute("data-sig"), html: oldBody ? oldBody.innerHTML : "", top: oldBody ? oldBody.scrollTop : 0 };
+    var q = readerFilter.toLowerCase();
+    html += '<section aria-labelledby="out-h" class="sect"><h2 id="out-h">What the agents wrote</h2><div class="card reader"><nav class="reader-nav" aria-label="Outputs">' +
+      (all.length > 8 ? '<div class="reader-find"><input class="field" type="search" id="readerFind" placeholder="Filter ' + all.length + ' files" aria-label="Filter the files" value="' + esc(readerFilter) + '"></div>' : "") + groups.map(function (g) {
+      var hasCur = g.items.some(function (i) { return i.path === cur.path; });
+      var open = q || hasCur || (readerOpen[g.name] != null ? readerOpen[g.name] : g.items.length <= 12);
+      return '<details class="rg" data-group="' + esc(g.name) + '"' + (open ? " open" : "") + '><summary class="rg-head"><b>' + esc(g.name) + '</b><span class="muted small">' + g.items.length + "</span></summary><ul>" + g.items.map(function (i) {
+        var hide = q && i.name.toLowerCase().indexOf(q) < 0 && i.path.toLowerCase().indexOf(q) < 0;
+        return '<li' + (hide ? " hidden" : "") + '><a href="#suite/' + encodeURIComponent(i.path) + '"' + (i.path === cur.path ? ' aria-current="true"' : "") + "><span>" + esc(i.name) + "</span>" + (i.meta ? '<span class="muted small">' + esc(i.meta) + "</span>" : "") + "</a></li>";
+      }).join("") + "</ul></details>";
+    }).join("") + '<p class="muted small no-match" id="readerNone" hidden>No file matches.</p></nav><article class="reader-body" id="readerBody" data-doc-host data-path="' + esc(cur.path) + '" tabindex="0" aria-label="' + esc(cur.name) + '"><p class="muted">Loading…</p></article></div></section>';
     main.innerHTML = html;
+    var nav = main.querySelector(".reader-nav"), body0 = document.getElementById("readerBody");
+    wireReaderNav(nav);
+    if (oldNav) nav.scrollTop = keep.nav;
+    else {
+      // Opened on a file further down the list (a link, a reload): show it in the list.
+      var curLink = nav.querySelector('a[aria-current="true"]');
+      if (curLink && curLink.offsetTop > nav.clientHeight - 40) nav.scrollTop = curLink.offsetTop - nav.clientHeight / 3;
+    }
+    if (keep.path === cur.path && keep.html) { body0.innerHTML = keep.html; body0.setAttribute("data-sig", keep.sig || ""); body0.scrollTop = keep.top; }
     api(docKey(cur.path)).then(function (d) {
       var body = document.getElementById("readerBody");
-      if (!body || parseRoute().v !== "suite") return;
-      var h = '<header class="reader-head"><div class="grow"><h3>' + esc(cur.name) + '</h3><span class="muted small"><span class="mono">' + esc(cur.path) + "</span>, " + esc(fmtSize(d.size)) + ", " + esc(fmtTime(d.mtime)) + "</span></div>" + (STATIC ? "" : '<a class="btn ghost" href="' + rawHref(cur.path) + '" target="_blank" rel="noopener">Open the file</a>') + "</header>";
-      h += d.kind === "md" ? '<div class="doc">' + d.html + "</div>" : d.kind === "large" ? emptyBox("This file is too large to show here.") : '<pre class="text">' + esc(d.text) + "</pre>";
+      if (!body || parseRoute().v !== "suite" || body.getAttribute("data-path") !== cur.path) return;
+      var sig = d.size + "|" + d.mtime;
+      if (body.getAttribute("data-sig") === sig) return;
+      var top = body.getAttribute("data-sig") ? body.scrollTop : 0;
+      var h = '<header class="reader-head"><div class="grow"><h3>' + esc(cur.name) + '</h3><span class="muted small"><span class="mono">' + esc(cur.path) + "</span>, " + esc(fmtSize(d.size)) + ", " + esc(fmtTime(d.mtime)) + "</span></div>" + (STATIC ? "" : '<div class="actions tight">' + fileBtns(cur.path) + '<a class="small" href="' + rawHref(cur.path) + '" target="_blank" rel="noopener">Raw</a></div>') + "</header>";
+      h += '<div class="doc-content">' + (d.kind === "md" ? '<div class="doc">' + d.html + "</div>" : d.kind === "large" ? emptyBox("This file is too large to show here.") : '<pre class="text">' + esc(d.text) + "</pre>") + "</div>";
       body.innerHTML = h;
+      body.setAttribute("data-sig", sig);
+      body.scrollTop = top;
       fixLinks(body, cur.path);
     }).catch(function (err) { var body = document.getElementById("readerBody"); if (body) body.innerHTML = '<div class="err-box" role="alert">' + esc(err.message || err) + "</div>"; });
+  }
+
+  var readerFilter = "", readerOpen = {};
+  function wireReaderNav(nav) {
+    nav.querySelectorAll("details.rg").forEach(function (d) {
+      d.addEventListener("toggle", function () { if (!readerFilter) readerOpen[d.getAttribute("data-group")] = d.open; });
+    });
+    var find = nav.querySelector("#readerFind");
+    if (!find) return;
+    function apply() {
+      var q = find.value.trim().toLowerCase(), any = false;
+      readerFilter = find.value.trim();
+      nav.querySelectorAll("details.rg").forEach(function (d) {
+        var shown = 0;
+        d.querySelectorAll("li").forEach(function (li) { var hit = !q || li.textContent.toLowerCase().indexOf(q) >= 0 || decodeURIComponent(li.querySelector("a").getAttribute("href")).toLowerCase().indexOf(q) >= 0; li.hidden = !hit; if (hit) shown++; });
+        d.hidden = !shown;
+        if (q && shown) d.open = true;
+        if (!q) d.open = readerOpen[d.getAttribute("data-group")] != null ? readerOpen[d.getAttribute("data-group")] : d.open;
+        any = any || shown > 0;
+      });
+      nav.querySelector("#readerNone").hidden = any;
+    }
+    find.addEventListener("input", apply);
+    find.addEventListener("keydown", function (e) { if (e.key === "Escape" && find.value) { find.value = ""; apply(); } });
+    if (readerFilter) apply();
   }
 
   // ── Stories ──────────────────────────────────────────────────────────────
   function viewStories() {
     var html = '<h1>Stories</h1><p class="sub">One user story at a time: pull, design, explore, automate, run.</p>';
     if (!state.stories.length) {
-      main.innerHTML = html + emptyBox("<p><b>No stories yet.</b></p><p>Add a story file to <code>.agentic-qa/stories/</code> (for example <code>SD-1-login.md</code>) and run <code>/qa-story SD-1</code>.</p>");
+      main.innerHTML = html + emptyBox("<p><b>No stories yet.</b></p><p>Add a story file to <code>.agentic-qa/stories/</code> (for example <code>SD-1-login.md</code>)" + (control() && control().available ? ". It shows up here, and its page has a button for each next step." : " and run <code>/qa-story SD-1</code>.") + "</p>");
       return;
     }
     var waiting = state.stories.filter(isWaitingStory);
@@ -686,7 +1439,7 @@
     main.innerHTML = html + storiesTable(state.stories);
   }
 
-  var storyCache = null, caseFilter = {};
+  var storyCache = null, caseFilter = {}, storyUrl = "";
   function storyStepItem(st, i, s) {
     var k = st.state === "running" ? "running" : st.state === "failed" ? "failed" : st.notNeeded ? "skip" : st.done ? "done" : s.next === st.id && s.review ? "turn" : s.next === st.id ? "next" : "todo";
     var note = { running: "Running", failed: "Failed", skip: "Not needed", done: st.durationMs ? "Done in " + fmtDur(st.durationMs) : "Done", turn: "Waiting for your review", next: "Next", todo: "Not started" }[k];
@@ -712,7 +1465,8 @@
     var notes = (s.notesByCase || {})[id] || [];
     var res = (s.resultsByCase || {})[id];
     var cell = function (k) { return c[k] && c[k] !== "—" ? h[k] : ""; };
-    var html = '<header class="cd-head"><span class="row-meta">' + statusChip(status) + '<span class="mono muted">' + esc(id) + "</span></span><h2>" + h.Title + "</h2></header>";
+    var html = '<header class="cd-head"><span class="row-meta">' + statusChip(status) + '<span class="mono muted">' + esc(id) + "</span>" +
+      (STATIC ? "" : '<span class="actions tight push"><button type="button" class="btn sm" data-case-edit="' + esc(id) + '"' + (storyLocked(s) ? ' disabled title="A step of this story is running"' : "") + ">Edit</button>" + openBtn(s.files.testCases, "btn ghost sm") + "</span>") + "</span><h2>" + h.Title + "</h2></header>";
     if (status === "Possible defect") {
       html += '<div class="says-does"><div><b>The story says</b>' + (cell("Expected") ? "<p>" + h.Expected + "</p>" : '<p class="muted">No expected result written.</p>') + '</div><div class="does"><b>The app does</b>' + (notes.length ? notes.map(function (n) { return "<p>" + n + "</p>"; }).join("") : '<p>See the <a href="#story/' + encodeURIComponent(s.key) + '/notes">Exploration notes</a>.</p>') + "</div></div>";
       html += '<p class="hint-text">Explore never changes the expected result to match the app. If the app is wrong, leave this case as it is: Automate writes it as <code>test.fixme</code>. If the story is wrong, update the story and run Design again.</p>';
@@ -748,23 +1502,125 @@
         return '<li><button type="button" class="ci" data-case="' + esc(r.cells.ID) + '"' + (i === selIdx ? ' aria-current="true"' : "") + '><span class="ci-t">' + r.html.Title + '</span><span class="row-meta">' + statusChip(r.cells.Status) + '<span class="mono muted">' + esc(r.cells.ID) + "</span></span></button></li>";
       }).join("") + "</ul>";
     }).join("");
-    return '<div class="filters" role="group" aria-label="Show test cases"><span class="muted small">Show</span>' + chips + '</div><div class="card md"><div class="md-list" id="caseList">' + (list || '<p class="muted pad">No cases.</p>') + '<p class="muted small kbd-hint">Use the up and down arrow keys to move between cases.</p></div><article class="md-detail" id="caseDetail" aria-live="polite">' + caseDetail(s, s.rows[selIdx]) + "</article></div>";
+    var addBtn = STATIC ? "" : '<button type="button" class="btn ghost sm push" data-guide="' + esc(s.key) + '"' + (storyLocked(s) ? " disabled" : "") + ' title="Step through the cases and record each result by hand">Test by hand</button><button type="button" class="btn ghost sm" data-case-add' + (storyLocked(s) ? " disabled" : "") + ">+ Add</button>";
+    return '<div class="filters" role="group" aria-label="Show test cases"><span class="muted small">Show</span>' + chips + addBtn + '</div><div class="card md"><div class="md-list" id="caseList">' + (list || '<p class="muted pad">No cases.</p>') + '<p class="muted small kbd-hint"><kbd>↑</kbd> <kbd>↓</kbd> move between cases' + (STATIC ? "" : " · <kbd>E</kbd> edits") + '</p></div><article class="md-detail" id="caseDetail" aria-live="polite">' + caseDetail(s, s.rows[selIdx]) + "</article></div>";
   }
+  // The case form (as in AIQA): the cells a person reviews; steps one per line, numbered when saved.
+  var CASE_TYPES = [["S", "Smoke"], ["R", "Regression"], ["N", "Negative"], ["E", "Edge"]];
+  var CASE_CELLS = ["AC", "Title", "Preconditions", "Steps", "Expected", "Tags", "Status"];
+  function cellText(v) { return String(v == null ? "" : v).replace(/<br\s*\/?>/gi, "\n").replace(/\\\|/g, "|").replace(/^\s*—\s*$/, ""); }
+  function storyLocked(s) { var j = control() && control().job; return !!(s.running || (j && j.kind === "story" && j.key === s.key)); }
+  function caseForm(s, r, isNew) {
+    var c = r ? r.cells : {}, sourced = !isNew && c.Source && !/^[—–-]?$/.test(String(c.Source).trim());
+    var v = function (k) { return esc(cellText(c[k])); };
+    var steps = esc(cellText(c.Steps).replace(/^\s*\d+[.)]\s*/gm, ""));
+    var statuses = sourced ? ["Existing", "Outdated", "Obsolete"] : Object.keys(STATUS_TONE);
+    var cur = c.Status || (isNew ? "Draft" : "");
+    var fld = function (id, label, input) { return '<div class="fld"><label class="field-label" for="' + id + '">' + label + "</label>" + input + "</div>"; };
+    var html = '<form class="tcform" id="caseForm" novalidate><h2>' + (isNew ? "Add a test case" : 'Edit <span class="mono">' + esc(c.ID) + "</span>") + "</h2>";
+    if (sourced) html += '<p class="note-box">This case came from an existing test (<span class="mono">' + esc(cellText(c.Source)) + "</span>). Its title, preconditions, steps and expected result follow that test, so change them there. Here you can change the criterion, tags and status.</p>";
+    html += '<div class="grid2">' + (isNew ? fld("tc_type", "Type", '<select id="tc_type" name="type">' + CASE_TYPES.map(function (t) { return '<option value="' + t[0] + '">' + t[1] + " (" + t[0] + ")</option>"; }).join("") + "</select>") : fld("tc_id", "ID", '<div class="mono" id="tc_id" style="padding:9px 0">' + esc(c.ID) + "</div>")) +
+      fld("tc_AC", "Acceptance criterion", '<input class="field mono" id="tc_AC" name="AC" value="' + v("AC") + '" placeholder="AC1"' + (s.criteria.length ? ' list="tc_acs"' : "") + '><datalist id="tc_acs">' + s.criteria.map(function (a) { return '<option value="' + esc(a.id) + '">'; }).join("") + "</datalist>") + "</div>";
+    if (!sourced) {
+      html += fld("tc_Title", "Title", '<input class="field" id="tc_Title" name="Title" value="' + v("Title") + '" required>') +
+        fld("tc_Preconditions", "Preconditions", '<textarea class="field" id="tc_Preconditions" name="Preconditions" rows="2">' + v("Preconditions") + "</textarea>") +
+        fld("tc_Steps", 'Steps <span class="muted small">one per line, numbered for you</span>', '<textarea class="field" id="tc_Steps" name="Steps" rows="5">' + steps + "</textarea>") +
+        fld("tc_Expected", "Expected result", '<textarea class="field" id="tc_Expected" name="Expected" rows="2">' + v("Expected") + "</textarea>");
+    }
+    html += '<div class="grid2">' + fld("tc_Tags", "Tags", '<input class="field mono" id="tc_Tags" name="Tags" value="' + (isNew ? esc("@regression @p1 @" + s.key) : v("Tags")) + '" placeholder="@regression @p1">') +
+      fld("tc_Status", "Status", '<select id="tc_Status" name="Status">' + statuses.map(function (x) { return "<option" + (x === cur ? " selected" : "") + ">" + esc(x) + "</option>"; }).join("") + "</select>") + "</div>";
+    html += '<div class="actions tight"><button type="submit" class="btn">' + (isNew ? "Add test case" : "Save") + '</button><button type="button" class="btn ghost" data-case-cancel>Cancel</button>' + (!isNew && !sourced ? '<button type="button" class="btn danger push" data-case-delete>Delete</button>' : "") + "</div>";
+    return html + '<p class="muted small">Saved straight into <span class="mono">' + esc(s.files.testCases) + "</span>. A deleted ID is listed as retired, so Design doesn't bring it back.</p></form>";
+  }
+  function readCaseForm(form, sourced) {
+    var out = {};
+    (sourced ? ["AC", "Tags", "Status"] : CASE_CELLS).forEach(function (k) { if (form.elements[k]) out[k] = form.elements[k].value; });
+    return out;
+  }
+
   function wireCases(s) {
     var tabBody = document.getElementById("tabBody");
     if (!tabBody) return;
+    function rowOf(id) { return s.rows.filter(function (r) { return r.cells.ID === id; })[0]; }
+    function baseOf(r) { var b = {}; CASE_CELLS.forEach(function (k) { if (k in r.cells) b[k] = r.cells[k]; }); return b; }
+    function openForm(id) {
+      if (storyLocked(s)) return toast("A step of " + s.key + " is running. Edit the cases when it has finished.");
+      if (editing()) return;
+      var r = id ? rowOf(id) : null;
+      if (id && !r) return;
+      caseEdit = { key: s.key, id: id || "__new", dirty: false, base: r ? baseOf(r) : null, sourced: !!(r && r.cells.Source && !/^[—–-]?$/.test(String(r.cells.Source).trim())) };
+      var det = document.getElementById("caseDetail");
+      det.innerHTML = caseForm(s, r, !id);
+      det.scrollTop = 0;
+      tabBody.querySelector(".md-list").classList.add("locked");
+      var first = det.querySelector(id ? (caseEdit.sourced ? "#tc_AC" : "#tc_Title") : "#tc_type");
+      if (first) first.focus();
+    }
+    function closeForm(selId) {
+      caseEdit = null;
+      if (selId) { history.replaceState(null, "", "#story/" + encodeURIComponent(s.key) + "/cases/" + encodeURIComponent(selId)); lastHash = location.hash; }
+      render(false);
+    }
+    function send(body, btn, label) {
+      if (btn) { btn.disabled = true; btn.textContent = label; }
+      return postJson("api/story/case", Object.assign({ key: s.key }, body)).catch(function (err) {
+        if (btn && btn.isConnected) { btn.disabled = false; btn.textContent = btn.getAttribute("data-label") || "Save"; }
+        toast(err.message || String(err));
+        return null;
+      });
+    }
+    tabBody.addEventListener("click", function (e) {
+      var ed = e.target.closest("[data-case-edit]"), add = e.target.closest("[data-case-add]");
+      if (ed) return openForm(ed.getAttribute("data-case-edit"));
+      if (add) return openForm(null);
+      if (e.target.closest("[data-case-cancel]")) {
+        if (caseEdit && caseEdit.dirty && !window.confirm("Discard your changes to this test case?")) return;
+        return closeForm(caseEdit && caseEdit.id !== "__new" ? caseEdit.id : null);
+      }
+      var del = e.target.closest("[data-case-delete]");
+      if (del && caseEdit && window.confirm("Delete " + caseEdit.id + "? Its ID is listed as retired and isn't used again.")) {
+        var gone = caseEdit.id;
+        send({ action: "delete", id: gone, base: caseEdit.base }, del, "Deleting…").then(function (r) { if (r) { toast("Deleted " + gone + ".", true); closeForm(null); } });
+      }
+    }, true);
+    tabBody.addEventListener("input", function (e) { if (caseEdit && e.target.closest("#caseForm")) caseEdit.dirty = true; });
+    tabBody.addEventListener("change", function (e) { if (caseEdit && e.target.closest("#caseForm")) caseEdit.dirty = true; });
+    tabBody.addEventListener("submit", function (e) {
+      if (!e.target || e.target.id !== "caseForm" || !caseEdit) return;
+      e.preventDefault();
+      var form = e.target, cells = readCaseForm(form, caseEdit.sourced), btn = form.querySelector('button[type="submit"]');
+      if (!caseEdit.sourced && !cells.Title.trim()) { form.elements.Title.focus(); return toast("A test case needs a title."); }
+      btn.setAttribute("data-label", btn.textContent);
+      var isNew = caseEdit.id === "__new";
+      send(isNew ? { action: "add", type: form.elements.type.value, cells: cells } : { action: "update", id: caseEdit.id, base: caseEdit.base, cells: cells }, btn, isNew ? "Adding…" : "Saving…")
+        .then(function (r) { if (r) { toast((isNew ? "Added " : "Saved ") + r.id + ".", true); closeForm(r.id); } });
+    });
+    // E edits the selected case, as the hint says (not while typing, and not with a modifier key).
+    tabBody.addEventListener("keydown", function (e) {
+      if ((e.key !== "e" && e.key !== "E") || e.ctrlKey || e.metaKey || e.altKey || caseEdit || /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+      var b = tabBody.querySelector('[data-case-edit]');
+      if (b && !b.disabled) { e.preventDefault(); b.click(); }
+    });
     function select(id, focus) {
+      if (caseEdit) {
+        if (caseEdit.dirty && !window.confirm("Discard your changes to this test case?")) return;
+        caseEdit = null;
+        tabBody.querySelector(".md-list").classList.remove("locked");
+      }
       history.replaceState(null, "", "#story/" + encodeURIComponent(s.key) + "/cases/" + encodeURIComponent(id));
+      lastHash = location.hash;
       tabBody.querySelectorAll(".ci").forEach(function (b) { if (b.getAttribute("data-case") === id) { b.setAttribute("aria-current", "true"); if (focus) b.focus(); } else b.removeAttribute("aria-current"); });
       var row = s.rows.filter(function (r) { return r.cells.ID === id; })[0];
       var det = document.getElementById("caseDetail");
       det.innerHTML = caseDetail(s, row);
+      det.scrollTop = 0;
       fixLinks(det, s.files.testCases);
       if (window.matchMedia("(max-width: 900px)").matches && !focus) det.scrollIntoView({ block: "start", behavior: "smooth" });
     }
     tabBody.addEventListener("click", function (e) {
       var b = e.target.closest(".ci"), f = e.target.closest(".fchip");
       if (b) select(b.getAttribute("data-case"), false);
+      if (f && caseEdit) return toast("Save or cancel the test case first.");
       if (f) { caseFilter[s.key] = f.getAttribute("data-filter"); tabBody.innerHTML = drawCases(s, (parseRoute().arg || "").split("/")[2]); fixLinks(tabBody, s.files.testCases); }
     });
     tabBody.addEventListener("keydown", function (e) {
@@ -777,10 +1633,84 @@
       select(all[i].getAttribute("data-case"), true);
     });
   }
+  // The story list beside a story (as in AIQA): filters, each story's status, and its manual · automated bar.
+  var paneFilter = "all";
+  function paneOpen() { return lsGet("agentic-qa-ui-story-pane") !== "closed"; }
+  function storyStatus(x) {
+    var job = control() && control().job;
+    if (x.running || (job && job.kind === "story" && job.key === x.key)) return ["Running", "neutral running"];
+    if (isWaitingStory(x)) return ["Your turn", "accent"];
+    if (x.lastRun && x.lastRun.failed) return ["Failing", "err"];
+    if (!x.total) return ["New", "neutral"];
+    if (!x.next) return ["Automated", "ok"];
+    return ["In progress", "line"];
+  }
+  /** The story's status line (as in AIQA): criteria covered, cases by status, automated, defects, questions, tokens. */
+  /** Open questions for the product owner, each ticked off once answered (kept as "answered:" in the test-case file). */
+  function questionsTab(s) {
+    var qs = s.questions || [];
+    if (!qs.length) return '<div class="card pad"><p class="muted" style="margin:0">' + (s.exists.testCases ? "No open questions. Design lists them here when the story leaves something unclear." : "Written by the Design step.") + "</p></div>";
+    var open = qs.filter(function (q) { return !q.answered; }).length;
+    return '<section class="card pad"><span class="eyebrow">Questions for the product owner · ' + open + " open</span><p class=\"muted small\" style=\"margin:6px 0 12px\">Tick a question once it's answered, and put the answer in the story or the test cases. Ticks are saved in <code>" + esc(s.files.testCases) + "</code>.</p>" +
+      '<ul class="qlist">' + qs.map(function (q) {
+        return '<li><label class="qrow' + (q.answered ? " done" : "") + '"><input type="checkbox" data-q="' + esc(q.id) + '"' + (q.answered ? " checked" : "") + (STATIC ? " disabled" : "") + "><span>" + q.html + "</span></label></li>";
+      }).join("") + "</ul></section>";
+  }
+  document.addEventListener("change", function (e) {
+    var cb = e.target.closest && e.target.closest("[data-q]");
+    if (!cb || STATIC) return;
+    var key = (parseRoute().arg || "").split("/")[0];
+    cb.disabled = true;
+    postJson("api/story/question", { key: key, id: cb.getAttribute("data-q"), answered: cb.checked })
+      .then(function () { render(false); })
+      .catch(function (err) { cb.checked = !cb.checked; cb.disabled = false; toast(err.message || String(err)); });
+  });
+  /** The story's ⋯ menu: redo it from the start, or open its files in an editor. */
+  function storyMenu(s) {
+    if (STATIC) return "";
+    var redo = control() && control().available ? '<button type="button" role="menuitem" data-redo="' + esc(s.key) + '"' + (canStart() && !s.running ? "" : " disabled") + ">Redo from the start…</button>" : "";
+    var items = redo + (s.exists.testCases ? '<button type="button" role="menuitem" data-open="' + esc(s.files.testCases) + '">Open the test cases in your editor</button>' : "") + (s.exists.story ? '<button type="button" role="menuitem" data-open="' + esc(s.files.story) + '">Open the story file in your editor</button>' : "");
+    return items ? '<details class="menu"><summary aria-label="More for ' + esc(s.key) + '" title="More">⋯</summary><div class="menu-pop" role="menu">' + items + "</div></details>" : "";
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest("[data-redo]");
+    if (b && !b.disabled) {
+      var key = b.getAttribute("data-redo");
+      b.closest("details").open = false;
+      if (!window.confirm("Redo " + key + " from the start? Design writes its test cases again (it keeps their IDs and your edits), then it pauses for your review.")) return;
+      var u = document.getElementById("storyUrl");
+      runAction("story", { key: key, force: true, url: u ? u.value.trim() : (state.workspace && state.workspace.appUrl) || "" }, null);
+    }
+    // Clicking outside an open ⋯ menu closes it.
+    document.querySelectorAll("details.menu[open]").forEach(function (d) { if (!d.contains(e.target)) d.open = false; });
+  });
+  function storyStatusLine(s) {
+    if (!s.total) return '<p class="status-line muted">No test cases yet. The Design step writes them.</p>';
+    var parts = [];
+    if (s.acs && s.acs.total) parts.push(s.acs.covered + " of " + s.acs.total + " ACs covered");
+    parts.push(plural(s.total, "case") + " (" + Object.keys(s.counts).map(function (k) { return s.counts[k] + " " + k.toLowerCase(); }).join(", ") + ")");
+    var a = automatedOf(s);
+    parts.push(a ? a + " automated" : "not automated yet");
+    var d = defectCount(s);
+    var html = parts.map(esc).join(" · ");
+    if (d) html += ' · <span class="err-text">' + esc(plural(d, "possible defect")) + "</span>";
+    if (s.openQuestions) html += " · " + esc(plural(s.openQuestions, "open question"));
+    if (s.tokens) html += " · " + esc(fmtTokens(s.tokens)) + " tokens to date";
+    return '<p class="status-line">' + html + "</p>";
+  }
+  function automatedOf(x) { var r = x.lastRun; return r ? r.passed + r.failed + r.flaky + r.skipped : 0; }
   function storySide(key) {
-    return '<aside class="story-side" aria-label="Stories"><div class="ss-head"><b>Stories</b><a class="small" href="#stories">All</a></div><nav>' + state.stories.map(function (x) {
-      return '<a href="#story/' + encodeURIComponent(x.key) + '"' + (x.key === key ? ' aria-current="page"' : "") + '><span class="kt"><span class="mono muted">' + esc(x.key) + "</span><b>" + esc(x.title) + '</b></span><span class="prog small">' + storyTrack(x) + '<span class="muted">' + esc(storyWhere(x)) + "</span></span></a>";
-    }).join("") + "</nav></aside>";
+    if (!paneOpen()) return '<aside class="story-side" aria-label="Stories"><button type="button" class="icon-btn" data-pane-toggle aria-expanded="false" title="Show the story list" aria-label="Show the story list"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg></button></aside>';
+    var rows = state.stories.map(function (x) { return { x: x, s: storyStatus(x) }; });
+    var n = function (label) { return rows.filter(function (r) { return r.s[0] === label; }).length; };
+    var want = { yourturn: "Your turn", failing: "Failing" }[paneFilter];
+    var chipB = function (id, label, c) { return '<button type="button" data-pf="' + id + '" aria-pressed="' + (paneFilter === id) + '">' + label + (id === "all" ? "" : " · " + c) + "</button>"; };
+    var shown = rows.filter(function (r) { return !want || r.s[0] === want || r.x.key === key; });
+    return '<aside class="story-side" aria-label="Stories"><div class="ss-head"><b>Stories <span class="muted">· ' + rows.length + '</span></b><button type="button" class="icon-btn" data-pane-toggle aria-expanded="true" title="Hide the story list" aria-label="Hide the story list"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button></div>' +
+      '<div class="sp-chips" role="group" aria-label="Filter stories">' + chipB("all", "All", 0) + chipB("yourturn", "Your turn", n("Your turn")) + chipB("failing", "Failing", n("Failing")) + "</div><nav>" + shown.map(function (r) {
+        var x = r.x, m = x.total || 0, a = automatedOf(x), pct = m ? Math.min(100, Math.round(100 * a / m)) : a ? 100 : 0;
+        return '<a class="sp-item" href="#story/' + encodeURIComponent(x.key) + '"' + (x.key === key ? ' aria-current="page"' : "") + '><span class="r1"><span class="mono muted">' + esc(x.key) + '</span><span class="chip ' + r.s[1] + '">' + esc(r.s[0]) + "</span></span><b>" + esc(x.title) + '</b><span class="cov" title="' + esc(m + " test cases · " + a + " automated") + '">' + (m || a ? '<span class="mabar" aria-hidden="true"><i style="width:' + pct + '%"></i></span><span>' + m + " M · " + a + " A</span>" : "<span>Not designed</span>") + "</span></a>";
+      }).join("") + (shown.length ? "" : '<p class="muted small" style="padding:10px 16px">No stories match.</p>') + "</nav></aside>";
   }
   function viewStory(key, tab, caseId) {
     tab = tab || "cases";
@@ -789,20 +1719,29 @@
       if (r.v !== "story" || (r.arg || "").split("/")[0] !== key) return;
       storyCache = s;
       var d = defectCount(s), nextName = STORY_STEP_NAME[s.next] || "";
-      var html = '<div class="story-page">' + storySide(s.key) + '<div class="story-main"><a class="back" href="#stories">← Stories</a><header class="story-head"><span class="mono muted">' + esc(s.key) + "</span><h1>" + esc(s.title) + '</h1><div class="row-meta small">' + (s.exists.testCases ? '<span class="mono">' + docLink(s.files.testCases, s.files.testCases) + "</span>" : "") +
+      var html = '<div class="story-page' + (paneOpen() ? "" : " pane-closed") + '" data-key="' + esc(s.key) + '">' + storySide(s.key) + '<div class="story-main"><a class="back" href="#stories">← Stories</a><header class="story-head"><span class="row-meta"><span class="mono muted">' + esc(s.key) + "</span>" + storyMenu(s) + "</span><h1>" + esc(s.title) + '</h1><div class="row-meta small">' + (s.exists.testCases ? '<span class="mono">' + docLink(s.files.testCases, s.files.testCases) + "</span>" : "") +
         (s.stale ? '<span class="chip warn">The story changed since its cases were designed</span>' : s.exists.testCases ? '<span class="muted">Story unchanged since Design</span>' : "") +
-        (s.total ? '<span class="muted">' + esc(plural(s.total, "test case")) + (s.criteria.length ? " from " + esc(plural(s.criteria.length, "acceptance criterion", "acceptance criteria")) : "") + "</span>" : "") + "</div></header>";
+        "</div>" + storyStatusLine(s) + "</header>";
+      var sKinds = s.steps.map(function (st) { return st.state === "running" ? "r" : st.state === "failed" ? "f" : st.notNeeded ? "s" : st.done ? "d" : s.next === st.id && s.review ? "n" : ""; });
+      var sDone = sKinds.filter(function (k) { return k === "d"; }).length, sRun = s.steps.filter(function (st) { return st.state === "running"; })[0];
+      html += '<div class="progress">' + progHead(sDone, s.steps.length, sRun ? esc(sRun.name) + " running" + (sRun.startedAt && !STATIC ? " for " + since(sRun.startedAt) : "") : esc(storyWhere(s))) + segbar(sKinds, sDone, sDone + " of " + s.steps.length + " steps done") + "</div>";
       html += '<ol class="ssteps" aria-label="Story steps">' + s.steps.map(function (st, i) { return storyStepItem(st, i, s); }).join("") + "</ol>";
-      if (s.review && s.next && !s.running) {
-        var before = s.next === "story-explore" ? "before Explore opens the app" : s.next === "story-script" ? "before Automate writes the tests" : "before " + nextName;
-        html += '<section class="gate row" aria-label="Your turn"><div class="grow"><b>Your turn: review the cases ' + esc(before) + '</b><span class="gate-muted">' + (d ? esc((d === 1 ? "One case contradicts" : count(d, "case") + " contradict") + " the story; decide which is right.") + " " : "") + "Edit, add or delete cases in <code>" + esc(s.files.testCases) + "</code>, then continue.</span></div>" + cmdBox("/qa-story " + s.key) + "</section>";
+      var job = control() && control().job;
+      if (job && job.kind === "story" && job.key === s.key) html += jobPanel(job);
+      else if (s.next && !s.running) {
+        // With the run buttons, Continue runs the story's next steps (up to its next review) from here.
+        var go = control() && control().available ? '<div class="story-run">' + (s.next !== "story-design" ? '<input class="field" type="url" id="storyUrl" aria-label="The app\'s address" placeholder="The app\'s address, https://…" value="' + esc(storyUrl || (state.workspace && state.workspace.appUrl) || (state.suite.run && state.suite.run.target) || "") + '">' : "") + runBtn('data-run="story" data-key="' + esc(s.key) + '"', (s.review ? "Continue to " : "Start ") + nextName, s.review ? "btn gate-btn" : "btn") + "</div>" : cmdBox("/qa-story " + s.key);
+        if (s.review) {
+          var before = s.next === "story-explore" ? "before Explore opens the app" : s.next === "story-script" ? "before Automate writes the tests" : "before " + nextName;
+          html += '<section class="gate row" aria-label="Your turn"><div class="grow"><b>Your turn: review the cases ' + esc(before) + '</b><span class="gate-muted">' + (d ? esc((d === 1 ? "One case contradicts" : count(d, "case") + " contradict") + " the story; decide which is right.") + " " : "") + (STATIC ? "Edit, add or delete cases in <code>" + esc(s.files.testCases) + "</code>, then continue." : "Edit, add or delete cases below (or in your editor), then continue.") + (s.openQuestions ? " " + esc(plural(s.openQuestions, "open question")) + ' need an answer or a tick: see <a href="#story/' + encodeURIComponent(s.key) + '/questions" style="color:inherit">Open questions</a>.' : "") + "</span></div>" + go + openBtn(s.files.testCases, "btn ghost") + "</section>";
+        } else if (control() && control().available) html += '<section class="card pad row-meta" aria-label="Next step" style="margin:0 0 16px"><span class="grow">Next: <b>' + esc(nextName) + "</b>. It runs the story's steps up to the next review.</span>" + go + "</section>";
       }
-      var tabs = [["cases", "Test cases", s.total], ["story", "Story and criteria"], ["questions", "Open questions"], ["notes", "Exploration notes"], ["snapshots", "Snapshots", s.snapshots.length], ["runs", "Runs", s.runs.length]];
+      var tabs = [["cases", "Test cases", s.total], ["story", "Story and criteria"], ["questions", "Open questions", s.questions && s.questions.length ? s.openQuestions : null], ["notes", "Exploration notes"], ["snapshots", "Snapshots", s.snapshots.length], ["runs", "Runs", s.runs.length]];
       html += '<nav class="utabs" aria-label="Story sections">' + tabs.map(function (t) { return '<a href="#story/' + encodeURIComponent(s.key) + "/" + t[0] + '"' + (t[0] === tab ? ' aria-current="true"' : "") + ">" + esc(t[1]) + (t[2] != null ? ' <span class="muted">' + t[2] + "</span>" : "") + "</a>"; }).join("") + "</nav>";
       html += '<section id="tabBody">';
       if (tab === "cases") html += s.rows.length ? drawCases(s, caseId) : emptyBox("No test cases yet. The Design step writes them.");
       else if (tab === "story") html += '<div class="grid2"><div class="card pad doc"><h3>Story</h3>' + (s.storyHtml || '<p class="muted">No story file.</p>') + '</div><div class="card pad doc"><h3>Testable acceptance criteria</h3>' + (s.criteriaHtml || '<p class="muted">Written by the Design step.</p>') + "</div></div>";
-      else if (tab === "questions") html += '<div class="card pad doc">' + (s.questionsHtml || '<p class="muted">None recorded.</p>') + "</div>";
+      else if (tab === "questions") html += questionsTab(s);
       else if (tab === "notes") html += '<div class="card pad doc">' + (s.notesHtml || '<p class="muted">Written by the Explore step.</p>') + "</div>";
       else if (tab === "runs") {
         if (s.results && s.results.stats) {
@@ -813,7 +1752,10 @@
         html += "<h2>Run history</h2>" + '<div class="card pad doc">' + (s.historyHtml || '<p class="muted">No runs yet. The Run step records each one here.</p>') + "</div>";
       } else if (tab === "snapshots") html += s.snapshots.length ? '<ul class="list card">' + s.snapshots.map(function (p) { return '<li class="mono">' + docLink(p, p.split("/").pop()) + "</li>"; }).join("") + "</ul>" : emptyBox("No snapshots yet. The Explore step saves them.");
       html += "</section></div></div>";
+      var oldList = document.getElementById("caseList"), oldPage = main.querySelector(".story-page"), keepList = oldList && oldPage && oldPage.getAttribute("data-key") === s.key ? oldList.scrollTop : 0;
       main.innerHTML = html;
+      var newList = document.getElementById("caseList");
+      if (newList && keepList) newList.scrollTop = keepList;
       fixLinks(main.querySelector("#tabBody"), s.files.testCases);
       if (tab === "cases" && s.rows.length) wireCases(s);
     }).catch(showError);
@@ -849,23 +1791,91 @@
     main.innerHTML = html + "</section>";
   }
 
-  function viewDoc(p) {
+  // ── Runs: every run of the full suite and of each story, newest first (as in AIQA) ──
+  var runsFilter = "all";
+  var RES_GLYPH = { failed: "✕", passed: "✓", paused: "⏸", running: "●" };
+  function viewRuns() {
+    api("api/runs").then(function (d) {
+      if (parseRoute().v !== "runs") return;
+      var all = d.runs || [];
+      var rows = all.filter(function (r) { return runsFilter === "all" || (runsFilter === "failed" ? r.result.kind === "failed" : r.ai); });
+      var seg = function (id, label) { return '<button type="button" data-runs="' + id + '" aria-pressed="' + (runsFilter === id) + '">' + label + "</button>"; };
+      var html = '<h1>Runs</h1><p class="lead">Every run of the full suite and of each story: what ran, how long it took, the tokens it used and how it ended.</p>';
+      html += '<div class="sec-head"><div class="seg" role="group" aria-label="Filter runs">' + seg("all", "All") + seg("failed", "Failed") + seg("ai", "AI steps") + '</div><span class="muted small push">' + esc(plural(all.length, "run")) + "</span></div>";
+      if (!rows.length) html += emptyBox(all.length ? "<p><b>No runs match this filter.</b></p><p>Try another filter.</p>" : "<p><b>No runs yet.</b></p><p>Start the full suite on the <a href=\"#now\">Now</a> page, or a story's next step on its page. Each run is listed here.</p>");
+      else html += '<div class="card tbl-card"><table class="tbl runs-tbl"><thead><tr><th>Run</th><th>Steps</th><th>Started</th><th>Took</th><th>Tokens</th><th>Result</th></tr></thead><tbody>' + rows.map(function (r) {
+        var href = r.kind === "suite" ? "#suite" : "#story/" + encodeURIComponent(r.key) + "/runs";
+        var story = r.kind === "story" ? state.stories.filter(function (x) { return x.key === r.key; })[0] : null;
+        var host = "";
+        try { host = r.target ? new URL(r.target).host : ""; } catch (e) {}
+        var what = r.kind === "suite" ? '<a class="strong-link" href="' + href + '">Full suite</a><br><span class="muted small">' + esc([host, r.filter && r.filter !== "none" ? r.filter : ""].filter(Boolean).join(" · ")) + "</span>"
+          : '<span class="kt"><span class="mono muted">' + esc(r.key) + '</span><a class="strong-link" href="' + href + '">' + esc(story ? story.title : r.key) + "</a></span>";
+        var steps = r.steps.filter(function (x) { return x.status !== "skipped"; }).map(function (x) { return x.name; }).join(" + ") || "—";
+        return '<tr class="click" data-href="' + href + '"' + (r.result.kind === "running" ? " data-open-panel" : "") + "><td>" + what + '</td><td class="steps-cell small">' + esc(steps) + '</td><td class="small" style="white-space:nowrap">' + esc(clock(r.startedAt)) + '</td><td class="mono small">' + esc(r.durationMs > 0 ? fmtDur(r.durationMs) : "—") + '</td><td class="mono small">' + esc(r.tokens ? fmtTokens(r.tokens) : "—") + '</td><td><span class="res res-' + esc(r.result.kind) + '"><span aria-hidden="true">' + (RES_GLYPH[r.result.kind] || "") + "</span>" + esc(r.result.text) + "</span></td></tr>";
+      }).join("") + "</tbody></table></div>";
+      html += '<p class="muted small">From <code>.agentic-qa/progress.jsonl</code> (the last 200 runs). Tokens are counted for the steps started from this dashboard.</p>';
+      main.innerHTML = html;
+    }).catch(showError);
+  }
+  document.addEventListener("click", function (e) {
+    var f = e.target.closest && e.target.closest("[data-runs]");
+    if (f) { runsFilter = f.getAttribute("data-runs"); return viewRuns(); }
+    var tr = e.target.closest && e.target.closest("tr[data-href]");
+    if (tr && !e.target.closest("a, button")) location.hash = tr.getAttribute("data-href");
+  });
+
+  function viewDoc(p, edit) {
     api(docKey(p)).then(function (d) {
-      if (parseRoute().v !== "doc") return;
-      var html = '<a class="back" href="javascript:history.back()">← Back</a><h1 class="mono" style="font-size:18px">' + esc(p) + '</h1><p class="sub small">' + esc(fmtSize(d.size)) + " · " + esc(fmtTime(d.mtime)) + (STATIC ? "" : ' · <a href="' + rawHref(p) + '" target="_blank" rel="noopener">Raw file</a>') + "</p>";
+      if (parseRoute().v !== "doc" && parseRoute().v !== "edit") return;
+      var html = '<div class="doc-view" data-doc-host><a class="back" href="javascript:history.back()">← Back</a><div class="sec-head"><h1 class="mono" style="font-size:18px">' + esc(p) + '</h1><div class="actions tight push">' + fileBtns(p) + '</div></div><p class="sub small">' + esc(fmtSize(d.size)) + " · " + esc(fmtTime(d.mtime)) + (STATIC ? "" : ' · <a href="' + rawHref(p) + '" target="_blank" rel="noopener">Raw file</a>') + '</p><div class="doc-content">';
       if (d.kind === "md") html += '<article class="card pad doc">' + d.html + "</article>";
       else if (d.kind === "large") html += emptyBox("This file is too large to show here.");
       else html += '<pre class="text">' + esc(d.text) + "</pre>";
-      main.innerHTML = html;
+      main.innerHTML = html + "</div></div>";
       fixLinks(main, p);
+      if (edit && editableFile(p) && !editing()) startFileEdit(main.querySelector("[data-doc-host]"), p);
     }).catch(showError);
   }
 
   var MODEL_LABEL = { sonnet: "Sonnet", opus: "Opus", haiku: "Haiku", fable: "Fable" };
+  // ── Settings (as in AIQA's Connect): AI, Project, Connection and Appearance tabs ──
+  var SETTINGS_TABS = [["ai", "AI"], ["project", "Project"], ["connection", "Connection"], ["appearance", "Appearance"]];
+  function settingsTab() {
+    var r = parseRoute();
+    if (r.v === "models") return "ai";
+    if (r.v !== "settings") return "";
+    return SETTINGS_TABS.some(function (t) { return t[0] === r.arg; }) ? r.arg : "ai";
+  }
+  function settingsHead(tab) {
+    return "<h1>Settings</h1>" + '<nav class="utabs" aria-label="Settings">' + SETTINGS_TABS.map(function (t) { return '<a href="#settings/' + t[0] + '"' + (t[0] === tab ? ' aria-current="true"' : "") + ">" + t[1] + "</a>"; }).join("") + "</nav>";
+  }
+  function viewProject(message) {
+    api("api/workspace").then(function (w) {
+      if (settingsTab() !== "project") return;
+      var html = settingsHead("project") + '<p class="sub">The app this project tests. The start form and a story’s next steps use it, and so does the qa-story skill in the chat.</p>';
+      if (message) html += '<p class="ok-box" role="status">' + esc(message) + "</p>";
+      html += '<form class="card start-form" id="projectForm" novalidate style="max-width:760px"><span class="eyebrow">Application</span><div><label class="field-label" for="pj-url">The app’s address</label><div class="sf-url"><input class="field" id="pj-url" name="appUrl" type="url" inputmode="url" spellcheck="false" placeholder="https://staging.my-app.com" value="' + esc(w.appUrl) + '"' + (STATIC ? " disabled" : "") + ">" + (STATIC ? "" : '<button class="btn" type="submit">Save</button>') + '</div><p class="muted small" style="margin:6px 0 0">' + (STATIC ? "This is a saved snapshot. Open the live dashboard to change it." : "Saved in <code>" + esc(w.file) + "</code>. Commit it to share it with your team; leave it empty to clear it.") + "</p></div></form>";
+      main.innerHTML = html;
+      var form = document.getElementById("projectForm");
+      if (STATIC || !form) return;
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        var v = form.elements.appUrl.value.trim();
+        if (v && !/^https?:\/\/\S+$/i.test(v)) { form.elements.appUrl.focus(); return toast("The app's address must start with http:// or https://."); }
+        postJson("api/workspace", { appUrl: v }).then(function () { if (state) state.workspace = { appUrl: v }; viewProject(v ? "Saved. New runs start from " + v + "." : "Cleared."); }).catch(function (err) { toast(err.message || String(err)); });
+      });
+    }).catch(showError);
+  }
+  function viewConnection() {
+    var html = settingsHead("connection") + '<p class="sub">Where this project’s user stories come from.</p>';
+    html += '<section class="card pad" style="max-width:760px"><span class="eyebrow">Stories</span><h2 style="margin:6px 0 4px">Local story files</h2><p style="margin:0 0 10px">Each story is a Markdown file in <code>.agentic-qa/stories/</code>, for example <code>SD-1-login.md</code>, with its key, title, description and acceptance criteria. It shows up under Stories as soon as the file is there.</p><p class="muted small" style="margin:0">' + esc(plural(state ? state.stories.length : 0, "story", "stories")) + " found. Connecting Jira, Rally or ALM Octane comes next.</p></section>";
+    main.innerHTML = html;
+  }
+
   function viewModels(message) {
     api("api/models").then(function (m) {
-      if (parseRoute().v !== "models") return;
-      var html = "<h1>Models</h1><p class=\"sub\">The Claude model each role's agent starts with. The full suite and the story steps share the roles.</p>";
+      if (settingsTab() !== "ai") return;
+      var html = settingsHead("ai") + "<p class=\"sub\">The Claude model each role's agent starts with. The full suite and the story steps share the roles.</p>";
       if (message) html += '<p class="ok-box" role="status">' + esc(message) + "</p>";
       html += '<form id="modelsForm"><div class="table-wrap models"><table><thead><tr><th>Role</th><th class="d-only">Used by</th><th>Model</th><th class="d-only">Runs on now</th></tr></thead><tbody>';
       m.roles.forEach(function (r) {
@@ -873,7 +1883,7 @@
         if (r.saved && m.options.indexOf(r.saved) < 0) opts.push([r.saved, r.saved + " (saved)"]);
         var res = r.key === "default" ? null : m.resolved[r.key];
         var now = res ? (res.model ? esc(MODEL_LABEL[res.model] || res.model) + ' <span class="small muted">(' + esc(res.source) + ")</span>" : '<span class="muted">Session model</span>') + (res.note ? '<br><span class="small muted">' + esc(res.note) + "</span>" : "") : '<span class="muted">—</span>';
-        html += '<tr><td><label for="m-' + esc(r.key) + '">' + esc(r.name) + '</label><span class="m-only small muted">' + esc(r.uses) + (res ? " · now: " + esc(res.model ? MODEL_LABEL[res.model] || res.model : "Session model") : "") + '</span></td><td class="small muted d-only">' + esc(r.uses) + '</td><td><select id="m-' + esc(r.key) + '" name="' + esc(r.key) + '"' + (STATIC ? " disabled" : "") + ">" +
+        html += '<tr><td><label for="m-' + esc(r.key) + '">' + esc(r.name) + '</label></td><td class="small muted d-only">' + esc(r.uses) + '</td><td><select id="m-' + esc(r.key) + '" name="' + esc(r.key) + '"' + (STATIC ? " disabled" : "") + ">" +
           opts.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (o[0] === r.saved ? " selected" : "") + ">" + esc(o[1]) + "</option>"; }).join("") + "</select></td><td class=\"d-only\">" + now + "</td></tr>";
       });
       html += "</tbody></table></div>";
@@ -900,13 +1910,12 @@
   }
 
   // ── Settings: the look, for this browser or as the project default ─────────
-  var LS_KEYS = { theme: "agentic-qa-ui-theme", mode: "agentic-qa-ui-mode", density: "agentic-qa-ui-density" };
+  var LS_KEYS = { theme: "agentic-qa-ui-theme", mode: "agentic-qa-ui-mode" };
   var LOOK = {
     theme: { geist: "Geist", carbon: "Carbon", industrial: "Industrial", corporate: "Corporate" },
-    mode: { light: "light", dark: "dark", system: "matches your computer" },
-    density: { comfortable: "comfortable", compact: "compact" }
+    mode: { light: "light", dark: "dark", system: "matches your computer" }
   };
-  var BUILT_IN = { theme: "geist", mode: "system", density: "comfortable" };
+  var BUILT_IN = { theme: "geist", mode: "system" };
   var THEME_CARDS = [
     ["geist", "Black and white, with blue when it's your turn. The built-in default.", "#FAFAFA", "#FFFFFF", "#171717", "#0070F3", "#FFFFFF", ["#1A7F37", "#B35400", "#CB2A2F"]],
     ["carbon", "IBM Plex, square corners and a shape for every status.", "#F4F4F4", "#161616", "#F4F4F4", "#0F62FE", "#FFFFFF", ["#24A148", "#EB6200", "#DA1E28"]],
@@ -917,6 +1926,7 @@
   function lsGet(k) { try { return window.localStorage.getItem(k); } catch (e) { return null; } }
   function lsSet(k, v) { try { window.localStorage.setItem(k, v); return true; } catch (e) { return false; } }
   function lsDel(k) { try { window.localStorage.removeItem(k); } catch (e) {} }
+  lsDel("agentic-qa-ui-density"); // a setting the dashboard no longer has
   function known(kind, v) { if (kind === "theme" && v === "slate") v = "geist"; return LOOK[kind][v] ? v : null; }
   function browserLook() {
     var out = {}, any = false;
@@ -934,21 +1944,20 @@
     var d = document.documentElement;
     d.setAttribute("data-theme", a.theme);
     if (a.mode === "system") d.removeAttribute("data-mode"); else d.setAttribute("data-mode", a.mode);
-    if (a.density === "compact") d.setAttribute("data-density", "compact"); else d.removeAttribute("data-density");
     if (window.agenticQaThemeSync) window.agenticQaThemeSync();
   }
   function describeLook(a) {
     if (!a || !Object.keys(a).length) return "Not set";
-    return ["theme", "mode", "density"].filter(function (k) { return a[k]; }).map(function (k) { return LOOK[k][a[k]]; }).join(", ");
+    return ["theme", "mode"].filter(function (k) { return a[k]; }).map(function (k) { return LOOK[k][a[k]]; }).join(", ");
   }
-  function sameLook(a, b) { return !!a && !!b && a.theme === b.theme && a.mode === b.mode && a.density === b.density; }
+  function sameLook(a, b) { return !!a && !!b && a.theme === b.theme && a.mode === b.mode; }
 
   function viewSettings(message) {
     api("api/settings").then(function (cfg) {
-      if (parseRoute().v !== "settings") return;
+      if (settingsTab() !== "appearance") return;
       if (!settingsDraft) settingsDraft = effectiveLook();
       if (STATIC) settingsScope = "browser";
-      var html = '<h1>Settings</h1><p class="sub">Choose how the dashboard looks. The page previews your choice; nothing is saved until you press Save.</p>';
+      var html = settingsHead("appearance") + '<p class="sub">Choose how the dashboard looks. The page previews your choice; nothing is saved until you press Save.</p>';
       if (message) html += '<p class="ok-box" role="status">' + esc(message) + "</p>";
       if (cfg.exists && !cfg.valid) html += '<p class="err-box" role="alert"><code>' + esc(cfg.file) + "</code> isn't valid JSON, so the project default is ignored. Fix or delete it to save a new one.</p>";
       html += '<form id="settingsForm" class="settings"><div>';
@@ -960,9 +1969,6 @@
       html += '<fieldset><legend>Mode</legend><div class="choices">' + [["light", "Light"], ["dark", "Dark"], ["system", "Match my computer"]].map(function (o) {
         return '<label class="choice"><input type="radio" name="s-mode" value="' + o[0] + '"' + (settingsDraft.mode === o[0] ? " checked" : "") + ">" + esc(o[1]) + "</label>";
       }).join("") + "</div></fieldset>";
-      html += '<fieldset><legend>Density</legend><div class="choices">' + [["comfortable", "Comfortable"], ["compact", "Compact"]].map(function (o) {
-        return '<label class="choice"><input type="radio" name="s-density" value="' + o[0] + '"' + (settingsDraft.density === o[0] ? " checked" : "") + ">" + esc(o[1]) + "</label>";
-      }).join("") + "</div></fieldset>";
       html += '<fieldset class="card save-box"><legend>Save as</legend><div class="choices">' +
         '<label class="choice block"><input type="radio" name="s-scope" value="browser"' + (settingsScope === "browser" ? " checked" : "") + '><span><b>This browser only</b><small>Only you see it, on this computer. Teammates keep the project default.</small></span></label>' +
         '<label class="choice block"><input type="radio" name="s-scope" value="project"' + (settingsScope === "project" ? " checked" : "") + (STATIC ? " disabled" : "") + '><span><b>Project default for everyone</b><small>' + (STATIC ? "Not available in a saved snapshot. Open the live dashboard to save it." : "Saved to " + esc(cfg.file) + ". Commit the file to share it with your team.") + "</small></span></label></div>" +
@@ -970,7 +1976,7 @@
         '<div class="actions"><span class="grow" id="settingsStatus" role="status"></span><button class="btn ghost" type="button" id="settingsDiscard">Discard changes</button><button class="btn" type="submit" id="settingsSave">Save</button></div></fieldset>';
       html += "</div>";
       var b = browserLook();
-      html += '<aside class="card pad wins"><h2 style="margin-top:0">Which setting wins</h2><ol><li>What you saved for this browser</li><li>The project default in <code>' + esc(cfg.file) + "</code></li><li>The built-in look: Geist, matching your computer, comfortable</li></ol>" +
+      html += '<aside class="card pad wins"><h2 style="margin-top:0">Which setting wins</h2><ol><li>What you saved for this browser</li><li>The project default in <code>' + esc(cfg.file) + "</code></li><li>The built-in look: Geist, matching your computer</li></ol>" +
         "<dl><dt>This browser</dt><dd>" + esc(describeLook(b)) + "</dd><dt>Project default</dt><dd>" + esc(describeLook(cfg.appearance)) + "</dd><dt>Showing now</dt><dd>" + esc(describeLook(effectiveLook())) + "</dd></dl>" +
         (b ? '<button class="btn ghost" type="button" id="settingsForget">Use the project default in this browser</button>' : "") + "</aside>";
       html += "</form>";
@@ -1011,7 +2017,7 @@
     });
     form.addEventListener("submit", function (e) {
       e.preventDefault();
-      var look = { theme: settingsDraft.theme, mode: settingsDraft.mode, density: settingsDraft.density };
+      var look = { theme: settingsDraft.theme, mode: settingsDraft.mode };
       if (settingsScope === "browser") {
         var ok = Object.keys(LS_KEYS).every(function (k) { return lsSet(LS_KEYS[k], look[k]); });
         if (!ok) return showError("This browser doesn't allow saving settings. Save it as the project default instead.");
@@ -1040,28 +2046,35 @@
 
   function render(scrollTop) {
     route = parseRoute();
-    if (route.v !== "settings" && settingsDraft) { settingsDraft = null; applyLook(effectiveLook()); }
+    if (settingsTab() !== "appearance" && settingsDraft) { settingsDraft = null; applyLook(effectiveLook()); }
     document.querySelectorAll(".rail a").forEach(function (a) {
       var v = a.getAttribute("data-view");
-      var on = v === route.v || (v === "stories" && route.v === "story") || (v === "suite" && route.v === "doc");
+      var on = v === route.v || (v === "stories" && route.v === "story") || (v === "suite" && (route.v === "doc" || route.v === "edit")) || (v === "settings" && route.v === "models");
       if (on) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
     });
     if (!state) return;
     document.getElementById("proj").textContent = state.project;
+    renderHeader();
+    renderPanel();
     document.title = state.project + " · Agentic QA Dashboard";
-    if (!state.hasData && route.v !== "doc" && route.v !== "models" && route.v !== "settings") {
-      main.innerHTML = "<h1>Nothing here yet</h1>" + emptyBox("<p>This project has no <code>.agentic-qa/</code> folder yet.</p><p>Run <code>/qa-pipeline &lt;url&gt;</code> for a full suite, or <code>/qa-story &lt;KEY&gt;</code> for one story. This page updates as files appear.</p>");
+    if (!state.hasData && route.v !== "doc" && route.v !== "edit" && route.v !== "models" && route.v !== "settings") {
+      main.innerHTML = control()
+        ? '<header class="page-head"><h1>Test a web app</h1></header><p class="lead">Start here: Agentic QA explores your app and builds a Playwright suite for it.</p>' + startForm("Give the address of the app to test. Five agents explore it, plan, write Playwright tests, review them and run them, and you review between steps. Everything they write goes in <code>.agentic-qa/</code>.") + '<p class="muted small" style="margin-top:18px">For one user story at a time, add a story file to <code>.agentic-qa/stories/</code> (for example <code>SD-1-login.md</code>). It shows up under Stories, where you can run its steps.</p>'
+        : "<h1>Nothing here yet</h1>" + emptyBox("<p>This project has no <code>.agentic-qa/</code> folder yet.</p><p>Run <code>/qa-pipeline &lt;url&gt;</code> for a full suite, or <code>/qa-story &lt;KEY&gt;</code> for one story. This page updates as files appear.</p>");
       return;
     }
     if (route.v === "stories") viewStories();
     else if (route.v === "story" && route.arg) { var parts = route.arg.split("/"); viewStory(parts[0], parts[1], parts[2]); }
     else if (route.v === "suite") viewSuite(route.arg);
     else if (route.v === "results") viewResults();
-    else if (route.v === "models") viewModels();
-    else if (route.v === "settings") viewSettings();
+    else if (route.v === "runs") viewRuns();
+    else if (route.v === "models") { history.replaceState(null, "", "#settings/ai"); lastHash = location.hash; viewModels(); }
+    else if (route.v === "settings") { var tab = settingsTab(); if (tab === "ai") viewModels(); else if (tab === "project") viewProject(); else if (tab === "connection") viewConnection(); else viewSettings(); }
     else if (route.v === "doc" && route.arg) viewDoc(route.arg);
+    else if (route.v === "edit" && route.arg) viewDoc(route.arg, true);
     else viewNow();
     if (scrollTop) window.scrollTo(0, 0);
+    refreshLog();
   }
 
   /** Copy buttons next to commands: the command goes to the clipboard, and the button says so for a moment. */
@@ -1079,6 +2092,88 @@
     }
   });
 
+  // ── The run buttons ──────────────────────────────────────────────────────
+  function toast(text, ok) {
+    var old = document.querySelector(".toast");
+    if (old) old.remove();
+    var t = document.createElement("div");
+    t.className = "toast " + (ok ? "ok-box" : "err-box");
+    t.setAttribute("role", ok ? "status" : "alert");
+    t.textContent = text;
+    document.body.appendChild(t);
+    setTimeout(function () { if (t.isConnected) t.remove(); }, 9000);
+  }
+  /** The state as compared between polls: without its time, or the running job's live counts. */
+  function stateKey(s) {
+    var c = s.control && s.control.job ? Object.assign({}, s.control, { job: Object.assign({}, s.control.job, { live: null }) }) : s.control;
+    return JSON.stringify(Object.assign({}, s, { generatedAt: "", control: c }));
+  }
+  function takeState(s) {
+    state = s;
+    lastJson = stateKey(s);
+    render(false);
+  }
+  /** POST api/run/<action>; the reply is the new state, so the page shows the step running at once. */
+  function runAction(action, body, btn, busyLabel) {
+    var label = btn ? btn.textContent : "";
+    if (btn) { btn.disabled = true; btn.textContent = busyLabel || "Starting…"; }
+    return fetch("api/run/" + action, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body || {}) })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(j.error || r.statusText); return j; }); })
+      .then(function (s) { takeState(s); if (action !== "stop" && action !== "finish") setPanel(true); return true; })
+      .catch(function (err) { if (btn && btn.isConnected) { btn.disabled = false; btn.textContent = label; } toast(err.message || String(err)); return false; });
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest("[data-run]");
+    if (!b || b.disabled || STATIC) return;
+    var kind = b.getAttribute("data-run");
+    if (kind === "step") runAction("step", { step: b.getAttribute("data-step") }, b);
+    else if (kind === "stop") {
+      var job = control() && control().job;
+      if (window.confirm(job ? "Stop " + job.label + "? What it wrote so far stays." : "Mark the running step as stopped? Only do this when the session running it has ended.")) runAction("stop", {}, b, "Stopping…");
+    } else if (kind === "finish") {
+      if (window.confirm("End this run without running its remaining steps?")) runAction("finish", {}, b, "Ending…");
+    } else if (kind === "story") {
+      var u = document.getElementById("storyUrl");
+      if (u && u.value.trim() && !/^https?:\/\/\S+$/i.test(u.value.trim())) { u.focus(); return toast("Enter the app's address, starting with http:// or https://."); }
+      runAction("story", { key: b.getAttribute("data-key"), url: u ? u.value.trim() : "" }, b);
+    }
+  });
+  document.addEventListener("submit", function (e) {
+    if (!e.target || e.target.id !== "startForm") return;
+    e.preventDefault();
+    var form = e.target, d = readStartForm(form), url = form.elements.url;
+    if (!/^https?:\/\/\S+$/i.test(d.url)) { url.focus(); return toast("Enter the app's address, starting with http:// or https://."); }
+    startDraft = d;
+    runAction("start", d, form.querySelector("#sf-go")).then(function (ok) {
+      if (!ok) return;
+      startDraft = null;
+      if (parseRoute().v !== "suite") location.hash = "#suite";
+    });
+  });
+  document.addEventListener("input", function (e) {
+    var t = e.target;
+    if (t && t.id === "storyUrl") storyUrl = t.value;
+    var form = t && t.closest && t.closest("#startForm");
+    if (form) startDraft = readStartForm(form);
+  });
+  document.addEventListener("change", function (e) {
+    var form = e.target && e.target.closest && e.target.closest("#startForm");
+    if (form) startDraft = readStartForm(form);
+  });
+  /** While someone types in a field on the page, a poll doesn't redraw it; it redraws when they leave the field. */
+  var renderPending = false;
+  function typing() {
+    var a = document.activeElement;
+    return !!(a && main.contains(a) && /^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName) && a.type !== "radio" && a.type !== "checkbox");
+  }
+  main.addEventListener("focusout", function () {
+    setTimeout(function () { if (renderPending && !typing() && !editing()) { renderPending = false; render(false); } }, 0);
+  });
+  function tick() {
+    document.querySelectorAll("[data-since]").forEach(function (el) { el.textContent = fmtDur(Date.now() - Date.parse(el.getAttribute("data-since"))); });
+    refreshLog();
+  }
+
   function setLive(kind, text) {
     var el = document.getElementById("live");
     el.className = "live" + (kind ? " " + kind : "");
@@ -1087,7 +2182,7 @@
 
   function poll() {
     api("api/state").then(function (s) {
-      var json = JSON.stringify(Object.assign({}, s, { generatedAt: "" }));
+      var json = stateKey(s);
       state = s;
       if (STATIC) setLive("snapshot", "Snapshot · " + fmtTime(s.generatedAt));
       else setLive("", "Live · " + new Date().toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
@@ -1095,14 +2190,27 @@
       if (json !== lastJson) {
         var first = !lastJson;
         lastJson = json;
-        if (first || (route.v !== "doc" && route.v !== "models" && route.v !== "settings")) render(false);
+        if (first || (route.v !== "doc" && route.v !== "models" && route.v !== "settings")) {
+          if (!first && (typing() || editing())) renderPending = true;
+          else render(false);
+        }
       }
+      tick();
+      renderHeader();
+      fetchFeed();
+      if (!panelOpen()) renderPanel();
     }).catch(function () { setLive("stale", "Disconnected — is the dashboard still running?"); });
   }
 
   // Moving within a page (another document in the suite reader, another case of the same story) keeps the scroll position.
   var lastRoute = parseRoute();
+  var lastHash = location.hash;
   window.addEventListener("hashchange", function () {
+    // Leaving an edit with unsaved changes asks first; staying puts the address back.
+    if (unsaved() && !window.confirm("You have unsaved changes. Leave without saving them?")) { history.replaceState(null, "", lastHash || "#"); return; }
+    fileEdit = null;
+    caseEdit = null;
+    lastHash = location.hash;
     var r = parseRoute(), key = function (x) { return x.v === "story" ? "story/" + (x.arg || "").split("/")[0] : x.v; };
     var samePage = key(r) === key(lastRoute) && (r.v === "suite" || r.v === "story");
     lastRoute = r;

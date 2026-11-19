@@ -49,7 +49,7 @@ Only `qa-setup` must be typed, because it installs software.
 |---|---|
 | `qa-pipeline <url>` | Runs the five full-suite agents in order |
 | `qa-story <KEY>` | Runs one story: Design → Explore → Automate → Run |
-| `qa-dashboard` | Opens the live dashboard, with a Models page for each agent's model; or saves a snapshot |
+| `qa-dashboard` | Opens the live dashboard, with Settings → AI for each agent's model; or saves a snapshot |
 | `qa-setup` | Checks and installs Playwright, playwright-cli and Chromium, asking first |
 
 ## Install
@@ -99,6 +99,10 @@ Copy `.github/agents/` and `.github/skills/` into your repository's `.github/` f
 - The commands are `/qa-pipeline`, `/qa-story` and so on.
 - The prompts are the same as Claude Code's, with Copilot's tool names.
 - Where Copilot can't start a subagent, the skills tell it to follow the agent's file itself.
+- **Each agent listed twice?** VS Code's Copilot also reads Claude Code's `.claude/agents/`. If your project has both
+  copies, keep one, or add this to `.vscode/settings.json` (this repository does):
+  `"chat.agentFilesLocations": { ".claude/agents": false, ".github/agents": true }`. Then run **Developer: Reload
+  Window**.
 
 ### Updating
 ```
@@ -203,32 +207,49 @@ Then run `/agentic-qa:qa-story SD-1`. Add `--url https://www.saucedemo.com` the 
 - `/agentic-qa:qa-dashboard` starts a local page and gives you its link. It follows a running pipeline or story
   every two seconds.
 - **Views:**
-  - Now (the start page): one sentence on what's happening, the suite's steps sized by how long they took, what's
-    waiting for your review with the command to continue (and a Copy button), the stories, the last test run and
-    the activity;
-  - Full suite: the run and its steps, then a reader for everything the agents wrote (documents, test cases, specs,
-    page objects, snapshots);
+  - Now (the start page): a form to **start a full-suite run from the app's address**, one sentence on what's
+    happening, the suite's steps sized by how long they took, what's waiting for your review with a **Continue**
+    button, the stories, the last test run and the activity;
+  - Full suite: the run and its steps, with **Continue**, **Run again** and **Stop** buttons and the running step's
+    live log, then a reader for everything the agents wrote (documents, test cases, specs, page objects, snapshots).
+    The reader is its own scroll view: the file list (with a filter and folding groups) and the open file scroll
+    separately;
   - Stories: each story's steps; its test cases grouped by acceptance criterion, one at a time (arrow keys move
     between them), with a Possible defect showing what the story says next to what the app does; notes and runs;
+  - Test by hand (on a story's test cases): a guide through the cases that records Passed, Failed or Blocked, a note
+    and a pasted screenshot into the test-case file;
+  - Runs: every run of the suite and of each story, with its steps, time, tokens and result, filtered by All,
+    Failed or AI steps;
   - Results: failures first, each with its error, its screenshot and the manual test case it automates; then flaky
     tests, every spec, and each story's recent runs;
-  - Models: the model each agent starts with (see [Models](#models));
-  - Settings: the theme, mode and density, saved for your browser or as the project default.
+  - Settings, in four tabs (as in AIQA's Connect): **AI**, the model each agent starts with (see [Models](#models));
+    **Project**, the app's address, saved in `.agentic-qa/workspace.json` and used by the start form, a story's next
+    step and the qa-story skill; **Connection**, where stories come from; **Appearance**, the theme and light / dark
+    mode, for your browser or as the project default.
+- **On a story:** tick off its open questions as they're answered (kept as `answered:` in the test-case file), and
+  the ⋯ menu redoes it from the start or opens its files in your editor.
 - **Looks:** four themes, each in light and dark: Geist (the default), Carbon, Industrial and Corporate. Carbon also
-  gives every status a shape, so it reads without colour. There's a compact density, and it works at phone width.
-- **A default for the team:** on the Settings page, save your choice for this browser only, or as the project
+  gives every status a shape, so it reads without colour.
+- **A default for the team:** under Settings → Appearance, save your choice for this browser only, or as the project
   default in `.agentic-qa/settings.json`. Commit that file and everyone who opens the dashboard gets the same look.
   Your browser's choice wins over the project default, which wins over the built-in look.
-- **Local and read-only:** it serves on 127.0.0.1 behind a random link and only reads `.agentic-qa/`. The two
-  exceptions are the Models page, which saves `.agentic-qa/ai.json`, and the Settings page, which saves
-  `.agentic-qa/settings.json`.
+- **Run activity panel:** on the right of every page, with the step that's running, what it writes and captures as it
+  happens, its tokens, and Continue or Stop. Header pills show what's running and what's waiting for you, and Ctrl/⌘K
+  jumps to any story, test case or file.
+- **Runs from the page:** each step runs as a headless Claude Code session (`claude -p --agent <step>`) in the
+  project, with the model from Settings → AI. It may edit files and run playwright-cli, Playwright, k6 and mkdir;
+  anything else is refused. One step runs at a time; its log is in `.agentic-qa/logs/<run>/`. A story's page has a
+  button for its next step. This needs the `claude` CLI on your PATH; without it, the page shows the chat commands.
+- **Local:** it serves on 127.0.0.1 behind a random link and only reads `.agentic-qa/`. Besides the runs and the
+  editors, Settings saves `.agentic-qa/ai.json` (AI), `.agentic-qa/workspace.json` (Project) and
+  `.agentic-qa/settings.json` (Appearance).
 - `--static` saves a self-contained `.agentic-qa/reports/dashboard.html` you can attach or share.
 - **Design tokens:** [`design/`](design/README.md) has the four themes as design tokens you can import into Figma,
   with the colour rules.
 
 ## Models
 Each role's agent can run on its own Claude model.
-- **On the dashboard:** open **Models** and pick Session model, Sonnet, Opus, Haiku or Fable for Default and each of
+- **On the dashboard:** open **Settings → AI** and pick Session model, Sonnet, Opus, Haiku or Fable for Default and each of
   the five roles. Then press Save.
 - **For one run:** `/agentic-qa:qa-pipeline https://my-app.com --model-qa-planner opus`, or `--model haiku` for every
   role. `qa-story` takes the same options.
@@ -238,7 +259,7 @@ starts. The story steps use the full-suite roles: Design = QA Planner, Explore =
 
 The order of precedence:
 1. an option on the command;
-2. the role's own pick on the Models page;
+2. the role's own pick in Settings → AI;
 3. the Default pick;
 4. the model of your Claude Code session (the agents' own `model: inherit`).
 
