@@ -599,7 +599,7 @@ export const MODEL_KEYS = ["default", ...MODEL_ROLES];
 export const MODEL_ALIASES = ["sonnet", "opus", "haiku", "fable"];
 /** The role each story step's agent plays. */
 export const STORY_STEP_ROLE = { "story-design": "qa-planner", "story-explore": "analyst", "story-script": "qa-engineer" };
-const PROVIDERS = ["anthropic", "copilot-sdk"];
+export const PROVIDERS = ["anthropic", "copilot-sdk"];
 
 function cleanId(v) {
   if (typeof v !== "string") return undefined;
@@ -636,15 +636,25 @@ export function readAiSettings(cwd) {
   try { return cleanAiSettings(JSON.parse(fs.readFileSync(aiSettingsFile(cwd), "utf-8"))); } catch { return {}; }
 }
 
-/** Replace the Claude picks; everything else in ai.json (provider, Copilot picks) is kept. */
-export function writeClaudeModels(cwd, picks) {
+/**
+ * Replace one provider's picks ("anthropic" or "copilot-sdk"), and set which provider runs the agents when `choose` is
+ * given. Everything else in ai.json (the other provider's picks) is kept, so AIQA and Agentic QA share the file.
+ */
+export function writeAiChoice(cwd, provider, picks, choose) {
+  if (!PROVIDERS.includes(provider)) throw new Error(`Unknown AI provider "${provider}".`);
   const current = readAiSettings(cwd);
-  const next = { ...current, models: { ...(current.models ?? {}), anthropic: cleanRoleModels(picks) } };
-  if (!Object.keys(next.models.anthropic).length) delete next.models.anthropic;
+  const next = { ...current, models: { ...(current.models ?? {}), [provider]: cleanRoleModels(picks) } };
+  if (!Object.keys(next.models[provider]).length) delete next.models[provider];
+  if (choose !== undefined) next.provider = choose;
   const clean = cleanAiSettings(next);
   fs.mkdirSync(path.dirname(aiSettingsFile(cwd)), { recursive: true });
   fs.writeFileSync(aiSettingsFile(cwd), JSON.stringify(clean, null, 2) + "\n");
   return clean;
+}
+
+/** Replace the Claude picks; everything else in ai.json (provider, Copilot picks) is kept. */
+export function writeClaudeModels(cwd, picks) {
+  return writeAiChoice(cwd, "anthropic", picks);
 }
 
 /** "opus", "claude-opus-4-8", "sonnet[1m]" → the alias a subagent takes; undefined for anything else. */
@@ -660,8 +670,17 @@ export function modelAlias(id) {
  * (--model-<key>, else --model) wins over .agentic-qa/ai.json; a role without its own pick takes the default. Nothing
  * picked = null: the agent's `model: inherit`, i.e. the session's model.
  */
-export function resolveRoleModels(cwd, flags = {}) {
-  const saved = readAiSettings(cwd).models?.anthropic ?? {};
+export function resolveRoleModels(cwd, flags = {}, provider = "anthropic") {
+  const saved = readAiSettings(cwd).models?.[provider] ?? {};
+  if (provider !== "anthropic") {
+    // Copilot takes its model ids as they are (gpt-4.1, claude-sonnet-4.5, …); it checks them when a step starts.
+    const out = {};
+    for (const role of MODEL_ROLES) {
+      const hit = [[flags.models?.[role] ?? flags.model, "command line"], [saved[role], ".agentic-qa/ai.json"], [flags.models?.default, "command line"], [saved.default, ".agentic-qa/ai.json"]].find(([v]) => !!cleanId(v));
+      out[role] = { model: hit ? cleanId(hit[0]) : null, source: hit ? hit[1] : "Copilot's default" };
+    }
+    return out;
+  }
   const keys = {};
   for (const k of MODEL_KEYS) {
     const hit = [[flags.models?.[k] ?? flags.model, "command line"], [saved[k], ".agentic-qa/ai.json"]].find(([v]) => !!v);

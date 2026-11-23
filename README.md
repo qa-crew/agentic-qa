@@ -120,7 +120,20 @@ Run `/agentic-qa:qa-setup` once per project. It checks for what the agents need,
 - Chromium.
 
 Optional: `@axe-core/playwright` for accessibility, and [k6](https://k6.io/docs/get-started/installation/) for
-performance. It also offers permission rules, so you aren't asked about every `playwright-cli` command.
+performance. It also offers permission rules, so you aren't asked about every `playwright-cli` command, and
+`.gitignore` lines for the files that shouldn't be committed.
+
+### Working as a team
+Commit `.agentic-qa/`. The snapshots, requirements, test plan, test cases and specs are the team's shared work: when a
+teammate pulls them, a new full-suite run can **reuse** them (the dashboard's start form offers Reuse, Refresh or
+Explore from scratch), so nobody spends tokens capturing the same pages again.
+- **Keep out of git** (`qa-setup` offers these lines): `.agentic-qa/auth-state.json` (a signed-in browser session),
+  `.agentic-qa/reports/`, `.agentic-qa/evidence/`, `.agentic-qa/progress.jsonl`, `.agentic-qa/logs/` and
+  `.playwright-cli/`.
+- **Refresh** re-checks each page and recaptures only what changed or is new, then updates requirements.md with a
+  "Changes since" list. In the chat: `/qa-pipeline <url> --refresh`, or `--skip analyst` to reuse them as they are.
+- The dashboard's Full suite page says whether the snapshots are committed, and gives the commands when they aren't.
+- Snapshots hold the text of the app's pages, so explore a test environment, not real customer data.
 
 ## The full suite: `qa-pipeline`
 
@@ -236,6 +249,9 @@ Then run `/agentic-qa:qa-story SD-1`. Add `--url https://www.saucedemo.com` the 
 - **Run activity panel:** on the right of every page, with the step that's running, what it writes and captures as it
   happens, its tokens, and Continue or Stop. Header pills show what's running and what's waiting for you, and Ctrl/⌘K
   jumps to any story, test case or file.
+- **Your AI:** Settings → AI shows whether Claude Code and GitHub Copilot are signed in and their plans, lets you pick
+  which runs the agents and each role's model; every run checks the AI first, and the start form can change a step's
+  model for that run. On Copilot, steps run with `copilot -p --agent <step>` (on Windows it needs PowerShell 7).
 - **Runs from the page:** each step runs as a headless Claude Code session (`claude -p --agent <step>`) in the
   project, with the model from Settings → AI. It may edit files and run playwright-cli, Playwright, k6 and mkdir;
   anything else is refused. One step runs at a time; its log is in `.agentic-qa/logs/<run>/`. A story's page has a

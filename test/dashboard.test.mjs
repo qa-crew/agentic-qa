@@ -216,6 +216,34 @@ test("the live server reads only .agentic-qa/ and writes only .agentic-qa/ai.jso
 });
 
 /** A bin folder with a fake `claude` (test/helpers/fake-claude.mjs) and an empty `playwright-cli`, for PATH. */
+/**
+ * An environment whose PATH has only the fake CLIs, node and the system folder, so the real claude, copilot, gh or
+ * pwsh on this computer are never found or run by a test.
+ */
+function isolatedEnv(bin, extra = {}) {
+  const sys = process.platform === "win32" ? [path.join(process.env.SystemRoot || "C:\\Windows", "System32")] : ["/usr/bin", "/bin"];
+  return { ...process.env, PATH: [bin, path.dirname(process.execPath), ...sys].join(path.delimiter), ...extra };
+}
+
+/** Adds a fake `copilot`, `gh` and (on Windows) `pwsh` to a fake bin folder; Copilot counts as signed in. */
+function addCopilot(bin) {
+  const fake = new URL("./helpers/fake-copilot.mjs", import.meta.url).href;
+  // On Windows, npm-style shims (as the real copilot.cmd), so the dashboard runs their node script directly.
+  fs.writeFileSync(path.join(bin, "copilot-entry.mjs"), `await import(${JSON.stringify(fake)});\n`);
+  fs.writeFileSync(path.join(bin, "gh-entry.mjs"), `process.env.FAKE_GH = "1";\nawait import(${JSON.stringify(fake)});\n`);
+  if (process.platform === "win32") {
+    fs.writeFileSync(path.join(bin, "copilot.cmd"), '@"%dp0%\\copilot-entry.mjs" %*\r\n');
+    fs.writeFileSync(path.join(bin, "gh.cmd"), '@"%dp0%\\gh-entry.mjs" %*\r\n');
+    fs.writeFileSync(path.join(bin, "pwsh.cmd"), "@exit /b 0\r\n");
+  } else {
+    fs.writeFileSync(path.join(bin, "copilot"), `#!/bin/sh\nexec "${process.execPath}" "${path.join(bin, "copilot-entry.mjs")}" "$@"\n`, { mode: 0o755 });
+    fs.writeFileSync(path.join(bin, "gh"), `#!/bin/sh\nexec "${process.execPath}" "${path.join(bin, "gh-entry.mjs")}" "$@"\n`, { mode: 0o755 });
+  }
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), "agentic-qa-copilot-"));
+  fs.writeFileSync(path.join(home, "config.json"), "// User settings belong in settings.json.\n" + JSON.stringify({ loggedInUsers: [{ host: "https://github.com", login: "someone" }] }));
+  return { COPILOT_HOME: home };
+}
+
 function fakeBin() {
   const bin = fs.mkdtempSync(path.join(os.tmpdir(), "agentic-qa-bin-"));
   const fake = fileURLToPath(new URL("./helpers/fake-claude.mjs", import.meta.url));
@@ -255,7 +283,7 @@ async function until(fn, what, ms = 15_000) {
 
 test("the run buttons start each step as a headless claude session, pause between steps and stop", async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "agentic-qa-run-"));
-  const env = { ...process.env, PATH: fakeBin() + path.delimiter + process.env.PATH };
+  const env = isolatedEnv(fakeBin());
   const { child, ready } = startServer(dir, env);
   try {
     const { port, base } = await ready;
@@ -355,7 +383,7 @@ test("the story page edits test cases, and the reader edits files and opens them
   // A no-op `code`, so Open in editor has an editor to start.
   if (process.platform === "win32") fs.writeFileSync(path.join(bin, "code.cmd"), "@exit /b 0\r\n");
   else fs.writeFileSync(path.join(bin, "code"), "#!/bin/sh\nexit 0\n", { mode: 0o755 });
-  const env = { ...process.env, PATH: bin + path.delimiter + process.env.PATH };
+  const env = isolatedEnv(bin);
   delete env.AGENTIC_QA_EDITOR;
   const { child, ready } = startServer(dir, env);
   try {
@@ -551,7 +579,7 @@ test("Settings → Project saves the app URL; open questions tick off; Redo runs
   const dir = makeProject();
   const tcFile = path.join(dir, ".agentic-qa/test-cases/SD-1-login.md");
   fs.writeFileSync(tcFile, fs.readFileSync(tcFile, "utf-8").replace("## Open Questions\n- None", "## Open Questions\n- Should a locked user see a support link?\n- Is the password field case-sensitive?"));
-  const env = { ...process.env, PATH: fakeBin() + path.delimiter + process.env.PATH };
+  const env = isolatedEnv(fakeBin());
   const { child, ready } = startServer(dir, env);
   try {
     const { port, base } = await ready;
@@ -589,5 +617,130 @@ test("Settings → Project saves the app URL; open questions tick off; Redo runs
     assert.equal(call.prompt, "/qa-story SD-1 --url https://shop.example --force");
   } finally {
     child.kill();
+  }
+});
+
+test("each run checks the AI first, runs on Claude or Copilot, and takes a model per step", async () => {
+  const dir = makeProject();
+  const bin = fakeBin();
+  const copilotEnv = addCopilot(bin);
+  // First: Claude signed out, and no Copilot on this computer.
+  const signedOut = startServer(dir, isolatedEnv(fakeBin(), { FAKE_CLAUDE_SIGNED_OUT: "1" }));
+  try {
+    const { port, base } = await signedOut.ready;
+    const r = await post(port, base + "api/run/start", { url: "https://shop.example" });
+    assert.equal(r.status, 409);
+    assert.match(JSON.parse(r.body).error, /claude auth login/);
+    assert.ok(!fs.readFileSync(path.join(dir, ".agentic-qa/progress.jsonl"), "utf-8").includes("https://shop.example"), "nothing recorded");
+  } finally {
+    signedOut.child.kill();
+  }
+
+  const { child, ready } = startServer(dir, isolatedEnv(bin, copilotEnv));
+  try {
+    const { port, base } = await ready;
+    // Settings → AI: both, with their plans; never an email, a login or an organization.
+    const raw = (await get(port, base + "api/models")).body;
+    const m = JSON.parse(raw);
+    assert.equal(m.status.anthropic.plan, "Claude Pro");
+    assert.equal(m.status["copilot-sdk"].plan, "Copilot Free");
+    assert.equal(m.status["copilot-sdk"].quota.chat, 200);
+    assert.equal(m.chosen, "anthropic", "Claude first when both are ready");
+    assert.ok(!/example\.com|someone|Org/.test(raw), "no email, login or organization");
+    assert.deepEqual(m.providers["copilot-sdk"].options.slice(0, 1), ["gpt-4.1"]);
+
+    // Pick Copilot, with a model for the Analyst; a bad id is refused.
+    assert.equal((await post(port, base + "api/models", { provider: "copilot-sdk", models: { analyst: "bad id!" }, use: true })).status, 400);
+    assert.equal((await post(port, base + "api/models", { provider: "copilot-sdk", models: { analyst: "gpt-5" }, use: true })).status, 200);
+    assert.deepEqual(JSON.parse(fs.readFileSync(path.join(dir, ".agentic-qa/ai.json"), "utf-8")), { provider: "copilot-sdk", models: { "copilot-sdk": { analyst: "gpt-5" } } });
+    const st = JSON.parse((await get(port, base + "api/state")).body);
+    assert.equal(st.control.ai.provider, "copilot-sdk");
+    assert.equal(st.control.ai.defaults.analyst, "gpt-5");
+
+    // A run on Copilot: the agent, its model, the site allowed, the task message as an argument.
+    assert.equal((await post(port, base + "api/run/start", { url: "https://shop.example", models: { "qa-planner": "claude-sonnet-4.5" } })).status, 200);
+    const state = async () => JSON.parse((await get(port, base + "api/state")).body);
+    let s = await until(async () => { const x = await state(); return !x.control.job && x.suite.run?.state === "paused" && x; }, "the Analyst on Copilot");
+    const calls = () => fs.readFileSync(path.join(dir, ".agentic-qa/fake-copilot.jsonl"), "utf-8").trim().split("\n").map((l) => JSON.parse(l));
+    const a = calls()[0];
+    assert.equal(a.prompt, "Target URL: https://shop.example");
+    assert.deepEqual(a.args.slice(a.args.indexOf("--agent"), a.args.indexOf("--agent") + 4), ["--agent", "analyst", "--model", "gpt-5"]);
+    assert.ok(a.args.includes("--allow-url=https://shop.example") && a.args.includes("--allow-tool=shell(playwright-cli:*)"));
+    assert.equal(s.suite.steps[0].state, "done");
+    assert.equal(s.suite.steps[0].model, "gpt-5");
+    const feed = JSON.parse((await get(port, base + "api/run/feed?path=" + encodeURIComponent(s.suite.steps[0].feed))).body);
+    assert.deepEqual(feed.events.map((e) => e.kind), ["write", "task", "warn", "note", "done"], "Copilot's events in the run panel");
+    // Continue keeps the run's AI and its own pick for the QA Planner.
+    assert.equal((await post(port, base + "api/run/step", { step: "qa-planner" })).status, 200);
+    s = await until(async () => { const x = await state(); return !x.control.job && x.suite.run?.next === "qa-engineer" && x; }, "the QA Planner on Copilot");
+    const pl = calls()[1];
+    assert.deepEqual(pl.args.slice(pl.args.indexOf("--agent"), pl.args.indexOf("--agent") + 4), ["--agent", "qa-planner", "--model", "claude-sonnet-4.5"]);
+
+    // Back to Claude: a story's models for this run go to the qa-story skill as --model-<role>.
+    assert.equal((await post(port, base + "api/models", { provider: "anthropic", use: true })).status, 200);
+    assert.equal((await post(port, base + "api/run/story", { key: "SD-1", models: { "qa-planner": "gpt-5" } })).status, 400, "not a Claude model");
+    assert.equal((await post(port, base + "api/run/story", { key: "SD-1", url: "https://shop.example", models: { "qa-planner": "opus", analyst: "haiku" } })).status, 200);
+    await until(() => fs.existsSync(path.join(dir, ".agentic-qa/fake-claude.jsonl")), "the story session");
+    const story = fs.readFileSync(path.join(dir, ".agentic-qa/fake-claude.jsonl"), "utf-8").trim().split("\n").map((l) => JSON.parse(l)).at(-1);
+    assert.equal(story.prompt, "/qa-story SD-1 --url https://shop.example --model-qa-planner opus --model-analyst haiku");
+  } finally {
+    child.kill();
+  }
+});
+
+test("committed snapshots are reused, refreshed or explored again, and the page says whether the team shares them", async () => {
+  // Whether the snapshots are in git: read-only git in a throwaway repository.
+  const { snapshotShare } = await import("../.claude/skills/qa-dashboard/dashboard/read.mjs");
+  const repo = fs.mkdtempSync(path.join(os.tmpdir(), "agentic-qa-git-"));
+  const git = (...a) => spawnSync("git", ["-C", repo, ...a], { encoding: "utf-8" });
+  assert.deepEqual(snapshotShare(repo, { fresh: true }), { inGit: false }, "outside a repository");
+  git("init", "-q");
+  git("config", "user.email", "qa@example.com");
+  git("config", "user.name", "QA");
+  fs.mkdirSync(path.join(repo, ".agentic-qa/snapshots"), { recursive: true });
+  for (const n of ["home", "cart"]) fs.writeFileSync(path.join(repo, `.agentic-qa/snapshots/${n}.yml`), `- heading "${n}"\n`);
+  let sh = snapshotShare(repo, { fresh: true });
+  assert.deepEqual([sh.inGit, sh.committed, sh.notCommitted, sh.ignored], [true, 0, 2, 0]);
+  git("add", ".agentic-qa/snapshots");
+  git("commit", "-q", "-m", "snapshots");
+  fs.writeFileSync(path.join(repo, ".agentic-qa/snapshots/cart.yml"), "- heading \"cart, changed\"\n");
+  sh = snapshotShare(repo, { fresh: true });
+  assert.deepEqual([sh.committed, sh.changed, sh.notCommitted], [2, 1, 0]);
+  fs.writeFileSync(path.join(repo, ".gitignore"), ".agentic-qa/\n");
+  fs.writeFileSync(path.join(repo, ".agentic-qa/snapshots/login.yml"), "- textbox \"Username\"\n");
+  assert.equal(snapshotShare(repo, { fresh: true }).ignored, 1, "a .gitignore that hides .agentic-qa/ keeps new snapshots from the team");
+
+  // Reuse: no Analyst session; the run starts at the QA Planner.
+  const dir = makeProject();
+  const { child, ready } = startServer(dir, isolatedEnv(fakeBin()));
+  try {
+    const { port, base } = await ready;
+    const state = async () => JSON.parse((await get(port, base + "api/state")).body);
+    assert.deepEqual((await state()).suite.snapshotInfo.count, 1);
+    assert.equal((await post(port, base + "api/run/start", { url: "https://shop.example", snapshots: "keep" })).status, 400);
+    assert.equal((await post(port, base + "api/run/start", { url: "https://shop.example", snapshots: "reuse" })).status, 200);
+    let s = await until(async () => { const x = await state(); return !x.control.job && x.suite.run?.state === "paused" && x; }, "the QA Planner");
+    assert.equal(s.suite.steps[0].state, "skipped");
+    assert.equal(s.suite.steps[0].note, "Reused the committed requirements and 1 snapshot");
+    assert.equal(s.suite.steps[1].state, "done");
+    const calls = () => fs.readFileSync(path.join(dir, ".agentic-qa/fake-claude.jsonl"), "utf-8").trim().split("\n").map((l) => JSON.parse(l));
+    assert.deepEqual(calls().map((c) => c.args[c.args.indexOf("--agent") + 1]), ["qa-planner"], "no Analyst session");
+
+    // Refresh: the Analyst runs in its refresh mode.
+    assert.equal((await post(port, base + "api/run/start", { url: "https://shop.example", snapshots: "refresh" })).status, 200);
+    await until(async () => { const x = await state(); return !x.control.job && x.suite.run?.state === "paused" && x; }, "the refreshing Analyst");
+    assert.equal(calls().at(-1).prompt, "Target URL: https://shop.example\nMode: refresh");
+  } finally {
+    child.kill();
+  }
+
+  // Nothing to reuse yet: refused.
+  const empty = fs.mkdtempSync(path.join(os.tmpdir(), "agentic-qa-empty-"));
+  const second = startServer(empty, isolatedEnv(fakeBin()));
+  try {
+    const { port, base } = await second.ready;
+    assert.equal((await post(port, base + "api/run/start", { url: "https://shop.example", snapshots: "reuse" })).status, 400);
+  } finally {
+    second.child.kill();
   }
 });

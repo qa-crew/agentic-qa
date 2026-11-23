@@ -9,7 +9,8 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { execFile, spawn } from "node:child_process";
-import { resolveRoleModels } from "../../qa-story/scripts/qa-files.mjs";
+import { MODEL_ALIASES, MODEL_ROLES, readAiSettings, resolveRoleModels } from "../../qa-story/scripts/qa-files.mjs";
+import { aiStatus, chosenProvider, notReady, PROVIDER_LABEL } from "./ai.mjs";
 import { SUITE_STEPS, readProgress, storyKeys } from "./read.mjs";
 
 const STEP_IDS = SUITE_STEPS.map((s) => s.id);
@@ -39,8 +40,27 @@ export function findOnPath(name) {
   return undefined;
 }
 
-/** Starts a command. A Windows .cmd/.bat shim runs through cmd.exe with every argument quoted (they're all fixed values). */
+/**
+ * The node script behind a Windows npm shim (copilot.cmd → node_modules\@github\copilot\npm-loader.js), or undefined.
+ * Running it with node directly skips cmd.exe, so an argument can hold anything (a task message, quotes, newlines).
+ */
+export function nodeShimTarget(file) {
+  if (!IS_WIN || !file || !/\.cmd$/i.test(file)) return undefined;
+  let text;
+  try { text = fs.readFileSync(file, "utf-8"); } catch { return undefined; }
+  const m = text.match(/"%dp0%\\([^"%]+\.[cm]?js)"/i);
+  if (!m) return undefined;
+  const target = path.join(path.dirname(file), m[1]);
+  return fs.existsSync(target) ? target : undefined;
+}
+
+/**
+ * Starts a command. A Windows npm shim runs its node script directly; another .cmd/.bat runs through cmd.exe with every
+ * argument quoted (they must be fixed values then).
+ */
 export function startProcess(file, args, cwd, stdio = ["pipe", "pipe", "pipe"]) {
+  const shim = nodeShimTarget(file);
+  if (shim) return spawn(process.execPath, [shim, ...args], { cwd, windowsHide: true, stdio });
   if (IS_WIN && /\.(cmd|bat)$/i.test(file)) {
     const quote = (a) => {
       if (/["%^\r\n]/.test(a)) throw new Error(`Can't pass ${JSON.stringify(a)} to ${path.basename(file)}.`);
@@ -122,6 +142,34 @@ export function feedEvents(e) {
   return out;
 }
 
+// The same allowances on GitHub Copilot's CLI: file writes, the agents' shell commands, and (per run) the app's site.
+const COPILOT_ALLOW = [
+  "--allow-tool=write", "--allow-tool=shell(playwright-cli:*)", "--allow-tool=shell(npx playwright:*)",
+  "--allow-tool=shell(npx --no-install playwright:*)", "--allow-tool=shell(k6:*)", "--allow-tool=shell(mkdir:*)",
+];
+
+/** The run panel's activity from one Copilot CLI JSONL event (`copilot -p … --output-format json`). */
+export function copilotFeed(e) {
+  const d = e?.data ?? {};
+  const clip = (s, n = 280) => String(s ?? "").replace(/\s+/g, " ").trim().slice(0, n);
+  if (e.type === "tool.execution_start") {
+    const t = String(d.toolName ?? ""), a = d.arguments ?? {};
+    if (/^(create|write)$/i.test(t)) return [{ kind: "write", text: "Wrote a file", path: a.path ?? a.file_path }];
+    if (/edit|str_replace|apply_patch/i.test(t)) return [{ kind: "edit", text: "Edited a file", path: a.path ?? a.file_path }];
+    if (/^(task|agent|delegate|subagent)/i.test(t)) return [{ kind: "agent", text: clip(a.description ?? a.prompt ?? `Started ${t}`) }];
+    if (/shell|bash|powershell|pwsh/i.test(t)) {
+      const cmd = String(a.command ?? "");
+      const snap = cmd.match(/playwright-cli\b.*\bsnapshot\b(?:.*--filename[= ]"?([^\s"]+))?/);
+      return [snap ? { kind: "snap", text: "Captured a page snapshot", path: snap[1] } : { kind: "task", text: clip(cmd, 240) }];
+    }
+    return [];
+  }
+  if (e.type === "tool.execution_complete" && d.success === false) return [{ kind: "warn", text: clip(d.error?.message ?? "A tool failed") }];
+  if (e.type === "assistant.message" && String(d.content ?? "").trim()) return [{ kind: "note", text: clip(d.content, 400) }];
+  if (e.type === "result") return [{ kind: e.exitCode ? "fail" : "done", text: e.exitCode ? `The session ended with exit code ${e.exitCode}` : "The session finished" }];
+  return [];
+}
+
 /** Token use from a stream-json result event: { total, input, output, cacheRead, cacheWrite, costUsd }, or undefined. */
 export function usageOf(e) {
   const u = e?.usage;
@@ -191,7 +239,7 @@ export function createRunner(root, here) {
     const filter = s.filter && s.filter !== "none" ? s.filter : "none";
     switch (step) {
       case "analyst":
-        return [`Target URL: ${s.target}`, s.requirements ? `Existing requirements: ${s.requirements}` : "", s.headed ? "headed" : ""].filter(Boolean).join("\n");
+        return [`Target URL: ${s.target}`, s.snapshots === "refresh" ? "Mode: refresh" : "", s.requirements ? `Existing requirements: ${s.requirements}` : "", s.headed ? "headed" : ""].filter(Boolean).join("\n");
       case "qa-planner":
         return `Base URL: ${base}`;
       case "qa-engineer":
@@ -204,15 +252,26 @@ export function createRunner(root, here) {
   }
 
   /** Starts one headless session; onEnd(code, finalText) when it exits. */
+  /**
+   * Starts one headless session on the run's AI; onEnd(code, finalText, stopped) when it exits.
+   *   Claude:  claude -p <args> --output-format stream-json …   (the prompt on stdin)
+   *   Copilot: copilot -p <prompt> <args> --output-format json … (the prompt as an argument; an npm shim runs via node)
+   */
   function launch(spec, onEnd) {
-    const claude = claudePath();
-    if (!claude) throw Object.assign(new Error("The Claude Code CLI (claude) isn't on this computer's PATH, so the dashboard can't start agents."), { status: 409 });
+    const copilot = spec.provider === "copilot-sdk";
+    const bin = copilot ? findOnPath("copilot") : claudePath();
+    if (!bin) throw Object.assign(new Error(copilot ? "The GitHub Copilot CLI (copilot) isn't on this computer's PATH." : "The Claude Code CLI (claude) isn't on this computer's PATH, so the dashboard can't start agents."), { status: 409 });
+    if (copilot && IS_WIN && /\.(cmd|bat)$/i.test(bin) && !nodeShimTarget(bin)) {
+      throw Object.assign(new Error(`Couldn't find the program behind ${path.basename(bin)}, so the task message can't be passed to it safely. Reinstall it with: npm install -g @github/copilot`), { status: 409 });
+    }
     const logRel = `.agentic-qa/logs/${spec.run}/${spec.logName}.log`;
     fs.mkdirSync(path.dirname(path.join(root, logRel)), { recursive: true });
     const log = fs.createWriteStream(path.join(root, logRel), { flags: "a" });
-    log.write(`${spec.label}, started ${new Date().toLocaleString()}\n${spec.args.includes("--model") ? `Model: ${spec.args[spec.args.indexOf("--model") + 1]}\n` : ""}\n`);
-    const args = ["-p", ...spec.args, "--output-format", "stream-json", "--verbose", "--permission-mode", "acceptEdits", "--allowedTools", ...ALLOWED_TOOLS];
-    const child = startProcess(claude, args, root);
+    log.write(`${spec.label}, started ${new Date().toLocaleString()} on ${copilot ? "GitHub Copilot" : "Claude Code"}\n${spec.args.includes("--model") ? `Model: ${spec.args[spec.args.indexOf("--model") + 1]}\n` : ""}\n`);
+    const args = copilot
+      ? ["-p", spec.prompt, ...spec.args, "--output-format", "json", "--no-ask-user", "--no-auto-update", "--no-color", ...COPILOT_ALLOW, ...(spec.allowUrl ? [`--allow-url=${spec.allowUrl}`] : [])]
+      : ["-p", ...spec.args, "--output-format", "stream-json", "--verbose", "--permission-mode", "acceptEdits", "--allowedTools", ...ALLOWED_TOOLS];
+    const child = startProcess(bin, args, root);
     // The run panel's feed: one JSON line per event, beside the log. Counts and tokens are kept for status().
     const eventsRel = logRel.replace(/\.log$/, ".events.jsonl");
     const events = fs.createWriteStream(path.join(root, eventsRel), { flags: "a" });
@@ -220,6 +279,7 @@ export function createRunner(root, here) {
     job = me;
     let finalText = "";
     let usage;
+    let outTokens = 0;
     let buf = "";
     const feed = (ev) => {
       if (ev.kind === "write" || ev.kind === "edit") { if (ev.path) me.files.add(ev.path); }
@@ -234,6 +294,18 @@ export function createRunner(root, here) {
       for (const l of lines) {
         let e;
         try { e = JSON.parse(l); } catch { if (l.trim()) log.write(l + "\n"); continue; }
+        if (copilot) {
+          // Copilot reports output tokens per message and premium requests at the end; its last message is the answer.
+          if (e.type === "assistant.message") {
+            if (String(e.data?.content ?? "").trim()) finalText = e.data.content;
+            outTokens += Number(e.data?.outputTokens) || 0;
+            me.tokens = outTokens || undefined;
+          }
+          if (e.type === "result") usage = { total: outTokens, output: outTokens, premiumRequests: Number(e.usage?.premiumRequests) || 0, provider: "copilot-sdk" };
+          const evs = copilotFeed(e);
+          for (const ev of evs) { feed(ev); log.write(`${ev.kind === "note" ? "" : `→ ${ev.kind.toUpperCase()} `}${ev.text}${ev.path ? ` ${ev.path}` : ""}\n`); }
+          continue;
+        }
         if (e.type === "result") {
           if (typeof e.result === "string") finalText = e.result;
           usage = usageOf(e);
@@ -263,18 +335,20 @@ export function createRunner(root, here) {
       if (me.silent) return;
       try { onEnd(code, finalText, me.stopping); } catch (err) { console.error(err); }
     };
-    child.on("error", (err) => { log.write(`Couldn't start claude: ${err.message}\n`); end(-1); });
+    child.on("error", (err) => { log.write(`Couldn't start ${copilot ? "copilot" : "claude"}: ${err.message}\n`); end(-1); });
     child.on("close", (code) => end(code));
     child.stdin.on("error", () => {});
-    child.stdin.end(spec.prompt);
+    child.stdin.end(copilot ? "" : spec.prompt);
   }
 
   function runStep(run, step) {
     const s = run.start;
-    const model = resolveRoleModels(root)[step]?.model;
-    record({ step, event: "start", run: s.run });
+    const provider = s.provider === "copilot-sdk" ? "copilot-sdk" : "anthropic";
+    // This run's pick for the step (the start form), else the saved pick (Settings → AI), else the AI's default.
+    const model = s.models?.[step] || resolveRoleModels(root, {}, provider)[step]?.model;
+    record({ step, event: "start", run: s.run, provider, model: model || undefined });
     try {
-      launchStep(s, step, model);
+      launchStep(s, step, model, provider);
     } catch (err) {
       record({ step, event: "failed", run: s.run, note: err.message });
       record({ step: "pipeline", event: "paused", run: s.run, next: step });
@@ -282,13 +356,18 @@ export function createRunner(root, here) {
     }
   }
 
-  function launchStep(s, step, model) {
+  function launchStep(s, step, model, provider) {
     const since = Date.now();
+    const copilot = provider === "copilot-sdk";
     launch({
       run: s.run,
       logName: step,
+      provider,
+      // Copilot shell commands that name a URL need it allowed: the run's site.
+      allowUrl: copilot ? new URL(s.target).origin : undefined,
       label: `${SUITE_STEPS.find((x) => x.id === step).name} (full suite, run ${s.run})`,
-      args: ["--agent", prefix + step, ...(model ? ["--model", model] : [])],
+      // Copilot reads the agent from .github/agents/<step>.agent.md; a plugin's agents carry its prefix on Claude only.
+      args: ["--agent", (copilot ? "" : prefix) + step, ...(model ? ["--model", model] : [])],
       prompt: taskMessage(step, s),
       info: { kind: "suite", run: s.run, step },
     }, (code, finalText, stopped) => {
@@ -341,14 +420,37 @@ export function createRunner(root, here) {
   }
   const fail = (status, error) => ({ status, error });
 
-  function preflight(needsBrowser) {
-    if (!claudePath()) return fail(409, "The Claude Code CLI (claude) isn't on this computer's PATH, so the dashboard can't start agents. Install Claude Code, or run the steps from the chat.");
+  /**
+   * Before every run: the AI it runs on is installed and signed in (claude auth status, or Copilot's sign-in and plan),
+   * and playwright-cli is there when the step explores the app. Resolves { provider } or { status, error }.
+   */
+  async function preflight(needsBrowser, provider) {
+    const st = await aiStatus();
+    const p = provider ?? chosenProvider(st, readAiSettings(root).provider);
+    const why = notReady(st, p);
+    if (why) return fail(409, `${why} Change it in Settings → AI.`);
     if (needsBrowser && !findOnPath("playwright-cli")) return fail(409, "playwright-cli isn't installed, so the Analyst can't explore the app. Run the qa-setup skill, or: npm install -g @playwright/cli@latest");
-    return undefined;
+    return { provider: p };
   }
 
-  /** POST api/run/start { url, grep, mode, headed, config } */
-  function start(body) {
+  /** This run's model picks ({ analyst: "opus", … }): known roles; a Claude alias or a Copilot model id; "" = the default. */
+  function runModels(raw, provider) {
+    if (raw === undefined || raw === null) return { models: {} };
+    if (typeof raw !== "object" || Array.isArray(raw)) return { error: "Send the models as { <role>: <model> }." };
+    const out = {};
+    for (const [k, v] of Object.entries(raw)) {
+      if (!MODEL_ROLES.includes(k)) return { error: `Unknown role "${k}".` };
+      if (typeof v !== "string") return { error: `The model for ${k} must be text.` };
+      if (!v) continue;
+      const ok = provider === "copilot-sdk" ? /^[\w.:/@[\]-]{1,120}$/.test(v) : MODEL_ALIASES.includes(v);
+      if (!ok) return { error: `"${v}" isn't a ${PROVIDER_LABEL[provider]} model the dashboard can start an agent with.` };
+      out[k] = v;
+    }
+    return { models: out };
+  }
+
+  /** POST api/run/start { url, grep, mode, headed, config, models, snapshots: "reuse" | "refresh" | "fresh" } */
+  async function start(body) {
     const b = body && typeof body === "object" ? body : {};
     const url = typeof b.url === "string" ? b.url.trim() : "";
     let parsed;
@@ -359,26 +461,39 @@ export function createRunner(root, here) {
     if (b.mode !== undefined && b.mode !== "step" && b.mode !== "auto") return fail(400, 'The mode must be "step" or "auto".');
     if (b.headed !== undefined && typeof b.headed !== "boolean") return fail(400, "headed must be true or false.");
     if (b.config !== undefined && b.config !== "keep" && b.config !== "overwrite") return fail(400, 'config must be "keep" or "overwrite".');
-    const why = busy() ?? preflight(true)?.error;
-    if (why) return fail(409, why);
+    // The snapshots and requirements a teammate committed: reuse them (no Analyst), refresh them, or explore again.
+    const snapMode = b.snapshots ?? "fresh";
+    if (!["reuse", "refresh", "fresh"].includes(snapMode)) return fail(400, 'snapshots must be "reuse", "refresh" or "fresh".');
+    const snapCount = (() => { try { return fs.readdirSync(path.join(dataDir, "snapshots")).filter((x) => x.endsWith(".yml")).length; } catch { return 0; } })();
+    if (snapMode !== "fresh" && (!snapCount || !has(".agentic-qa/requirements/requirements.md"))) return fail(400, "There are no snapshots and requirements to reuse yet. Explore the app from scratch.");
+    if (busy()) return fail(409, busy());
+    const pre = await preflight(snapMode !== "reuse");
+    if (pre.error) return pre;
+    const picks = runModels(b.models, pre.provider);
+    if (picks.error) return fail(400, picks.error);
+    if (busy()) return fail(409, busy());
     for (const d of ["snapshots", "requirements", "test-plan", "test-cases", "test-scripts/pages", "reports/test-results"]) fs.mkdirSync(path.join(dataDir, d), { recursive: true });
     // An existing requirements document dropped next to requirements.md is merged in, as the qa-pipeline skill does.
     const dropped = fs.readdirSync(path.join(dataDir, "requirements")).filter((f) => /\.md$/i.test(f) && f !== "requirements.md");
     const run = newRunId();
     const config = has("playwright.config.ts") ? (b.config ?? "keep") : undefined;
-    record({ step: "pipeline", event: "start", run, target: url, filter: grep, mode: b.mode ?? "step", headed: b.headed || undefined, config, requirements: dropped.length === 1 ? `.agentic-qa/requirements/${dropped[0]}` : undefined });
-    try { runStep(lastRun(), "analyst"); } catch (err) { return fail(err.status ?? 500, err.message); }
+    record({ step: "pipeline", event: "start", run, target: url, filter: grep, mode: b.mode ?? "step", headed: b.headed || undefined, config, requirements: dropped.length === 1 ? `.agentic-qa/requirements/${dropped[0]}` : undefined, provider: pre.provider, models: Object.keys(picks.models).length ? picks.models : undefined, snapshots: snapMode });
+    if (snapMode === "reuse") record({ step: "analyst", event: "skipped", run, note: `Reused the committed requirements and ${snapCount} snapshot${snapCount === 1 ? "" : "s"}` });
+    try { runStep(lastRun(), snapMode === "reuse" ? "qa-planner" : "analyst"); } catch (err) { return fail(err.status ?? 500, err.message); }
     return { status: 200 };
   }
 
   /** POST api/run/step { step }: run one step of the last run (the next one, again, or the deferred reviewer). */
-  function step(body) {
+  async function step(body) {
     const id = body && typeof body === "object" ? body.step : undefined;
     if (!STEP_IDS.includes(id)) return fail(400, `Unknown step. Steps: ${STEP_IDS.join(", ")}.`);
     const run = lastRun();
     if (!run || !run.start.target) return fail(409, "There's no full-suite run to continue. Start one with the app's address.");
-    const why = busy() ?? preflight(id === "analyst")?.error;
-    if (why) return fail(409, why);
+    if (busy()) return fail(409, busy());
+    // A run keeps the AI it started on.
+    const pre = await preflight(id === "analyst", run.start.provider === "copilot-sdk" ? "copilot-sdk" : "anthropic");
+    if (pre.error) return pre;
+    if (busy()) return fail(409, busy());
     const ended = run.events.filter((e) => e.step === "pipeline" && e.event !== "start").at(-1);
     if (ended && ended.event !== "resume") record({ step: "pipeline", event: "resume", run: run.start.run });
     try { runStep(run, id); } catch (err) { return fail(err.status ?? 500, err.message); }
@@ -411,8 +526,8 @@ export function createRunner(root, here) {
     return { status: 200 };
   }
 
-  /** POST api/run/story { key, url? }: run the story's next steps with the qa-story skill, up to its next review. */
-  function story(body) {
+  /** POST api/run/story { key, url?, force?, models? }: run the story's next steps with the qa-story skill, up to its next review. */
+  async function story(body) {
     const b = body && typeof body === "object" ? body : {};
     if (typeof b.key !== "string" || !storyKeys(root).includes(b.key)) return fail(400, "Unknown story.");
     let url = "";
@@ -422,17 +537,25 @@ export function createRunner(root, here) {
       if (!parsed || !/^https?:$/.test(parsed.protocol) || /\s/.test(String(b.url).trim())) return fail(400, "Enter the app's address, starting with http:// or https://.");
       url = String(b.url).trim();
     }
-    const why = busy() ?? preflight(false)?.error;
-    if (why) return fail(409, why);
+    if (busy()) return fail(409, busy());
+    const pre = await preflight(false);
+    if (pre.error) return pre;
+    const picks = runModels(b.models, pre.provider);
+    if (picks.error) return fail(400, picks.error);
+    if (busy()) return fail(409, busy());
+    // The skill takes a model per role for this run: --model-<role> <model>.
+    const flags = Object.entries(picks.models).map(([role, m]) => ` --model-${role} ${m}`).join("");
     const run = newRunId();
     try {
       launch({
         run,
         logName: b.key,
         label: `Story ${b.key}`,
+        provider: pre.provider,
+        allowUrl: pre.provider === "copilot-sdk" && url ? new URL(url).origin : undefined,
         args: [],
         // force: redo the story from the start (Design again; it keeps the case IDs and a person's edits).
-        prompt: `/${prefix}qa-story ${b.key}${url ? ` --url ${url}` : ""}${b.force === true ? " --force" : ""}`,
+        prompt: `/${pre.provider === "copilot-sdk" ? "" : prefix}qa-story ${b.key}${url ? ` --url ${url}` : ""}${b.force === true ? " --force" : ""}${flags}`,
         info: { kind: "story", run, key: b.key },
       }, () => {});
     } catch (err) {
@@ -443,7 +566,7 @@ export function createRunner(root, here) {
 
   function status() {
     return {
-      available: !!claudePath(),
+      available: !!claudePath() || !!findOnPath("copilot"),
       job: job ? {
         kind: job.kind, run: job.run, step: job.step, key: job.key, label: job.label, log: job.log, events: job.events, startedAt: job.startedAt,
         // Changes while it runs; the page reads it for the run panel without redrawing the view.

@@ -36,14 +36,23 @@ these rules to `.claude/settings.json` (merge them with what's there and keep th
 
 ## .gitignore (optional)
 Agentic QA's outputs under `.agentic-qa/` (requirements, test plan, test cases, test scripts, snapshots) are meant to be
-committed. Offer to add these lines to `.gitignore` for the files that shouldn't be:
+committed: then everyone on the team gets the snapshots and requirements, and nobody spends tokens capturing them again.
+Offer to add these lines to `.gitignore` for the files that shouldn't be:
 ```
 .agentic-qa/auth-state.json
 .agentic-qa/reports/
 .agentic-qa/evidence/
 .agentic-qa/progress.jsonl
+.agentic-qa/logs/
+.playwright-cli/
 ```
-`auth-state.json` holds a signed-in browser session, so it should never be committed.
+- `auth-state.json` holds a signed-in browser session, so it should never be committed.
+- `logs/` (the dashboard's session logs) and `.playwright-cli/` (the browser tool's downloads and console logs) belong to
+  one person's run.
+- If `.gitignore` already ignores `.agentic-qa/` as a whole, say so: the team won't get the snapshots, and each QA would
+  capture them again. Offer to replace that line with the lines above.
+- Snapshots hold the text of the app's pages (product names, test accounts' names). Explore a test environment, not
+  one with real customer data you can't commit.
 
 ## Finish
 Say what's ready and what to run next: the qa-pipeline skill with a URL for a full suite, or the qa-story skill with

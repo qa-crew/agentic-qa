@@ -2,6 +2,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { createHash } from "node:crypto";
+import { execFileSync } from "node:child_process";
 import {
   extractTcId, qaPaths, keyFromFileName, parseFrontMatter, parseResultsJson, parseStoryFile, parseTestCaseFile, statusCounts,
   stepState, storyFiles, storyHash, STORY_STEPS,
@@ -63,7 +64,7 @@ function stepsFromProgress(events) {
   const steps = {};
   for (const e of events) {
     const s = (steps[e.step] ??= {});
-    if (e.event === "start") { s.startedAt = e.ts; s.endedAt = undefined; s.note = undefined; s.run = e.run; }
+    if (e.event === "start") { s.startedAt = e.ts; s.endedAt = undefined; s.note = undefined; s.run = e.run; s.model = e.model; s.provider = e.provider; }
     else s.endedAt = e.ts;
     s.state = EVENT_STATE[e.event] ?? e.event;
     if (e.note) s.note = e.note;
@@ -175,6 +176,33 @@ export function readWorkspace(cwd) {
   }
 }
 
+/**
+ * Whether the full suite's snapshots are shared through git, so teammates reuse them instead of capturing them again.
+ * Read-only git only (ls-files): { inGit, total, committed, changed, notCommitted, ignored }, or { inGit: false }
+ * outside a repository (or without git). Cached for 30 s, since the page asks every 2 s.
+ */
+const shareCache = new Map();
+export function snapshotShare(cwd, { fresh = false } = {}) {
+  const hit = shareCache.get(cwd);
+  if (hit && !fresh && Date.now() - hit.at < 30_000) return hit.value;
+  const git = (...args) => execFileSync("git", ["-C", cwd, ...args], { encoding: "utf-8", timeout: 5000, windowsHide: true, stdio: ["ignore", "pipe", "ignore"] });
+  const ymls = (out) => out.split(/\r?\n/).filter((l) => /^\.agentic-qa\/snapshots\/[^/]+\.yml$/.test(l)).length;
+  let value;
+  try {
+    if (git("rev-parse", "--is-inside-work-tree").trim() !== "true") throw new Error("not a repo");
+    const dir = ".agentic-qa/snapshots";
+    const committed = ymls(git("ls-files", "--", dir));
+    const changed = ymls(git("ls-files", "--modified", "--", dir));
+    const notCommitted = ymls(git("ls-files", "--others", "--exclude-standard", "--", dir));
+    const ignored = ymls(git("ls-files", "--others", "--ignored", "--exclude-standard", "--", dir));
+    value = { inGit: true, total: committed + notCommitted + ignored, committed, changed, notCommitted, ignored };
+  } catch {
+    value = { inGit: false };
+  }
+  shareCache.set(cwd, { at: Date.now(), value });
+  return value;
+}
+
 /** The tokens in some "usage" progress lines (written when a dashboard session ends), or undefined when there are none. */
 function sumTokens(lines) {
   return lines.length ? lines.reduce((a, e) => a + (Number(e.total) || 0), 0) : undefined;
@@ -244,6 +272,15 @@ function suiteState(cwd, events, keys, cases) {
     specs,
     pageObjects: list(cwd, ".agentic-qa/test-scripts/pages", ".page.ts"),
     snapshots: list(cwd, ".agentic-qa/snapshots", ".yml"),
+    // For "Reuse, Refresh or Explore" in the start form, and whether the team shares them.
+    snapshotInfo: (() => {
+      const files = list(cwd, ".agentic-qa/snapshots", ".yml");
+      const newest = files.reduce((t, f) => { try { return Math.max(t, fs.statSync(path.join(cwd, f)).mtimeMs); } catch { return t; } }, 0);
+      return { count: files.length, newest: newest ? new Date(newest).toISOString() : undefined, requirements: fs.existsSync(path.join(cwd, ".agentic-qa/requirements/requirements.md")) };
+    })(),
+    share: list(cwd, ".agentic-qa/snapshots", ".yml").length ? snapshotShare(cwd) : undefined,
+    // Agentic QA's own repository keeps its test runs out of git on purpose; don't ask to commit them there.
+    selfRepo: (() => { try { return JSON.parse(fs.readFileSync(path.join(cwd, ".claude-plugin", "plugin.json"), "utf-8")).name === "agentic-qa"; } catch { return false; } })(),
     config: fileInfo(cwd, "playwright.config.ts"),
     results: summarizeResults(cwd, ".agentic-qa/reports/test-results/results.json", cases),
     htmlReport: fileInfo(cwd, ".agentic-qa/reports/playwright-report/index.html"),

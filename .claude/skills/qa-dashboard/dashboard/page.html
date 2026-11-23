@@ -535,6 +535,20 @@
   .menu-pop button { text-align: left; font: 14px var(--font-sans); padding: 8px 10px; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--fg); cursor: pointer; }
   .menu-pop button:hover:not(:disabled) { background: var(--bg-sunken); }
   .menu-pop button:disabled { color: var(--fg-muted); cursor: default; }
+  .ai-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+  .ai-card h3 { margin: 10px 0 4px; font-size: 17px; }
+  .ai-card.chosen { border-color: var(--focus); box-shadow: 0 0 0 1px var(--focus); }
+  .other-model { display: block; margin-top: 6px; min-height: 34px; font-size: 13px; width: 100%; }
+  .other-model[hidden] { display: none; }
+  .ai-line { margin: 0; }
+  .ai-line .chip { margin-right: 6px; }
+  details.run-models > summary { cursor: pointer; font-weight: 600; font-size: 14px; padding: 4px 0; }
+  details.run-models[open] > summary { margin-bottom: 10px; }
+  .rm-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px 14px; }
+  .rm-grid select { width: 100%; }
+  .story-run details.run-models { flex-basis: 100%; }
+  .share-line { margin: 0 0 12px; }
+  .share-line .cmd code { max-width: 52ch; overflow: hidden; text-overflow: ellipsis; }
   .toast { position: fixed; right: 16px; bottom: 16px; z-index: 50; max-width: min(460px, calc(100vw - 32px)); box-shadow: var(--shadow-sm); }
   @media (max-width: 1100px) { .story-page { grid-template-columns: minmax(0, 1fr); } .story-side { display: none; } .story-main .back { display: inline-block; } }
   @media (max-width: 900px) { .md-list { max-width: none; border-right: 0; border-bottom: 1px solid var(--border); } .reader-nav { max-width: none; border-right: 0; border-bottom: 1px solid var(--border); max-height: 280px; overflow-y: auto; } .fail-main { border-right: 0; border-bottom: 1px solid var(--border-subtle); } }
@@ -645,13 +659,51 @@
   // ── Running agents from the page ─────────────────────────────────────────
   // state.control comes from the live server only: { available: the claude CLI is there, job: what the page started }.
   function control() { return (!STATIC && state && state.control) || null; }
-  function canStart() { var c = control(); return !!(c && c.available && !c.job); }
+  function canStart() { var c = control(); return !!(c && c.available && !c.job && (!c.ai || c.ai.ready)); }
   function busyText() {
     var c = control();
     if (!c) return "";
-    if (!c.available) return "Starting agents from here needs the Claude Code CLI (claude) on this computer.";
-    return c.job ? c.job.label + " is running." : "";
+    if (!c.available) return "Starting agents from here needs the Claude Code CLI (claude) or the GitHub Copilot CLI (copilot) on this computer.";
+    if (c.job) return c.job.label + " is running.";
+    return c.ai && !c.ai.ready ? c.ai.why : "";
   }
+  // ── The AI a run uses (checked before it starts) and the models for this run ──
+  var ROLES_ALL = ["analyst", "qa-planner", "qa-engineer", "qa-reviewer", "qa-reporter"];
+  var ROLE_NAME = { analyst: "Analyst", "qa-planner": "QA Planner", "qa-engineer": "QA Engineer", "qa-reviewer": "QA Reviewer", "qa-reporter": "QA Reporter" };
+  /** "Runs on Claude Code · Claude Pro", or why the AI can't run the agents yet. */
+  function aiLine() {
+    var c = control(), a = c && c.ai;
+    if (!c) return "";
+    if (!a) return '<p class="ai-line muted small">Checking which AI this computer has\u2026</p>';
+    var q = a.quota && a.quota.chat != null && a.quota.chat !== "unlimited" ? " · " + a.quota.chat + " chat requests left" : "";
+    return a.ready
+      ? '<p class="ai-line small"><span class="chip ok">Ready</span> Runs on <b>' + esc(a.label) + "</b> · " + esc(a.plan || "") + esc(q) + ' · <a href="#settings/ai">Change</a></p>'
+      : '<div class="msg warn ai-line"><p><b>The AI isn\u2019t ready.</b> ' + esc(a.why) + '</p><p><a href="#settings/ai">Open Settings \u2192 AI</a></p></div>';
+  }
+  /** Selects for this run's model per role, pre-filled with the saved defaults (Settings → AI). */
+  function runModelsPicker(id, roles, picked) {
+    var a = control() && control().ai;
+    if (!a || !roles.length) return "";
+    var label = function (m) { return MODEL_LABEL[m] || m; };
+    var sameDefault = a.provider === "anthropic" ? "the session\u2019s model" : "Copilot\u2019s default";
+    var changed = picked && Object.keys(picked).length;
+    return '<details class="run-models" id="' + id + '"' + (changed ? " open" : "") + '><summary>Models for this run <span class="muted small">' + esc(roles.map(function (r) { var m = (picked && picked[r]) || a.defaults[r]; return ROLE_NAME[r] + " " + (m ? label(m) : "default"); }).join(" · ")) + '</span></summary><div class="rm-grid">' + roles.map(function (r) {
+      var d = a.defaults[r], cur = (picked && picked[r]) || "";
+      return '<label class="fld"><span class="field-label">' + esc(ROLE_NAME[r]) + '</span><select data-role="' + esc(r) + '"><option value="">Saved: ' + esc(d ? label(d) : sameDefault) + "</option>" + a.options.map(function (o) { return '<option value="' + esc(o) + '"' + (o === cur ? " selected" : "") + ">" + esc(label(o)) + "</option>"; }).join("") + "</select></label>";
+    }).join("") + '</div><p class="muted small" style="margin:6px 0 0">For this run only. Change the saved ones in <a href="#settings/ai">Settings \u2192 AI</a>.</p></details>';
+  }
+  function pickedModels(root) {
+    var out = {};
+    root.querySelectorAll(".run-models select[data-role]").forEach(function (sel) { if (sel.value) out[sel.getAttribute("data-role")] = sel.value; });
+    return out;
+  }
+  /** The roles a story's next steps use: Design = QA Planner, Explore = Analyst, Automate = QA Engineer. */
+  function storyRoles(next) {
+    var order = ["story-design", "story-explore", "story-script"], role = { "story-design": "qa-planner", "story-explore": "analyst", "story-script": "qa-engineer" };
+    var i = order.indexOf(next);
+    return i < 0 ? [] : order.slice(i).map(function (x) { return role[x]; });
+  }
+
   function stepName(id) { var x = stepById(id); return x ? x.name : id; }
   function since(iso) { return '<span data-since="' + esc(iso) + '">' + esc(fmtDur(Date.now() - Date.parse(iso))) + "</span>"; }
   function runBtn(attrs, label, cls) { return '<button type="button" class="' + (cls || "btn") + '" ' + attrs + (canStart() ? "" : ' disabled title="' + esc(busyText() || "Not available") + '"') + ">" + esc(label) + "</button>"; }
@@ -667,16 +719,55 @@
     var html = '<form class="card start-form" id="startForm" novalidate><span class="eyebrow">Start a run</span>' + (intro ? '<p class="sf-note">' + intro + "</p>" : "");
     html += '<div><label class="field-label" for="sf-url">The app\'s address</label><div class="sf-url"><input class="field" id="sf-url" name="url" type="url" inputmode="url" autocomplete="url" spellcheck="false" required placeholder="https://your-app.example" value="' + esc(d.url) + '"><button class="btn" type="submit" id="sf-go"' + (off ? " disabled" : "") + ">Start the full suite</button></div></div>";
     // Which tests: a segmented control (as in AIQA), with the tag filter it stands for under it.
+    html += snapshotChoice(d.snapshots);
     html += '<div class="sf-opts"><div><span class="field-label" id="sf-grep-l">Tests to run</span><input type="hidden" name="grep" id="sf-grep" value="' + esc(d.grep) + '"><div class="seg" role="group" aria-labelledby="sf-grep-l">' + greps.map(function (g) { return '<button type="button" data-grep="' + esc(g[0]) + '" aria-pressed="' + (g[0] === d.grep) + '">' + esc(g[1]) + "</button>"; }).join("") + '</div><p class="muted small" id="sf-grep-h" style="margin:6px 0 0">' + grepHint(d.grep) + "</p></div>";
     html += '<fieldset><legend>How to run</legend><label class="opt"><input type="radio" name="mode" value="step"' + (d.mode !== "auto" ? " checked" : "") + '><span>Step by step<small>Pauses after each step for your review. The slow QA Reviewer waits until you run it.</small></span></label><label class="opt"><input type="radio" name="mode" value="auto"' + (d.mode === "auto" ? " checked" : "") + "><span>All five steps<small>Runs straight through, the QA Reviewer included.</small></span></label></fieldset>";
     html += '<fieldset><legend>Options</legend><label class="opt"><input type="checkbox" name="headed"' + (d.headed ? " checked" : "") + "><span>Show the browser while the Analyst explores</span></label>";
     if (state.suite.config.exists) html += '<label class="opt"><input type="radio" name="config" value="keep"' + (d.config !== "overwrite" ? " checked" : "") + '><span>Keep my <span class="mono">playwright.config.ts</span><small>Its testDir must include .agentic-qa/test-scripts.</small></span></label><label class="opt"><input type="radio" name="config" value="overwrite"' + (d.config === "overwrite" ? " checked" : "") + '><span>Replace it with Agentic QA\'s</span></label>';
     html += "</fieldset></div>";
+    html += aiLine() + runModelsPicker("sf-models", ROLES_ALL, d.models);
     if (c && !c.available) html += '<p class="sf-note">' + esc(busyText()) + " Or run <code>/qa-pipeline &lt;url&gt;</code> in Claude Code.</p>";
     else if (c && c.job) html += '<p class="sf-note">' + esc(busyText()) + " You can start a new run when it ends.</p>";
-    else html += '<p class="sf-note muted small">Each step runs as a Claude Code session in this project, with the models from the <a href="#settings/ai">Settings → AI</a> page. It can edit files here and run playwright-cli, Playwright and k6; nothing else.</p>';
+    else html += '<p class="sf-note muted small">Each step runs as a ' + esc(c && c.ai ? c.ai.label : "Claude Code") + ' session in this project. It can edit files here and run playwright-cli, Playwright and k6; nothing else.</p>';
     return html + "</form>";
   }
+  // The snapshots and requirements already in the project (often a teammate's, from git): reuse, refresh or explore.
+  function snapshotChoice(picked) {
+    var si = state.suite.snapshotInfo;
+    if (!si || !si.count || !si.requirements) return "";
+    var m = picked || "reuse";
+    var opts = [["reuse", "Reuse " + si.count + " snapshots"], ["refresh", "Refresh them"], ["fresh", "Explore from scratch"]];
+    return '<div><span class="field-label" id="sf-snap-l">Snapshots</span><input type="hidden" name="snapshots" value="' + esc(m) + '"><div class="seg" role="group" aria-labelledby="sf-snap-l">' +
+      opts.map(function (o) { return '<button type="button" data-snap="' + o[0] + '" aria-pressed="' + (o[0] === m) + '">' + esc(o[1]) + "</button>"; }).join("") +
+      '</div><p class="muted small" id="sf-snap-h" style="margin:6px 0 0">' + snapHint(m) + "</p></div>";
+  }
+  function snapHint(m) {
+    var si = state.suite.snapshotInfo, when = si.newest ? " from " + esc(clock(si.newest)) : "";
+    return m === "reuse" ? "Start at the QA Planner with the " + si.count + " snapshots and the requirements" + when + ". No exploring, so no tokens spent on it."
+      : m === "refresh" ? "The Analyst revisits each page, recaptures only what changed, adds new pages and updates the requirements."
+      : "The Analyst explores the whole app again and replaces them.";
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest("#startForm [data-snap]");
+    if (!b) return;
+    var form = b.closest("form"), m = b.getAttribute("data-snap");
+    form.elements.snapshots.value = m;
+    form.querySelectorAll("[data-snap]").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+    document.getElementById("sf-snap-h").innerHTML = snapHint(m);
+    startDraft = readStartForm(form);
+  });
+  /** Whether the snapshots are in git for the team (read-only git), and how to commit them when they aren't. */
+  function shareLine() {
+    var sh = state.suite.share, n = state.suite.snapshots.length;
+    if (!sh || !n || STATIC) return "";
+    if (state.suite.selfRepo) return '<p class="muted small share-line">This is Agentic QA\u2019s own repository: its test runs\u2019 snapshots stay out of git on purpose.</p>';
+    if (!sh.inGit) return '<p class="muted small share-line">This project isn\u2019t a git repository, so the snapshots can\u2019t be shared with your team.</p>';
+    if (sh.ignored) return '<div class="msg warn share-line"><p><b>' + esc(plural(sh.ignored, "snapshot")) + " " + (sh.ignored === 1 ? "is" : "are") + " ignored by .gitignore</b>, so your team can\u2019t get them and each QA would capture them again.</p><p>Keep <code>.agentic-qa/</code> in git and leave out only the run files; the qa-setup skill sets that up.</p></div>";
+    var todo = sh.notCommitted + sh.changed;
+    if (todo) return '<div class="msg info share-line"><p><b>' + esc(sh.notCommitted ? plural(sh.notCommitted, "snapshot") + " not committed yet" : "") + (sh.notCommitted && sh.changed ? ", " : "") + esc(sh.changed ? plural(sh.changed, "snapshot") + " changed" : "") + '.</b> Commit them with the requirements so your team reuses them instead of capturing them again:</p><div class="actions tight" style="margin-top:8px">' + cmdBox('git add .agentic-qa/snapshots .agentic-qa/requirements') + cmdBox('git commit -m "Agentic QA: snapshots and requirements"') + "</div></div>";
+    return '<p class="small share-line"><span class="chip ok">Shared</span> All ' + esc(plural(sh.committed, "snapshot")) + " are committed, so your team reuses them.</p>";
+  }
+
   function grepHint(g) { return g === "all" ? "Every test the QA Engineer writes." : "The tests tagged " + g.split("|").map(function (t) { return "<code>" + esc(t) + "</code>"; }).join(" or ") + "."; }
   document.addEventListener("click", function (e) {
     var b = e.target.closest && e.target.closest("#startForm [data-grep]");
@@ -689,7 +780,7 @@
   });
   function readStartForm(form) {
     var f = form.elements;
-    return { url: f.url.value.trim(), grep: f.grep.value, mode: (form.querySelector('input[name="mode"]:checked') || {}).value || "step", headed: f.headed.checked, config: (form.querySelector('input[name="config"]:checked') || {}).value || "keep" };
+    return { url: f.url.value.trim(), grep: f.grep.value, mode: (form.querySelector('input[name="mode"]:checked') || {}).value || "step", headed: f.headed.checked, snapshots: f.snapshots ? f.snapshots.value : undefined, config: (form.querySelector('input[name="config"]:checked') || {}).value || "keep", models: pickedModels(form) };
   }
 
   /** What the page started, in a line: the activity itself is in the run panel (as in AIQA). */
@@ -818,6 +909,8 @@
     var waiting = state.stories.filter(isWaitingStory);
     if (waiting.length) pills.push('<a class="tchip turn opt" href="#story/' + encodeURIComponent(waiting[0].key) + '"><span class="cdot" aria-hidden="true"></span>' + esc(waiting.length === 1 ? waiting[0].key + " · waiting for you" : waiting.length + " stories waiting for you") + "</a>");
     var r = state.suite.results;
+    var ai = control() && control().ai;
+    if (ai) pills.push('<a class="tchip opt" href="#settings/ai" title="' + esc(ai.ready ? "The agents run on " + ai.label : ai.why) + '"><span class="cdot ' + (ai.ready ? "ok" : "bad") + '" aria-hidden="true"></span>' + esc(ai.ready ? ai.plan || ai.label : "AI not ready") + "</a>");
     if (r && r.stats) pills.push('<a class="tchip opt" href="#results" title="The last full-suite test run"><span class="cdot ' + (r.stats.failed ? "bad" : "ok") + '" aria-hidden="true"></span>Last run · ' + esc(r.stats.failed ? r.stats.failed + " failed" : "passing") + (ago(r.startedAt || r.mtime) ? " · " + esc(ago(r.startedAt || r.mtime)) : "") + "</a>");
     var el = document.getElementById("pills"), html = pills.join("");
     if (el.getAttribute("data-html") !== html) { el.innerHTML = html; el.setAttribute("data-html", html); }
@@ -879,7 +972,7 @@
         title = failed ? "Stopped at the " + esc(nx.name) : "Your turn: review the " + esc(st.name) + "'s output";
         actions = runBtn('data-run="step" data-step="' + esc(run.next) + '"', failed ? "Run the " + stepName(run.next) + " again" : "Continue to the " + stepName(run.next), "btn sm");
       } else title = run && run.state === "done" ? "Full suite finished" : esc(st.name) + (st.state === "running" ? " is running in another session" : " · " + esc(st.state));
-      sub = esc(st.name) + (st.durationMs ? " · " + esc(fmtDur(st.durationMs)) : "") + (st.tokens ? " · " + esc(fmtTokens(st.tokens)) + " tokens" : "");
+      sub = esc(st.name) + (st.model ? " · " + esc(MODEL_LABEL[st.model] || st.model) : "") + (st.durationMs ? " · " + esc(fmtDur(st.durationMs)) : "") + (st.tokens ? " · " + esc(fmtTokens(st.tokens)) + " tokens" : "");
     } else if (src && src.story) {
       eyebrow = 'Run · <a href="#story/' + encodeURIComponent(src.story.key) + '">' + esc(src.story.key) + "</a>";
       title = esc(storyWhere(src.story));
@@ -1368,7 +1461,7 @@
     var oldNav = main.querySelector(".reader-nav"), oldBody = document.getElementById("readerBody");
     var keep = { nav: oldNav ? oldNav.scrollTop : 0, path: oldBody && oldBody.getAttribute("data-path"), sig: oldBody && oldBody.getAttribute("data-sig"), html: oldBody ? oldBody.innerHTML : "", top: oldBody ? oldBody.scrollTop : 0 };
     var q = readerFilter.toLowerCase();
-    html += '<section aria-labelledby="out-h" class="sect"><h2 id="out-h">What the agents wrote</h2><div class="card reader"><nav class="reader-nav" aria-label="Outputs">' +
+    html += '<section aria-labelledby="out-h" class="sect"><h2 id="out-h">What the agents wrote</h2>' + shareLine() + '<div class="card reader"><nav class="reader-nav" aria-label="Outputs">' +
       (all.length > 8 ? '<div class="reader-find"><input class="field" type="search" id="readerFind" placeholder="Filter ' + all.length + ' files" aria-label="Filter the files" value="' + esc(readerFilter) + '"></div>' : "") + groups.map(function (g) {
       var hasCur = g.items.some(function (i) { return i.path === cur.path; });
       var open = q || hasCur || (readerOpen[g.name] != null ? readerOpen[g.name] : g.items.length <= 12);
@@ -1730,7 +1823,7 @@
       if (job && job.kind === "story" && job.key === s.key) html += jobPanel(job);
       else if (s.next && !s.running) {
         // With the run buttons, Continue runs the story's next steps (up to its next review) from here.
-        var go = control() && control().available ? '<div class="story-run">' + (s.next !== "story-design" ? '<input class="field" type="url" id="storyUrl" aria-label="The app\'s address" placeholder="The app\'s address, https://…" value="' + esc(storyUrl || (state.workspace && state.workspace.appUrl) || (state.suite.run && state.suite.run.target) || "") + '">' : "") + runBtn('data-run="story" data-key="' + esc(s.key) + '"', (s.review ? "Continue to " : "Start ") + nextName, s.review ? "btn gate-btn" : "btn") + "</div>" : cmdBox("/qa-story " + s.key);
+        var go = control() && control().available ? '<div class="story-run">' + (s.next !== "story-design" ? '<input class="field" type="url" id="storyUrl" aria-label="The app\'s address" placeholder="The app\'s address, https://…" value="' + esc(storyUrl || (state.workspace && state.workspace.appUrl) || (state.suite.run && state.suite.run.target) || "") + '">' : "") + runBtn('data-run="story" data-key="' + esc(s.key) + '"', (s.review ? "Continue to " : "Start ") + nextName, s.review ? "btn gate-btn" : "btn") + runModelsPicker("storyModels", storyRoles(s.next), null) + "</div>" : cmdBox("/qa-story " + s.key);
         if (s.review) {
           var before = s.next === "story-explore" ? "before Explore opens the app" : s.next === "story-script" ? "before Automate writes the tests" : "before " + nextName;
           html += '<section class="gate row" aria-label="Your turn"><div class="grow"><b>Your turn: review the cases ' + esc(before) + '</b><span class="gate-muted">' + (d ? esc((d === 1 ? "One case contradicts" : count(d, "case") + " contradict") + " the story; decide which is right.") + " " : "") + (STATIC ? "Edit, add or delete cases in <code>" + esc(s.files.testCases) + "</code>, then continue." : "Edit, add or delete cases below (or in your editor), then continue.") + (s.openQuestions ? " " + esc(plural(s.openQuestions, "open question")) + ' need an answer or a tick: see <a href="#story/' + encodeURIComponent(s.key) + '/questions" style="color:inherit">Open questions</a>.' : "") + "</span></div>" + go + openBtn(s.files.testCases, "btn ghost") + "</section>";
@@ -1872,39 +1965,69 @@
     main.innerHTML = html;
   }
 
+  // Settings → AI (as in AIQA's Connect → AI): what this computer has, which AI runs the agents, each role's model.
+  var aiDraft = null;
+  function aiCard(s, chosen) {
+    var line = !s ? "" : !s.installed ? "Not installed" : !s.signedIn ? "Not signed in" : "Signed in · " + s.plan;
+    var q = s && s.quota ? [s.quota.chat === "unlimited" ? "unlimited chat" : s.quota.chat != null ? s.quota.chat + " chat requests left" : "", s.quota.premium === "unlimited" ? "unlimited premium requests" : s.quota.premium ? s.quota.premium + " premium requests left" : s.quota.premium === 0 ? "no premium requests" : "", s.quota.resets ? "resets " + s.quota.resets : ""].filter(Boolean).join(" · ") : "";
+    var ok = s && s.installed && s.signedIn;
+    return '<section class="card pad ai-card' + (chosen ? " chosen" : "") + '"><div class="row-meta"><span class="chip ' + (ok ? (s.problems.length ? "warn" : "ok") : "neutral") + '">' + esc(ok ? (s.problems.length ? "Needs attention" : "Ready") : line) + '</span>' + (chosen ? '<span class="chip accent">Runs the agents</span>' : "") + "</div>" +
+      "<h3>" + esc(s ? s.label : "") + '</h3><p style="margin:0">' + esc(ok ? line : s && s.fix ? s.fix : line) + "</p>" + (q ? '<p class="muted small" style="margin:4px 0 0">' + esc(q) + "</p>" : "") +
+      (s && s.problems.length ? '<div class="msg warn" style="margin-top:10px">' + s.problems.map(function (p) { return "<p>" + esc(p) + "</p>"; }).join("") + "</div>" : "") + "</section>";
+  }
   function viewModels(message) {
     api("api/models").then(function (m) {
       if (settingsTab() !== "ai") return;
-      var html = settingsHead("ai") + "<p class=\"sub\">The Claude model each role's agent starts with. The full suite and the story steps share the roles.</p>";
+      var st = m.status;
+      var draft = aiDraft || (aiDraft = { provider: m.chosen });
+      var p = m.providers[draft.provider] ? draft.provider : "anthropic", pm = m.providers[p];
+      var html = settingsHead("ai") + '<p class="sub">Which AI runs the agents, and the model each role starts with. Each run checks the AI first; the start form can change a step’s model for that run only.</p>';
       if (message) html += '<p class="ok-box" role="status">' + esc(message) + "</p>";
-      html += '<form id="modelsForm"><div class="table-wrap models"><table><thead><tr><th>Role</th><th class="d-only">Used by</th><th>Model</th><th class="d-only">Runs on now</th></tr></thead><tbody>';
-      m.roles.forEach(function (r) {
-        var opts = [["", r.key === "default" ? "Session model" : "Default"]].concat(m.options.map(function (o) { return [o, MODEL_LABEL[o] || o]; }));
-        if (r.saved && m.options.indexOf(r.saved) < 0) opts.push([r.saved, r.saved + " (saved)"]);
-        var res = r.key === "default" ? null : m.resolved[r.key];
-        var now = res ? (res.model ? esc(MODEL_LABEL[res.model] || res.model) + ' <span class="small muted">(' + esc(res.source) + ")</span>" : '<span class="muted">Session model</span>') + (res.note ? '<br><span class="small muted">' + esc(res.note) + "</span>" : "") : '<span class="muted">—</span>';
-        html += '<tr><td><label for="m-' + esc(r.key) + '">' + esc(r.name) + '</label></td><td class="small muted d-only">' + esc(r.uses) + '</td><td><select id="m-' + esc(r.key) + '" name="' + esc(r.key) + '"' + (STATIC ? " disabled" : "") + ">" +
-          opts.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (o[0] === r.saved ? " selected" : "") + ">" + esc(o[1]) + "</option>"; }).join("") + "</select></td><td class=\"d-only\">" + now + "</td></tr>";
+      html += '<div class="sec-head"><span class="eyebrow">Your AI</span>' + (STATIC ? "" : '<button type="button" class="btn ghost sm push" id="aiCheck">Check again</button>') + "</div>";
+      html += st ? '<div class="ai-cards">' + ["anthropic", "copilot-sdk"].map(function (k) { return aiCard(st[k], m.chosen === k); }).join("") + "</div>" + (st.checkedAt ? '<p class="muted small" style="margin:6px 0 0">Checked ' + esc(clock(st.checkedAt)) + ". Nothing is sent to either AI to check.</p>" : "")
+        : '<p class="muted">Not checked in a saved snapshot.</p>';
+      html += '<form id="modelsForm" style="margin-top:22px"><fieldset class="sf-opts" style="display:block;border:0;padding:0;margin:0 0 16px"><legend class="eyebrow" style="margin-bottom:8px">Run the agents with</legend><div class="choices">' + ["anthropic", "copilot-sdk"].map(function (k) {
+        var s = st && st[k], ready = !st || (s.installed && s.signedIn && !s.problems.some(function (x) { return /turned off|No Copilot requests|PowerShell 7/.test(x); }));
+        return '<label class="choice"><input type="radio" name="provider" value="' + k + '"' + (p === k ? " checked" : "") + (STATIC ? " disabled" : "") + '><span>' + esc(m.providers[k].label) + (ready ? "" : ' <small class="muted">(not ready)</small>') + "</span></label>";
+      }).join("") + "</div></fieldset>";
+      html += '<div class="table-wrap models"><table><thead><tr><th>Role</th><th>Used by</th><th>Model on ' + esc(pm.label) + "</th><th>Runs on now</th></tr></thead><tbody>";
+      pm.roles.forEach(function (r) {
+        var dflt = p === "anthropic" ? (r.key === "default" ? "Session model" : "Default") : r.key === "default" ? "Copilot’s default" : "Default";
+        var opts = [["", dflt]].concat(pm.options.map(function (o) { return [o, MODEL_LABEL[o] || o]; }));
+        if (r.saved && pm.options.indexOf(r.saved) < 0) opts.push([r.saved, r.saved]);
+        if (p !== "anthropic") opts.push(["__other", "Other…"]);
+        var res = r.key === "default" ? null : pm.resolved[r.key];
+        var now = res ? (res.model ? esc(MODEL_LABEL[res.model] || res.model) + ' <span class="small muted">(' + esc(res.source) + ")</span>" : '<span class="muted">' + (p === "anthropic" ? "Session model" : "Copilot’s default") + "</span>") + (res.note ? '<br><span class="small muted">' + esc(res.note) + "</span>" : "") : '<span class="muted">—</span>';
+        html += '<tr><td><label for="m-' + esc(r.key) + '">' + esc(r.name) + '</label></td><td class="small muted">' + esc(r.uses) + '</td><td><select id="m-' + esc(r.key) + '" name="' + esc(r.key) + '"' + (STATIC ? " disabled" : "") + ">" +
+          opts.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (o[0] === r.saved ? " selected" : "") + ">" + esc(o[1]) + "</option>"; }).join("") + '</select><input class="field mono other-model" name="other-' + esc(r.key) + '" placeholder="Copilot model id" hidden aria-label="' + esc(r.name) + ' model id"></td><td>' + now + "</td></tr>";
       });
       html += "</tbody></table></div>";
       html += STATIC
-        ? '<p class="small muted">This is a saved snapshot. Open the live dashboard to change the models.</p>'
-        : '<div class="actions"><button class="btn" type="submit" id="saveModels">Save</button><span class="small muted">Saved in <code>' + esc(m.file) + "</code>.</span></div>";
-      html += '</form><div class="card pad small" style="margin-top:20px"><p style="margin-top:0"><b>How the picks apply.</b> <code>/qa-pipeline</code> and <code>/qa-story</code> read them when they start each agent, so the next step that starts uses them. A <code>--model-&lt;role&gt;</code> or <code>--model</code> option on those commands wins for that run. "Session model" means the model of your Claude Code session.</p><p style="margin-bottom:0">GitHub Copilot uses its own model picker; these picks don\'t apply there.</p></div>';
+        ? '<p class="small muted">This is a saved snapshot. Open the live dashboard to change the AI or the models.</p>'
+        : '<div class="actions"><button class="btn" type="submit" id="saveModels">Save</button><span class="small muted">Saved in <code>' + esc(m.file) + "</code>, which AIQA reads too.</span></div>";
+      html += '</form><div class="card pad small" style="margin-top:20px"><p style="margin-top:0"><b>How the picks apply.</b> Runs started here use the AI picked above. In the chat, <code>/qa-pipeline</code> and <code>/qa-story</code> use the Claude picks; a <code>--model-&lt;role&gt;</code> or <code>--model</code> option wins for that run.</p><p style="margin-bottom:0">' + (p === "anthropic" ? "“Session model” means the model your Claude Code account uses by default." : "Copilot checks a model id when a step starts; one your plan doesn’t include stops the step with Copilot’s message.") + "</p></div>";
       main.innerHTML = html;
       var form = document.getElementById("modelsForm");
+      var check = document.getElementById("aiCheck");
+      if (check) check.addEventListener("click", function () {
+        check.disabled = true; check.textContent = "Checking…";
+        postJson("api/ai/check", {}).then(function () { viewModels("Checked again."); }).catch(function (err) { toast(err.message || String(err)); check.disabled = false; check.textContent = "Check again"; });
+      });
       if (STATIC || !form) return;
+      form.addEventListener("change", function (e) {
+        if (e.target.name === "provider") { aiDraft = { provider: e.target.value }; return viewModels(); }
+        if (e.target.tagName === "SELECT") { var other = form.elements["other-" + e.target.name]; if (other) { other.hidden = e.target.value !== "__other"; if (!other.hidden) other.focus(); } }
+      });
       form.addEventListener("submit", function (e) {
         e.preventDefault();
         var models = {};
-        form.querySelectorAll("select").forEach(function (s) { models[s.name] = s.value; });
+        form.querySelectorAll("select").forEach(function (s) { models[s.name] = s.value === "__other" ? (form.elements["other-" + s.name].value || "").trim() : s.value; });
         var btn = document.getElementById("saveModels");
         btn.disabled = true;
         btn.textContent = "Saving…";
-        fetch("api/models", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ models: models }) })
-          .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || r.statusText); return j; }); })
-          .then(function () { viewModels("Saved. The next agent that starts uses these models."); })
-          .catch(function (err) { btn.disabled = false; btn.textContent = "Save"; showError(err); });
+        postJson("api/models", { provider: p, models: models, use: true })
+          .then(function () { aiDraft = null; viewModels("Saved. " + pm.label + " runs the agents from the next step that starts."); })
+          .catch(function (err) { btn.disabled = false; btn.textContent = "Save"; toast(err.message || String(err)); });
       });
     }).catch(showError);
   }
@@ -2135,7 +2258,8 @@
     } else if (kind === "story") {
       var u = document.getElementById("storyUrl");
       if (u && u.value.trim() && !/^https?:\/\/\S+$/i.test(u.value.trim())) { u.focus(); return toast("Enter the app's address, starting with http:// or https://."); }
-      runAction("story", { key: b.getAttribute("data-key"), url: u ? u.value.trim() : "" }, b);
+      var sm = document.getElementById("storyModels");
+      runAction("story", { key: b.getAttribute("data-key"), url: u ? u.value.trim() : "", models: sm ? pickedModels(sm.parentNode) : {} }, b);
     }
   });
   document.addEventListener("submit", function (e) {

@@ -1,5 +1,7 @@
 node_modules/
 .agentic-qa/
+# playwright-cli's own files (downloads, console logs) from an agent's run
+.playwright-cli/
 test-results/
 playwright-report/
 __pycache__/

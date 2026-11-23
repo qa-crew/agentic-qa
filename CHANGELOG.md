@@ -5,6 +5,22 @@ Every change to Agentic QA is listed here.
 ## Unreleased
 
 ### Added
+- **Share and reuse snapshots:** a teammate's committed snapshots and requirements no longer need capturing again.
+  The start form offers **Reuse** (start at the QA Planner, no exploring), **Refresh** (the Analyst's new refresh mode
+  recaptures only what changed or is new and adds "Changes since" to requirements.md; `/qa-pipeline --refresh` in the
+  chat) or **Explore from scratch**, when snapshots exist. The Full suite page says whether the snapshots are committed
+  (read-only git), with the commands when they aren't. `qa-setup` now also offers to ignore `.agentic-qa/logs/` and
+  `.playwright-cli/`, and warns when `.gitignore` hides all of `.agentic-qa/` from the team.
+- **Your AI, checked before every run:** Settings → AI shows whether Claude Code and GitHub Copilot are installed and
+  signed in, and the plan ("Claude Pro", "Copilot Free · 200 chat requests left"), from `claude auth status`, Copilot's
+  sign-in and `gh api copilot_internal/user`. Nothing is sent to either AI to check, and no email, login or
+  organization reaches the page. A run refuses to start (with the fix) when the AI it runs on isn't ready. On Windows,
+  Copilot needs PowerShell 7 to run the agents' shell commands; the check says so.
+- **Run on Claude or Copilot:** pick which AI runs the agents in Settings → AI, with its own model per role (Claude's
+  aliases, or Copilot model ids such as gpt-4.1 or claude-sonnet-4.5). On Copilot each step runs as
+  `copilot -p … --agent <step>` with the agents in `.github/agents/`, and its activity shows in the run panel.
+- **Models for this run:** the start form and a story's next step have a "Models for this run" section, pre-filled from
+  Settings → AI. A run keeps its picks and its AI when you continue it; the run panel shows each step's model.
 - **Settings in four tabs** (as in AIQA's Connect): **AI** (the Models page moved here; `#models` still works),
   **Project** (the app's address, saved in `.agentic-qa/workspace.json`, which the qa-story skill already reads; the
   start form and a story's next step start from it), **Connection** (where stories come from) and **Appearance**.

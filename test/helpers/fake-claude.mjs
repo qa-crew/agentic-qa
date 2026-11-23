@@ -7,6 +7,12 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 
 const args = process.argv.slice(2);
+// `claude auth status --json`: signed in to Claude Pro unless FAKE_CLAUDE_SIGNED_OUT is set. The email is there to
+// check it never reaches the page.
+if (args[0] === "auth" && args[1] === "status") {
+  process.stdout.write(JSON.stringify(process.env.FAKE_CLAUDE_SIGNED_OUT ? { loggedIn: false } : { loggedIn: true, authMethod: "claude.ai", subscriptionType: "pro", email: "someone@example.com", orgName: "Someone's Org" }));
+  process.exit(0);
+}
 // `node --test` loads every file under test/ as a test: then there's no -p, and nothing to do.
 if (!args.includes("-p")) process.exit(0);
 const agent = args.includes("--agent") ? args[args.indexOf("--agent") + 1] : undefined;

@@ -23,7 +23,8 @@ import { randomBytes } from "node:crypto";
 import { execFile } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { buildState, buildStory, readWorkspace, runsHistory, storyKeys } from "./read.mjs";
-import { MODEL_ALIASES, MODEL_KEYS, readAiSettings, resolveRoleModels, writeClaudeModels } from "../../qa-story/scripts/qa-files.mjs";
+import { MODEL_ALIASES, MODEL_KEYS, readAiSettings, resolveRoleModels, writeAiChoice } from "../../qa-story/scripts/qa-files.mjs";
+import { aiStatus, aiSummary, cachedStatus, chosenProvider, COPILOT_MODELS, PROVIDER_LABEL, PROVIDERS } from "./ai.mjs";
 import { renderMarkdown } from "./md.mjs";
 import { createRunner, findOnPath, startProcess } from "./runner.mjs";
 import { answerQuestion, editCase, recordManual } from "./cases.mjs";
@@ -186,30 +187,57 @@ const ROLE_INFO = {
   "qa-reporter": { name: "QA Reporter", uses: "Full suite step 5" },
 };
 
-function modelsView() {
-  const saved = readAiSettings(root).models?.anthropic ?? {};
+/**
+ * Settings → AI: which AI this computer has (status, or null in a --static snapshot), which one runs the agents, and
+ * each provider's model per role. The top-level options / roles / resolved are Claude's, as before.
+ */
+function modelsView(status) {
+  const settings = readAiSettings(root);
+  const per = (p) => {
+    const saved = settings.models?.[p] ?? {};
+    return {
+      label: PROVIDER_LABEL[p],
+      options: p === "anthropic" ? MODEL_ALIASES : COPILOT_MODELS,
+      roles: MODEL_KEYS.map((key) => ({ key, ...ROLE_INFO[key], saved: saved[key] ?? "" })),
+      resolved: resolveRoleModels(root, {}, p),
+    };
+  };
+  const providers = { anthropic: per("anthropic"), "copilot-sdk": per("copilot-sdk") };
   return {
     file: ".agentic-qa/ai.json",
     exists: fs.existsSync(path.join(dataDir, "ai.json")),
-    options: MODEL_ALIASES,
-    roles: MODEL_KEYS.map((key) => ({ key, ...ROLE_INFO[key], saved: saved[key] ?? "" })),
-    resolved: resolveRoleModels(root),
+    saved: settings.provider ?? "",
+    chosen: status ? chosenProvider(status, settings.provider) : settings.provider === "copilot-sdk" ? "copilot-sdk" : "anthropic",
+    status: status ?? null,
+    providers,
+    options: providers.anthropic.options,
+    roles: providers.anthropic.roles,
+    resolved: providers.anthropic.resolved,
   };
 }
 
-/** Validates a Models page save: known roles only; a model alias, "" (session model), or the value already saved. */
+/**
+ * Settings → AI's save: { provider?, models?, use? }. A provider's models: known roles only; for Claude an alias, "" (the
+ * session's model) or the value already saved; for Copilot a model id. use: true makes that provider run the agents.
+ */
 function saveModels(body) {
-  const picks = body && typeof body === "object" ? body.models : undefined;
+  const b = body && typeof body === "object" ? body : {};
+  const provider = b.provider ?? "anthropic";
+  if (!PROVIDERS.includes(provider)) return { status: 400, error: `Unknown AI provider "${provider}".` };
+  if (b.use !== undefined && typeof b.use !== "boolean") return { status: 400, error: "use must be true or false." };
+  const picks = b.models;
+  if (picks === undefined && b.use === true) { writeAiChoice(root, provider, readAiSettings(root).models?.[provider] ?? {}, provider); return { status: 200 }; }
   if (!picks || typeof picks !== "object" || Array.isArray(picks)) return { status: 400, error: "Send { models: { <role>: <model> } }." };
-  const saved = readAiSettings(root).models?.anthropic ?? {};
+  const saved = readAiSettings(root).models?.[provider] ?? {};
   const next = {};
   for (const [key, value] of Object.entries(picks)) {
     if (!MODEL_KEYS.includes(key)) return { status: 400, error: `Unknown role "${key}".` };
     if (typeof value !== "string") return { status: 400, error: `The model for ${key} must be text.` };
-    if (value && !MODEL_ALIASES.includes(value) && value !== saved[key]) return { status: 400, error: `Unknown model "${value}" for ${key}.` };
+    const ok = !value || value === saved[key] || (provider === "anthropic" ? MODEL_ALIASES.includes(value) : /^[\w.:/@[\]-]{1,120}$/.test(value));
+    if (!ok) return { status: 400, error: `Unknown model "${value}" for ${key}.` };
     if (value) next[key] = value;
   }
-  writeClaudeModels(root, next);
+  writeAiChoice(root, provider, next, b.use === true ? provider : undefined);
   return { status: 200 };
 }
 
@@ -307,9 +335,20 @@ function send(res, status, body, type = "application/json; charset=utf-8") {
 }
 
 let runner;
-const runView = () => ({ ...buildState(root), control: runner.status() });
+/** The page's state, with the AI the steps run on: its status, model options and each role's default model. */
+const runView = () => {
+  const sum = aiSummary(cachedStatus(), readAiSettings(root).provider);
+  const ai = sum && {
+    ...sum,
+    options: sum.provider === "anthropic" ? MODEL_ALIASES : COPILOT_MODELS,
+    defaults: Object.fromEntries(Object.entries(resolveRoleModels(root, {}, sum.provider)).map(([role, v]) => [role, v.model])),
+  };
+  return { ...buildState(root), control: { ...runner.status(), ai } };
+};
 const WRITES = {
-  "api/models": { save: saveModels, view: modelsView },
+  "api/models": { save: saveModels, view: async () => modelsView(await aiStatus()) },
+  // "Check again": ask the CLIs now instead of using the last minute's answer.
+  "api/ai/check": { save: async () => { await aiStatus({ fresh: true }); return { status: 200 }; }, view: async () => modelsView(await aiStatus()) },
   "api/settings": { save: saveSettings, view: settingsView },
   "api/run/start": { save: (b) => runner.start(b), view: runView },
   "api/run/step": { save: (b) => runner.step(b), view: runView },
@@ -328,7 +367,7 @@ const WRITES = {
 function writeStatic() {
   const out = path.resolve(root, typeof flag("static") === "string" ? flag("static") : ".agentic-qa/reports/dashboard.html");
   const state = buildState(root);
-  const data = { "api/state": state, "api/models": modelsView(), "api/settings": settingsView(), "api/runs": { runs: runsHistory(root) }, "api/workspace": workspaceView() };
+  const data = { "api/state": state, "api/models": modelsView(null), "api/settings": settingsView(), "api/runs": { runs: runsHistory(root) }, "api/workspace": workspaceView() };
   const docs = new Set([
     ...state.suite.documents.map((d) => d.path),
     ...state.suite.testCases.map((t) => t.path),
@@ -375,8 +414,8 @@ function serve() {
         return send(res, 400, { error: "Send a JSON body." });
       }
       try {
-        const r = write.save(body);
-        return r.error ? send(res, r.status, { error: r.error }) : send(res, 200, r.body ?? write.view());
+        const r = await write.save(body);
+        return r.error ? send(res, r.status, { error: r.error }) : send(res, 200, r.body ?? (await write.view()));
       } catch (err) {
         return send(res, 500, { error: String(err?.message ?? err) });
       }
@@ -403,7 +442,7 @@ function serve() {
         const f = fileForEdit(url.searchParams.get("path") ?? "");
         return send(res, f.status, f.error ? { error: f.error } : f.body);
       }
-      if (route === "api/models") return send(res, 200, modelsView());
+      if (route === "api/models") return send(res, 200, modelsView(await aiStatus()));
       if (route === "api/runs") return send(res, 200, { runs: runsHistory(root) });
       if (route === "api/workspace") return send(res, 200, workspaceView());
       if (route === "api/settings") return send(res, 200, settingsView());

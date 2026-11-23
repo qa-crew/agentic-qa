@@ -1,7 +1,7 @@
 ---
 name: qa-pipeline
 description: Run the Agentic QA full-suite QA pipeline on a web app (analyst → qa-planner → qa-engineer → qa-reviewer → qa-reporter). It writes requirements, a test plan, test cases, Playwright page objects and specs, and reports under .agentic-qa/. Pass a URL, or a step name to run one step again. Use it when the user asks to test a web app from its URL, to build or rerun the Playwright suite, or to run one step again (for example, run the regression tests = the qa-reporter step with --grep @regression).
-argument-hint: "<url> [--grep <tags>|all] [--skip a,b] [--auto] [--requirements <file>] [--headed] [--users N --minutes M] [--model <m>] [--model-<role> <m>]"
+argument-hint: "<url> [--grep <tags>|all] [--skip a,b] [--auto] [--requirements <file>] [--headed] [--refresh] [--users N --minutes M] [--model <m>] [--model-<role> <m>]"
 allowed-tools: Bash(node "${CLAUDE_SKILL_DIR}/scripts/progress.mjs" *) Bash(node "${CLAUDE_SKILL_DIR}/scripts/models.mjs") Bash(node "${CLAUDE_SKILL_DIR}/scripts/models.mjs" *) Bash(playwright-cli --version) Bash(npx --no-install playwright --version) Bash(mkdir -p .agentic-qa/*)
 ---
 
@@ -27,6 +27,9 @@ Arguments: $ARGUMENTS
 - `--requirements <file>`: an existing requirements document for the analyst to merge in. Without it, use the
   `.md` file the user dropped in `.agentic-qa/requirements/` (any name except `requirements.md`), if there's exactly one.
 - `--headed`: show the browser while the analyst explores.
+- `--refresh`: the project already has snapshots and a requirements.md (often committed by a teammate): the analyst
+  updates them, recapturing only what changed or is new, instead of exploring from scratch. To reuse them as they are
+  (no analyst, no tokens), use `--skip analyst`.
 - `--users N --minutes M`: scale of the k6 load test (default 10 users, 2 minutes). Only used with `@performance`.
 - `--model <m>`: the model for every role this run. `--model-<role> <m>` for one role, e.g. `--model-qa-planner opus`.
   Roles: `default`, `analyst`, `qa-planner`, `qa-engineer`, `qa-reviewer`, `qa-reporter`.
@@ -76,7 +79,7 @@ For each step:
 
    | Step | Task message |
    |---|---|
-   | analyst | Target URL · existing requirements path (if any) · "headed" (if `--headed`) |
+   | analyst | Target URL · "Mode: refresh" (if `--refresh`) · existing requirements path (if any) · "headed" (if `--headed`) |
    | qa-planner | Base URL |
    | qa-engineer | Base URL · Test filter (as given, `all`, or "none") · performance scale U and D (with `@performance`) · "Keep config" (if chosen) |
    | qa-reviewer | "Review the generated suite." |
